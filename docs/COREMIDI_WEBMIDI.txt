@@ -19,7 +19,7 @@ presses of one key. Queue saturation or send errors pause that output, release
 only the bridge's own notes/pedals, and require explicit open/re-enable before
 retrying. A disconnected device may be unable to receive those releases.
 Synthetic internal-synth resets never appear as incoming hardware MIDI. A
-real input packet loss resets its stream parser and pauses/release its route;
+real input packet loss resets its stream parser and pauses/releases its route;
 disconnecting another input preserves the selected input's buffered packets.
 Browser arrival timestamps are used, not raw CoreMIDI clock values mislabeled
 as browser time. This is not full W3C conformance or sample-accurate timing.
@@ -41,3 +41,10 @@ CI note: the first simulator test run exposed WebKit bug293831 on iOS18.5
 (system libswiftWebKit resides in a Cryptex not in its loader search path).
 tools/configure-simulator-tests.py adds the documented simulator-only test
 environment path when that library exists. Device binaries are unchanged.
+
+Verified Mac run:40826367667, source09247ef47755accc6ce8e77db63786255c77d093.
+Simulator and device builds succeeded;11 native XCTest cases passed on iOS18.6
+Simulator, including output validation and bounded duplicate-note recovery.
+The runtime selector chose18.6, avoiding the18.5 loader bug. The guarded
+Cryptex fallback was not needed/exercised in that successful run.
+Real hardware MIDI output, Safari and physical iOS27 remain untested.

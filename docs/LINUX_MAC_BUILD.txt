@@ -94,7 +94,7 @@ App Store export is for Apple's distribution flow and is not a universal
 sideloadable IPA. A simulator .app cannot be installed on a real iPhone.
 No signed IPA is claimed until a successful signing run produces one.
 
-CURRENT BUILD ACCESS, 29 OCTOBER2026
+FIRST VERIFIED BUILD ACCESS, 29 OCTOBER2026
 The user explicitly authorized a separate branch in public sftrimmer after
 GitHub denied creating a private build repository. project128-ios-build was
 pushed without changing main. Its push trigger ran successfully on a real
@@ -112,16 +112,26 @@ physical-device runtime were not run. Exact results: docs/IPA_VERIFICATION.json.
 The IPA is supplied at downloads/Project128-unsigned.ipa. The preferred bank
 source is published at sources/banks/Project128_GS_Editable_Source.sf2.
 
+LATEST BRIDGE BUILD, 29 OCTOBER2026
+Run: https://github.com/akamakakakakaalaka/sftrimmer/actions/runs/40826367667
+Source:09247ef47755accc6ce8e77db63786255c77d093. Simulator and unsigned real
+arm64 iPhone builds succeeded. Eleven native XCTest cases passed on iPhone16Pro
+with iOS18.6 Simulator. Native tests cover request boundaries, output-message
+validation, duplicate-note release accounting and its4096-note limit. The
+runtime selector avoids the known18.5 WebKit-loader bug by choosing the newest
+installed iOS18 runtime; its guarded Cryptex fallback was not exercised.
+The downloaded IPA is7,929,788bytes; its CRC, Mach-O iOS2 platform, iOS18 minimum,
+full bundled runtime and bank bytes were checked against this local build.
+It remains unsigned. Exact hashes and results: docs/IPA_VERIFICATION.json.
+
 WHAT THIS CAN AND CANNOT VERIFY
-A successful macOS CI compile establishes that Xcode accepts the native
-project, resources, and selected target. The default workflow does not
-boot Simulator, execute XCTest, or exercise live audio/native MIDI. The
-web/core test results and native compile log are separate evidence.
-Simulator runtime tests can be added and run on the Mac runner, but are
-still separate from physical-device tests. Actual iPhone/iPad audio,
-WKWebView worklet behavior, route changes, interruptions, screen locking,
-background behavior, native MIDI latency, and installation require a real
-device and appropriate signing. No emulator or CI compile proves them.
+Xcode compilation and native XCTest establish the checked native policies and
+source compatibility on the stated Simulator. The browser audio tests exercise
+real PCM separately in Chromium. They do not verify WKWebView audio worklets,
+physical iPhone/iPad audio, native MIDI latency, route changes, interruptions,
+screen locking, background behavior or installation. Those still require a
+real device and appropriate signing. A Home Screen web version is deployed for
+MIDI files, soundfonts and onscreen keys, without native CoreMIDI hardware access.
 
 PRIMARY REFERENCES (consulted 28 OCTOBER 2026)
 OSX-KVM requirements and documented limitations:

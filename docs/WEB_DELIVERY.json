@@ -1,0 +1,29 @@
+{
+  "url": "https://project128-mobile-player.cosmo-hosimaru.chatgpt.site",
+  "visibility": "owner-private",
+  "project_id": "appgprj_6ae2d34826208191988f9c65b61ca0ee",
+  "deployment_id": "appgdep_6ae2e08db6f48191b5c739062f9475a5",
+  "deployment_status": "succeeded",
+  "site_source_commit": "bb96faee23f20a8831cbb3391ccdb77deb46ff1c",
+  "upstream_player_commit": "09247ef47755accc6ce8e77db63786255c77d093",
+  "offline_cache": "project128-pwa-db413721a3ef4ef4",
+  "cached_files": 34,
+  "browser_verification": {
+    "manifest": true,
+    "offline_reload": true,
+    "offline_SF2_import": true,
+    "offline_SF3_conversion": true,
+    "onscreen_audio_peak": 0.054660677909851074,
+    "MIDI_file_audio_peak": 0.05596190690994263,
+    "no_fake_WebMIDI": true,
+    "parts": 128,
+    "page_errors": [],
+    "actual_iOS27_device_tested": false,
+    "WebKit_browser_tested": false
+  },
+  "local_core_tests_passed": 126,
+  "local_browser_tests_passed": 26,
+  "native_hardware_access_in_Safari": false,
+  "custom_import_persistence": "session memory; reselect after closing",
+  "independent_review": "No remaining Critical or Important findings; minor status-label issue noted"
+}

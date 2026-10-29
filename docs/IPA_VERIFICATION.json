@@ -1,7 +1,7 @@
 {
   "artifact": "Project128-unsigned.ipa",
-  "bytes": 7903105,
-  "sha256": "06a0fe28a5422de8ed379057e1dac7dfc137690af4ab216c180c528f2f3170ff",
+  "bytes": 7929788,
+  "sha256": "6e9032ef35f71e980b6bdc49ebd6d6180845c6d5c0f7e97ac2cd764b36035732",
   "under_20MB": true,
   "ZIP_CRC_verified": true,
   "Mach_O": "arm64 executable",
@@ -19,12 +19,19 @@
   "signature_load_command_present": false,
   "signing_required_before_installation": true,
   "device_runtime_verified": false,
-  "XCTest_run": false,
+  "XCTest_run": true,
   "bundled_bank_SHA256_verified": true,
   "bundled_runtime_matches_local_build": true,
   "web_core_tests_on_Mac_passed": 126,
-  "build_commit": "f215e9df2870220dce26dcad78a6a7136169ff2d",
-  "build_url": "https://github.com/akamakakakakaalaka/sftrimmer/actions/runs/40814584793",
+  "build_commit": "09247ef47755accc6ce8e77db63786255c77d093",
+  "build_url": "https://github.com/akamakakakakaalaka/sftrimmer/actions/runs/40826367667",
   "branch": "project128-ios-build",
-  "main_branch_unchanged": true
+  "main_branch_unchanged": true,
+  "XCTest_passed": 11,
+  "XCTest_failed": 0,
+  "no_code_MIDI_Thru_included": true,
+  "CoreMIDI_output_hardware_tested": false,
+  "local_browser_tests_passed": 26,
+  "XCTest_simulator": "iPhone 16 Pro / iOS18.6",
+  "simulator_Cryptex_fallback_exercised": false
 }

@@ -15,6 +15,20 @@ current tests/geometry are recorded in docs/VERIFICATION.json and output reports
 Full Sampei feature parity remains incomplete. Native simulator/device Xcode
 compilation passed; Apple signing and physical-device runtime remain unverified. The250-item catalog remains a roadmap, not250 finished features.
 
+START ON AN IPHONE WITHOUT SIGNING
+Open https://project128-mobile-player.cosmo-hosimaru.chatgpt.site in Safari
+with the ChatGPT account that owns this private Site. Use Share > Add to Home
+Screen, then Start Audio. After the offline cache is ready, the bundled player
+and bank can reload offline. MIDI files, soundfonts and onscreen keys use local
+audio. Imported files must be reselected after closing the app. This delivery
+was tested in Chromium; physical iOS27 and Safari playback remain unverified.
+
+NO-CODE LIVE MIDI ROUTING IN THE NATIVE BUILD
+Under MIDI, Connect MIDI devices, choose Input and Output, then Enable MIDI
+Thru. SysEx requires its separate opt-in. The installed native app supplies
+CoreMIDI; the Safari Home Screen version has no native hardware access. MIDI
+files continue playing through the internal synth. See docs/COREMIDI_WEBMIDI.txt.
+
 START ON A COMPUTER
 Install Node.js 22.12+ (Node24 recommended).
   npm ci
