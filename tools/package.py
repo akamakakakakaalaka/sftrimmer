@@ -18,7 +18,7 @@ def main():
     features = json.loads((ROOT / 'docs/features-250.json').read_text())
     assert len(features) == 250 and sorted(f['id'] for f in features) == list(range(1,251))
     files = [p for p in ROOT.rglob('*') if p.is_file() and not any(x in EXCLUDED for x in p.relative_to(ROOT).parts)
-             and not p.name.endswith(('.log', '.sf2', '.xcuserstate')) and not p.is_symlink()
+             and not p.name.endswith(('.log', '.sf2', '.ipa', '.xcuserstate')) and not p.is_symlink()
              and p.relative_to(ROOT).as_posix() != 'ios/Project128/WebBundle/banks/starter.sf3']
     archive = OUT / 'Project128_iOS_Source.zip'
     with zipfile.ZipFile(archive, 'w', compression=zipfile.ZIP_DEFLATED, compresslevel=9) as z:

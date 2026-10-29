@@ -89,3 +89,13 @@ mask decode, actual audio and SF3 conversion passed. All3 measured geometries
 unchanged.8 Swift syntax files and59 PBX objects statically parsed. Independent
 review found no Important/Critical issue. Native compilation/signing/device
 appearance still unverified. Source ZIP and icon comparison regenerated.
+
+First actual Xcode builds, 29 October2026:
+User authorized project128-ios-build branch in public sftrimmer. Main remains
+54e665de0875496ef75565d2422b014afe9d9bfd. Branch push workflow run40814584793
+succeeded: macOS15.7.9 arm64, Xcode16.4, SDK18.5;126 Node tests and simulator
+plus Release iphoneos compilation passed. Downloaded7,903,105-byte IPA verified
+for ZIP CRC, arm64/iOS (not simulator), iOS18 minimum, exact web assets and single
+starter bank hash. Unsigned: no Apple code signature/profile, no physical-device
+or XCTest result claimed. IPA and preferred editable bank source are published
+on the isolated branch; docs/IPA_VERIFICATION.json records full evidence.

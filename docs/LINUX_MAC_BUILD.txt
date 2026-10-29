@@ -95,14 +95,22 @@ sideloadable IPA. A simulator .app cannot be installed on a real iPhone.
 No signed IPA is claimed until a successful signing run produces one.
 
 CURRENT BUILD ACCESS, 29 OCTOBER2026
-GitHub command-line access is now connected to the user's account. The local
-project still has no configured remote, and the connector lists only the public
-sftrimmer repository. Creating a separate private project128-ios repository was
-denied with GraphQL "Resource not accessible by integration (createRepository)".
-No remote code was changed and no Mac workflow was dispatched. Using the
-unrelated public repository needs the user's choice; source would be public on
-that branch. No Apple signing identity/profile is configured locally. The new
-unsigned-device job is prepared locally but has not produced an IPA yet.
+The user explicitly authorized a separate branch in public sftrimmer after
+GitHub denied creating a private build repository. project128-ios-build was
+pushed without changing main. Its push trigger ran successfully on a real
+macOS15.7.9 arm64 runner using Xcode16.4 (16F6), device/simulator SDK18.5.
+Run: https://github.com/akamakakakakaalaka/sftrimmer/actions/runs/40814584793
+Build commit: f215e9df2870220dce26dcad78a6a7136169ff2d
+
+Both simulator and unsigned Release iphoneos builds succeeded. All126 Node
+behavior tests also passed on Mac. The downloaded IPA was independently checked
+on Linux for ZIP CRC, arm64 Mach-O executable, LC_BUILD_VERSION platform iOS2,
+iOS18.0 minimum, exact bundled runtime/bank hashes and7,903,105-byte size.
+No Apple signature or provisioning profile is present. AltStore/Sideloadly or
+another authorized signing/install setup is still needed. Native XCTest and
+physical-device runtime were not run. Exact results: docs/IPA_VERIFICATION.json.
+The IPA is supplied at downloads/Project128-unsigned.ipa. The preferred bank
+source is published at sources/banks/Project128_GS_Editable_Source.sf2.
 
 WHAT THIS CAN AND CANNOT VERIFY
 A successful macOS CI compile establishes that Xcode accepts the native

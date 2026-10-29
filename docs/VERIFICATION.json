@@ -1,6 +1,6 @@
 {
   "version": "0.1.0",
-  "status": "Source foundation; native compile/sign/device validation pending",
+  "status": "Native simulator/device compilation passed; unsigned IPA produced; signing and device runtime pending",
   "node_behavior_tests": {
     "passed": 126,
     "failed": 0
@@ -47,7 +47,7 @@
     "PBX_objects_parsed": 59,
     "Swift_files_syntax_parsed": 8,
     "bank_copy_script_executed": true,
-    "xcodebuild_run": false,
+    "xcodebuild_run": true,
     "XCTest_run": false,
     "signed_IPA_created": false,
     "device_verified": false
@@ -139,7 +139,7 @@
     "dev_kvm_available": false,
     "CPU_virtualization_flags_exposed": false,
     "native_Xcode_installed": false,
-    "Mac_CI_workflow_run": false
+    "Mac_CI_workflow_run": true
   },
   "features_catalog_entries": 250,
   "features_all_completed": false,
@@ -194,5 +194,35 @@
       "native_script_reinstalled_on_reload": true,
       "independent_review": "No Important or Critical findings"
     }
+  },
+  "native_build": {
+    "artifact": "Project128-unsigned.ipa",
+    "bytes": 7903105,
+    "sha256": "06a0fe28a5422de8ed379057e1dac7dfc137690af4ab216c180c528f2f3170ff",
+    "under_20MB": true,
+    "ZIP_CRC_verified": true,
+    "Mach_O": "arm64 executable",
+    "LC_BUILD_VERSION_platform": "iOS (2), not iOS Simulator",
+    "minimum_iOS": "18.0",
+    "binary_minimum_iOS": "18.0.0",
+    "bundle_identifier": "org.project128.player",
+    "Xcode": "16.4 (16F6)",
+    "iOS_SDK": "18.5",
+    "macOS_runner": "15.7.9 arm64",
+    "simulator_compile_succeeded": true,
+    "device_compile_succeeded": true,
+    "Apple_signing_performed": false,
+    "provisioning_profile_embedded": false,
+    "signature_load_command_present": false,
+    "signing_required_before_installation": true,
+    "device_runtime_verified": false,
+    "XCTest_run": false,
+    "bundled_bank_SHA256_verified": true,
+    "bundled_runtime_matches_local_build": true,
+    "web_core_tests_on_Mac_passed": 126,
+    "build_commit": "f215e9df2870220dce26dcad78a6a7136169ff2d",
+    "build_url": "https://github.com/akamakakakakaalaka/sftrimmer/actions/runs/40814584793",
+    "branch": "project128-ios-build",
+    "main_branch_unchanged": true
   }
 }

@@ -12,8 +12,8 @@ and P.Time settings persist independently by exact soundbank and MIDI address.
 This is original SpessaSynth-based source, not a Sampei source fork. References,
 measurement limits and video-access limitations are in docs/UI_REFERENCE_EVIDENCE.txt;
 current tests/geometry are recorded in docs/VERIFICATION.json and output reports.
-Full Sampei feature parity and native iOS compile/sign/device validation remain
-incomplete. The250-item catalog remains a roadmap, not250 finished features.
+Full Sampei feature parity remains incomplete. Native simulator/device Xcode
+compilation passed; Apple signing and physical-device runtime remain unverified. The250-item catalog remains a roadmap, not250 finished features.
 
 START ON A COMPUTER
 Install Node.js 22.12+ (Node24 recommended).
@@ -29,7 +29,7 @@ Open ios/Project128.xcodeproj on a supported Mac with Xcode. Select the Project1
 An .xcodeproj is a development project. A distributable .ipa contains an .app bundle and needs appropriate signing/provisioning to install; renaming a ZIP does not produce an installable app.
 
 LINUX BUILD ORCHESTRATION
-Read docs/LINUX_MAC_BUILD.txt and .github/workflows/build-ios.yml. The workflow runs the Apple toolchain on a real Mac runner; it does not emulate macOS inside Linux. The current workspace lacks KVM/virtualization access and sufficient disk for a practical Xcode VM. No signed native build or device verification has been performed here.
+Read docs/LINUX_MAC_BUILD.txt and .github/workflows/build-ios.yml. The workflow runs the Apple toolchain on a real Mac runner; it does not emulate macOS inside Linux. The current workspace lacks KVM/virtualization access and sufficient disk for a practical Xcode VM. The Mac workflow has now compiled simulator and device builds successfully. downloads/Project128-unsigned.ipa is the unsigned iPhone build (iOS18+); sign/install using a setup such as AltStore or Sideloadly. Physical-device behavior and Apple signing remain unverified. See docs/IPA_VERIFICATION.json.
 
 VERIFY / PACKAGE
   npm test
@@ -45,6 +45,6 @@ Original preset files retain exact bank identity and part edits. KQ .kqspreset c
 LICENSES
 Original project code: Apache-2.0. Third-party engines, encoders, bank samples and optional extra instruments have their own notices in licenses/. In particular, any TimGM6mb samples are GPL-2 licensed; this does not turn them into Roland samples. Retain source/provenance and redistribution terms.
 
-The complete preferred editable bank source is supplied separately beside the ZIP as Project128_GS_Editable_Source.sf2 (32,542,290bytes). See licenses/banks/SOURCE_DELIVERY.txt. Redistribute that source alongside the compressed bank and notices.
+The complete preferred editable bank source is supplied separately beside the ZIP as Project128_GS_Editable_Source.sf2 (32,542,290bytes). It is also published in sources/banks on the project128-ios-build branch. See licenses/banks/SOURCE_DELIVERY.txt. Redistribute that source alongside the compressed bank and notices.
 
 Imported custom bank bytes currently stay in session memory: after reopening, import the same bank to relink its stable fingerprint. The bundled starter reloads automatically. Automatic persistent custom-bank storage is future work, not a completed feature.

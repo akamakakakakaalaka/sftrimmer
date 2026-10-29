@@ -34,6 +34,6 @@ token path, and reinstalled on navigation/process recovery. Browser builds and
 missing native images fall back to the bundled SVGs. Only small PNG data URLs
 are accepted from the native image boundary; remote or SVG payloads are rejected.
 
-Validation distinguishes browser masks from actual UIKit appearance. Native
-compilation, signing and device appearance remain pending; Linux static parsing
-and a simulated PNG boundary do not establish those results.
+Validation distinguishes browser masks from actual UIKit appearance. Native simulator and device compilation have since passed on the Mac runner.
+Signing and actual device appearance remain unverified; a successful compile
+and a simulated PNG boundary do not establish physical-device appearance.
