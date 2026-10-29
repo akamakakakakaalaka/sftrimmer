@@ -1,0 +1,48 @@
+Sampei-style interface implementation plan
+
+Goal: deliver a working source revision with a closer documented Sampei layout.
+Architecture: retain PlayerEngine and state contracts. New PartRack owns stable
+128-panel DOM. Main owns routing, patch selection and existing file/transport UI.
+Tech: TypeScript, CSS, Playwright, existing SwiftUI/WebKit resource pipeline.
+Spec: ../specs/2026-10-29-sampei-interface-design.txt
+
+Constraints: original app code, no claim of Sampei source fork, no unsupported
+dummy controls, no new runtime dependencies, source ZIP <20,000,000 bytes.
+Review focus: hidden keyboard during page change; another part changed by a dial;
+partial edits overwrite mapped presets; patch text injects markup; landscape dock
+obscures controls. Native compile/sign/device claims must remain pending.
+
+Task 1 — Source inspection and part rack
+[x] Verify official source availability and current screenshots.
+[x] Add persistent, independently editable PartRack with native range semantics.
+[x] Verify last-part selection and exact nested field intent through browser tests.
+Files: web/src/part-rack.ts, part-rack.css; tests/browser/player.spec.ts.
+Interface: PartRack(container,{select,edit,choosePatch,parameters}); update(state,banks);
+setPlaying(id,playing). Edits carry the concrete part ID and changed field paths.
+
+Task 2 — Compact navigation, patch sheet and fixed keyboard
+[x] Write browser cases for rack editing, page changes and patch search; run RED.
+[x] Move existing inspector/transport to Param/SMF pages; keep IDs and engine APIs.
+[x] Add patch dialog with bank column, search and atomic bank+patch selection.
+[x] Apply flat rose default, existing palette preservation, responsive keyboard dock.
+[x] Run the new browser cases GREEN and existing interface suite.
+Files: web/src/main.ts, style.css, state.ts; tests/browser/player.spec.ts.
+
+Task 3 — Review and delivery
+[x] Independent review of UI state/selection/input behavior.
+[x] Run core tests, browser tests, production CSP/audio/compression verification,
+    native asset sync tests and TypeScript/Vite build.
+[x] Update evidence/docs, synchronize iOS resources, regenerate portrait/tablet
+    screenshots and verify source archive CRC/bytes and <20 MB size.
+Files: tools/verify-production.mjs, docs/IMPLEMENTED.txt, docs/VERIFICATION.json,
+docs/PROGRESS.txt, README.txt and generated iOS assets/output artifacts.
+
+Website-only steering implemented after initial tasks:
+[x] Recheck the manual's own IMG_0205–0217 references; exclude App Store/GitHub
+    material from the design basis.
+[x] Match six-menu order and grouped popovers; move master controls under Param.
+[x] Add distinctCC120/123/121 reset dispatch, M hold-solo, K.Shft and keyboard ruler.
+[x] Add name/prog-range/bank matching, persistent favorites, sorting and Close.
+[x] Review popup input/focus/scroll and safe keyboard register/visibility changes.
+Final exact results and packaging evidence are recorded in docs/VERIFICATION.json
+and output/package-verification.json after verification, not assumed by this plan.

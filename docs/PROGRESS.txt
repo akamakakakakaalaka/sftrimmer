@@ -13,3 +13,30 @@ Deferred: custom-bank persistence afterrestart; full named-modelXG/SysEx; microt
 Final required scope added: per-part app-preset MSB/LSB/Program Change maps, snapshot isolation and separate incoming-versus-font addresses. Review found repeated recall and same-baseline UI intent issues; actual PCM regressions now cover both. Fine-grained edit fields prevent a volume edit from replacing a MIDI-recalled instrument. Current60 Node tests,2 asset-sync tests,5 browser tests and production audio check.
 Final restore fix: validate imported data, stop/reset active MIDI transport, then apply restored state. Browser regression observed continued playback before fix and passed afterward. Final suite60 Node+2 asset-sync+6 browser+production PCM check all green. No native Mac compile/signing/device claim.
 Native-policy production check additionally reproduced blocked encoder data-URL fetching. Added data: only to connect-src for the locally bundled Vorbis module; external connections and script policy remain restricted. Actual UI conversion/export now passes using the exact native CSP and token prefix, and the exported SF3 decodes correctly.
+
+Interface revision, 29 October2026:
+User steering: use ONLY the developer website documentation/screenshots as the
+current design reference. Earlier public-source search found no full Sampei app
+source; the unrelated tab helper and App Store reference material are not used
+or bundled in this website-based reconstruction.
+Completed: flat rose128-part rack, native rotary ranges and exact field intent,
+single wide desktop panels, M hold/accessible solo, K.Shft, documented menu order,
+grouped popovers, master controls under Param, distinctCC120/123/121 reset actions,
+patch query grammar/favorites/source-order sorting/Close persistence, keyboard
+ruler/destination and wide four-octave register. Original SpessaSynth retained.
+Ruling: preserve explicit user upgrades128parts and absoluteADSR/delay; do not add
+unsupported dials to mimic the screenshot. Cost: incomplete original parity.
+Ruling: existing palette choices survive; rose is the default only for new state.
+Review: no Critical/Important findings. Fixed both reviewed popup polish issues:
+opening/return focus and popup scroll reset; browser coverage includes both.
+Earlier review's stale open patch-sheet refresh and landscape panic reachability
+were also corrected. A new navigation check caught inherited scroll hiding part
+128's identity; viewport regression observed RED and passed after route reset.
+Source ZIP/native bundle/preview artifacts are regenerated after final checks.
+Native Mac compilation/signing/device verification remain pending.
+Final website-only revision verification:73 Node behavioral tests,11 Chromium
+interface tests,2 binary synchronization tests, TypeScript/Vite production build,
+actual AudioWorklet audio with nonzero PCM, and SF3 conversion/export/finite decode
+under exact native CSP/token prefix all passed. Portrait/desktop/tablet, Param
+popover and patch-browser previews regenerated. Native compile/sign/device tests
+remain pending; output/package-verification.json records the exact source archive.

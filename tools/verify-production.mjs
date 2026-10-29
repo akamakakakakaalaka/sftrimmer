@@ -47,7 +47,9 @@ try{
  await page.locator('#start-audio').click();
  await page.waitForFunction(()=>document.querySelectorAll('#part-patch option').length>128,{timeout:60000});
  assert.equal(await page.locator('#parts-grid button[data-part]').count(),128);
+ assert.equal(await page.locator('#part-rack [data-panel-part]').count(),128);
  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
+ assert.equal(await page.evaluate(()=>{const box=document.querySelector('.keyboard-panel').getBoundingClientRect();return box.top>=0&&box.bottom<=innerHeight;}),true);
  await page.keyboard.down('a');
  const peak=await page.evaluate(async()=>{
   let peak=0;const data=new Float32Array(2048);
@@ -73,13 +75,21 @@ try{
  const bytes=Buffer.concat(chunks),bank=SoundBankLoader.fromArrayBuffer(bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength));
  assert(bank.samples.every(sample=>sample.isCompressed&&sample.getAudioData().every(Number.isFinite)));
  await page.locator('[data-bank-use]').first().click();
- await page.locator('[data-tab="perform"]').click();
+ await page.locator('#panels-home').click();
  await mkdir('output',{recursive:true});
  await page.screenshot({path:'output/Project128_Portrait.png'});
+ await page.locator('[data-tab="parameters"]').click();
+ await page.screenshot({path:'output/Project128_Parameters.png'});
+ await page.locator('#panels-home').click();
+ await page.locator('[data-rack-patch="0"]').click();
+ await page.screenshot({path:'output/Project128_PatchBrowser.png'});
+ await page.locator('#close-patch-dialog').click();
  await page.setViewportSize({width:1440,height:1024});
  await page.screenshot({path:'output/Project128_Desktop.png'});
+ await page.setViewportSize({width:768,height:1024});
+ await page.screenshot({path:'output/Project128_Tablet.png'});
  assert.deepEqual(errors,[]);
- const report={built_assets:true,native_token_prefix:true,native_content_security_policy:true,browser_sf3_conversion:true,parts:128,starter_presets:await page.locator('#part-patch option').count(),actual_audio_peak:peak,
+ const report={built_assets:true,native_token_prefix:true,native_content_security_policy:true,browser_sf3_conversion:true,parts:128,editable_part_panels:128,docked_keyboard:true,starter_presets:await page.locator('#part-patch option').count(),actual_audio_peak:peak,
   user_gesture_audio:true,portrait_horizontal_overflow:false,catalog_count:250,page_errors:errors,native_iOS_verified:false};
  await writeFile('output/production-verification.json',JSON.stringify(report,null,2));
  console.log(JSON.stringify(report,null,2));

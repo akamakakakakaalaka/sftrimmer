@@ -2,7 +2,7 @@
   "version": "0.1.0",
   "status": "Source foundation; native compile/sign/device validation pending",
   "node_behavior_tests": {
-    "passed": 60,
+    "passed": 73,
     "failed": 0
   },
   "asset_sync_tests": {
@@ -10,7 +10,7 @@
     "failed": 0
   },
   "chromium_UI_tests": {
-    "passed": 6,
+    "passed": 11,
     "failed": 0
   },
   "production": {
@@ -19,8 +19,10 @@
     "native_content_security_policy": true,
     "browser_sf3_conversion": true,
     "parts": 128,
+    "editable_part_panels": 128,
+    "docked_keyboard": true,
     "starter_presets": 295,
-    "actual_audio_peak": 0.06330887973308563,
+    "actual_audio_peak": 0.06297805905342102,
     "user_gesture_audio": true,
     "portrait_horizontal_overflow": false,
     "catalog_count": 250,
@@ -126,5 +128,43 @@
     "Mac_CI_workflow_run": false
   },
   "features_catalog_entries": 250,
-  "features_all_completed": false
+  "features_all_completed": false,
+  "verified_date": "2026-10-29",
+  "interface_revision": {
+    "design_reference_scope": "Developer website manual and hosted screenshots only",
+    "reference_urls": [
+      "https://www.kiraqtech.jp/blog/kq-sampei/",
+      "https://www.kiraqtech.jp/blog/kq-sampei/kq-sampei-manual/"
+    ],
+    "original_source_reconstruction": true,
+    "Sampei_source_fork": false,
+    "editable_scrolling_panels": 128,
+    "themes": 5,
+    "documented_menu_order": [
+      "Presets",
+      "Reset",
+      "Param",
+      "MIDI",
+      "Preferences",
+      "SMF"
+    ],
+    "patch_query_syntax": [
+      "name terms",
+      "prog8-15",
+      "bank0"
+    ],
+    "persistent_patch_favorites": true,
+    "source_order_sorting": true,
+    "close_after_selection_toggle": true,
+    "keyboard_scroll_ruler": true,
+    "mute_hold_solo": true,
+    "reset_CC_messages": [
+      120,
+      123,
+      121
+    ],
+    "full_original_behavior_parity": false,
+    "independent_review_critical_or_important_findings": 0,
+    "reviewed_popup_focus_and_scroll_fixed": true
+  }
 }

@@ -2,6 +2,17 @@ PROJECT 128 — original iOS MIDI player source, v0.1
 
 This is a source project, not a signed/installed iPhone app. The embedded player is also testable in a desktop browser. The full 250-item feature catalog is in docs/features-250.html and JSON; proposed items are not claims of completed features. See docs/IMPLEMENTED.txt for the actual build scope and verification results.
 
+INTERFACE REVISION — 29 OCTOBER 2026
+This revision uses ONLY the developer's own product page, manual and hosted
+screenshots as its design references. It includes128 editable scrolling panels,
+rotary mixer/ADSR controls, M tap/hold-solo, documented six-menu order, grouped
+popovers, master controls under Param, three distinct MIDI reset actions, patch
+favorites and prog/bank search, a Close toggle, and a docked keyboard with ruler.
+The rose default follows the website; four previous palettes remain available.
+This is original code using SpessaSynth, not a Sampei source fork. Full behavior
+parity is incomplete. See docs/superpowers/specs/2026-10-29-sampei-interface-design.txt
+for the exact website references and retained user-requested extensions.
+
 START ON A COMPUTER
 Install Node.js 22.12+ (Node24 recommended).
   npm ci

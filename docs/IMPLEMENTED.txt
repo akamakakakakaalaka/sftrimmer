@@ -1,7 +1,8 @@
 PROJECT128 v0.1 — current implementation and limits
 
 WORKING SOURCE FOUNDATION
-128 logical parts across eight MIDI ports; portrait overview and focused editor.
+128 logical parts across eight MIDI ports; 128 directly editable scrolling panels, optional compact navigator, and focused Param editor. Flat rose panels, rotary mixer/ADSR dials, the documented Presets/Reset/Param/MIDI/settings/player menu order, grouped popovers and docked touch keyboard follow ONLY the developer website manual and its hosted screenshots. This is an original reconstruction, not a source fork. M tap mutes, hold solos, Shift+Enter/Space offers accessible solo; K.Shft uses the existing per-part transpose.
+Searchable two-column bank/patch sheet commits a concrete bank and full patch address to the selected part. Mixer and ADSR edits retain exact part identity and individual field intent. The keyboard stays visible behind menu popovers and remains available in Panels/SMF and landscape. A register ruler scrolls the keyboard, destination selection targets all128 parts, and wide layouts show four octaves. Hiding or shifting the keyboard releases its own notes without issuing a global panic. Popup focus/return and reopen scroll are handled. The patch browser supports name/prog-range/bank queries, persistent stars/favorites, source-order and sorted views, and a separate Close-after-selection toggle.
 Independent concrete SF2/SF3/DLS bank/program bindings, SHA256 bank fingerprints and isolated voice caches. Synthetic mixed-format PCM tests verify equal preset/sample names do not merge voices across banks.
 Per-part bank MSB/LSB/program controls, mute/solo, volume/pan, melodic transpose, drum-key remapping, effect sends and locks.
 Individual original .p128preset JSON save/import/export, nested parameter isolation and bank references. Session JSON backup/restore; corrupt imports leave current state intact. KQ .kqspreset is not supported.
@@ -12,7 +13,7 @@ MIDI file playback, tempo multiplier, seek/pause/resume, independent format2 seq
 Chromatic, major/minor families, Hijaz, Hirajoshi and Insen scale templates/root mapping. This is a scale mapper, not context-aware chord reharmonization. Microtonal Rast/Bayati are visibly unavailable pending proper cent tuning.
 Per-part reverb/chorus/delay sends; master delay time/feedback/mix, flanger mix and bit-depth reduction. Per-preset dedicated delay units and sample-rate-reduction bitcrush are not complete. SpessaSynth XG effects/SysEx are supported to the adapter's present extent, not certified full XG-model conformance; arbitrary GS/XG part-mode SysEx still has limits.
 Opt-in SF2→SF3 conversion with quality/progress and originals retained for the session; low-rate PCM stays exact rather than being nearest-neighbor upsampled. File compression uses lossy Vorbis, while ZIP packaging is lossless.
-Four themes, local offline runtime and accessible labels. Full physical-device VoiceOver/Dynamic Type audits remain pending.
+Five themes including a new-session rose default; saved palettes remain intact. Local offline runtime and accessible native range controls. Full physical-device VoiceOver/Dynamic Type audits remain pending.
 Native SwiftUI source: secure loopback WebKit host, Files/share bridge, settings mirrored through native storage, AVAudioSession lifecycle hooks, eight CoreMIDI input streams and bounded overflow recovery. Actual native compilation and behavior remain unverified.
 Linux-triggered Mac-runner workflow, optional signed IPA export from supplied private signing secrets, and read-only Mac toolchain preflight. This is real Mac infrastructure, not macOS emulation inside Linux.
 
@@ -21,13 +22,14 @@ Project128 GS, GeneralUser GS 2.0.3 BETA plus eight actual TimGM6mb variants sel
 The GPL preferred editable combined SF2 is supplied separately alongside the project archive. License/provenance notices and source hashes are included. Do not redistribute only the compressed bank without its required source-delivery arrangement.
 
 VERIFICATION IN THIS LINUX WORKSPACE
-60 Node/TypeScript behavioral tests passed: real PCM bank isolation and generation tails, note collision/sustain/reset/transport cases, MIDI parsing/timing, custom DSP, persistence/preset isolation, app-preset program mapping/field intent, conversion and complete bundled-bank integrity.
+73 Node/TypeScript behavioral tests passed: real PCM bank isolation and generation tails, note collision/sustain/reset/transport cases, MIDI parsing/timing, custom DSP, persistence/preset isolation, app-preset program mapping/field intent, documented patch-search grammar, stable sorting and favorite state, conversion and complete bundled-bank integrity.
 2 binary asset-sync tests passed.
-6 Chromium interface tests passed: portrait128-part selection, persistent tuning across MIDI formats0/1/2, bundled-bank startup/corrupt import preservation, native interruption event note release/pause, persistent per-part app-preset MIDI program maps, and session restore stopping/resetting transport before applying saved controls.
+11 Chromium interface tests passed. Coverage includes portrait128-part selection and visible parameter navigation, independent rotary mixer/ADSR edits, persistent keyboard/page switching and landscape bounds, patch search/selection, persistent tuning across MIDI formats0/1/2, bundled-bank startup/corrupt import preservation, native interruption event note release/pause, persistent per-part app-preset MIDI program maps, and session restore stopping/resetting transport before applying saved controls. Current exact counts are in VERIFICATION.json.
 Production assets passed actual AudioWorklet playback with nonzero PCM and no page errors under a native-style token-prefixed URL.295 starter patches and all250 catalog entries load. Portrait has no horizontal overflow.
 TypeScript and Vite production build passed. Native project/resources/plist/Swift syntax received static checks; they are not substitutes for xcodebuild/XCTest or device verification.
 
 KNOWN REMAINING LIMITS
+Full documented Sampei behavior parity is unfinished: additional controller dials, key-range/channel modes, pinch keyboard zoom, all original preferences, bank modifiers/streaming, and more remain outside this build. No unsupported dummy controls are included merely for visual similarity.
 No signed IPA or installed iPhone build exists yet. Native compilation, signing, WKWebView local-origin worklet support, live MIDI latency, background audio, interruptions and physical-device behavior require the Mac workflow and actual hardware tests.
 Custom imported bank bytes are session-memory-only and must be reimported after reopening; fingerprints and preset settings persist. The starter reloads automatically. Persistent custom bank storage is planned.
 Panel values display saved controls, not complete live MIDI feedback. MIDI can recall other snapshots. Edits affect their specified fields; Apply displayed settings explicitly restores the whole visible part. A full live effective-state display is future work.

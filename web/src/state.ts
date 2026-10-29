@@ -1,4 +1,4 @@
-import type { AppState, Envelope, MasterState, PartState, PresetMapping, SavedPreset } from './contracts.ts';
+import type { AppState, Envelope, MasterState, PartState, PatchBrowserSettings, PresetMapping, SavedPreset } from './contracts.ts';
 import { normalizeMode } from './harmony.ts';
 
 const SESSION_KEY = 'project128.session';
@@ -34,12 +34,37 @@ function createPart(id: number): PartState {
 }
 
 function createMaster(): MasterState {
-  return { keyShift: 0, fineTune: 0, gain: 0.7, tempo: 1, root: 0, mode: 'chromatic', theme: 'dark',
+  return { keyShift: 0, fineTune: 0, gain: 0.7, tempo: 1, root: 0, mode: 'chromatic', theme: 'rose',
     delayTime: 0.3, delayFeedback: 0.25, delayMix: 0, flangerMix: 0, crusherBits: 16 };
 }
 
+function createPatchBrowser(): PatchBrowserSettings {
+  return { favorites: [], sort: 'none', closeOnSelect: true, favoritesOnly: false };
+}
+
 export function createState(): AppState {
-  return { version: 1, master: createMaster(), parts: Array.from({ length: PART_COUNT }, (_, id) => createPart(id)), selectedPart: 0, presetMappings: [] };
+  return { version: 1, master: createMaster(), parts: Array.from({ length: PART_COUNT }, (_, id) => createPart(id)), selectedPart: 0, presetMappings: [], patchBrowser: createPatchBrowser() };
+}
+
+function restorePatchBrowser(raw: unknown): PatchBrowserSettings {
+  const defaults = createPatchBrowser();
+  if (!record(raw)) return defaults;
+  const favorites: string[] = [];
+  const seen = new Set<string>();
+  if (Array.isArray(raw.favorites)) {
+    for (const favorite of raw.favorites) {
+      if (typeof favorite !== 'string' || favorite.length === 0 || favorite.length > 400 || seen.has(favorite)) continue;
+      seen.add(favorite);
+      favorites.push(favorite);
+      if (favorites.length === 8192) break;
+    }
+  }
+  return {
+    favorites,
+    sort: raw.sort === 'none' || raw.sort === 'name' || raw.sort === 'program' || raw.sort === 'bank' ? raw.sort : defaults.sort,
+    closeOnSelect: boolean(raw.closeOnSelect, defaults.closeOnSelect),
+    favoritesOnly: boolean(raw.favoritesOnly, defaults.favoritesOnly)
+  };
 }
 
 function restoreMaster(raw: unknown): MasterState {
@@ -111,6 +136,7 @@ export function restoreState(raw: unknown): AppState {
     }
   }
   state.presetMappings = restoreMappings(raw.presetMappings);
+  state.patchBrowser = restorePatchBrowser(raw.patchBrowser);
   return state;
 }
 

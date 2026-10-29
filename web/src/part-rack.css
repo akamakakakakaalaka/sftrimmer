@@ -1,0 +1,344 @@
+.part-rack {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+}
+
+.part-rack .sampei-part {
+  --dial-track: var(--key, #fffaf7);
+  --dial-fill: var(--accent, #ae102b);
+  --dial-face: var(--active, #ce6556);
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr);
+  gap: 9px;
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid transparent;
+  background: var(--surface, #f6bdb4);
+  color: var(--text, #2b1518);
+  scroll-margin: 110px 0 240px;
+}
+
+.part-rack .sampei-part.is-selected {
+  border-color: var(--accent, #ae102b);
+}
+
+.part-rack .sampei-part.is-playing .sampei-part-select {
+  background: var(--accent, #ae102b);
+  color: var(--key, #fffaf7);
+}
+
+.part-rack .sampei-strip {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 3px;
+  min-width: 0;
+}
+
+.part-rack .sampei-saved-volume {
+  position: relative;
+  width: 14px;
+  min-height: 74px;
+  flex: 1;
+  align-self: center;
+  overflow: hidden;
+  background: var(--key, #fffaf7);
+}
+
+.part-rack .sampei-saved-volume-fill {
+  position: absolute;
+  inset: auto 2px 2px;
+  height: calc(var(--saved-volume, 0%) - 2px);
+  min-height: 0;
+  background: var(--accent, #ae102b);
+}
+
+.part-rack .is-muted .sampei-saved-volume-fill { opacity: .35; }
+
+.part-rack button,
+.part-rack input {
+  font: inherit;
+}
+
+.part-rack button {
+  cursor: pointer;
+  border: 0;
+  border-radius: 0;
+  color: inherit;
+  background: var(--key, #fffaf7);
+}
+
+.part-rack button:hover { background: var(--surface-raised, #fff3ed); }
+.part-rack button:focus-visible,
+.part-rack input:focus-visible {
+  outline: 2px solid var(--accent, #ae102b);
+  outline-offset: 2px;
+}
+
+.part-rack .sampei-toggle {
+  min-width: 44px;
+  min-height: 44px;
+  margin: 0 -4px;
+  padding: 0;
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-touch-callout: none;
+  font-size: 14px;
+  line-height: 1;
+}
+
+.part-rack .sampei-toggle[aria-pressed="true"] {
+  background: var(--accent, #ae102b);
+  color: var(--key, #fffaf7);
+}
+
+.part-rack .sampei-lock {
+  display: flex;
+  min-height: 44px;
+  min-width: 44px;
+  margin: 0;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  cursor: pointer;
+  font-size: 10px;
+  line-height: 1;
+}
+
+.part-rack .sampei-checkbox {
+  width: 19px;
+  height: 19px;
+  margin: 0;
+  accent-color: var(--accent, #ae102b);
+  cursor: pointer;
+}
+
+.part-rack .sampei-part-body { min-width: 0; }
+
+.part-rack .sampei-part-head {
+  display: grid;
+  grid-template-columns: 44px 55px minmax(0, 1fr) 44px;
+  align-items: end;
+  gap: 6px;
+  margin-bottom: 9px;
+}
+
+.part-rack .sampei-head-field {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 4px;
+  text-align: center;
+}
+
+.part-rack .sampei-field-caption,
+.part-rack .sampei-dial-caption {
+  color: var(--text, #2b1518);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 16px;
+  white-space: nowrap;
+}
+
+.part-rack .sampei-part-select,
+.part-rack .sampei-address,
+.part-rack .sampei-patch,
+.part-rack .sampei-parameters {
+  display: flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  background: var(--key, #fffaf7);
+  font-size: 14px;
+  line-height: 18px;
+}
+
+.part-rack .sampei-address {
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.part-rack .sampei-patch {
+  display: block;
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.part-rack .sampei-parameters {
+  align-self: end;
+  font-size: 10px;
+}
+
+.part-rack .sampei-dial-row {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  align-items: start;
+  gap: 5px;
+}
+
+.part-rack .sampei-envelope { margin-top: 7px; }
+
+.part-rack .sampei-dial {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  align-items: center;
+  cursor: ew-resize;
+  touch-action: pan-y;
+}
+
+.part-rack .sampei-knob {
+  position: relative;
+  display: block;
+  width: var(--dial-size, 44px);
+  height: var(--dial-size, 44px);
+  margin-top: 3px;
+  flex: none;
+  border-radius: 50%;
+  background: conic-gradient(from 225deg, var(--dial-fill) 0deg var(--dial-progress, 0deg), var(--dial-track) var(--dial-progress, 0deg) 270deg, transparent 270deg 360deg);
+}
+
+.part-rack .sampei-knob::before {
+  position: absolute;
+  inset: 3px;
+  border-radius: 50%;
+  background: var(--dial-face);
+  content: '';
+}
+
+.part-rack .sampei-knob-needle {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  transform: rotate(var(--dial-angle, -135deg));
+}
+
+.part-rack .sampei-knob-needle::after {
+  position: absolute;
+  top: 5px;
+  left: calc(50% - 2px);
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--text, #2b1518);
+  content: '';
+}
+
+.part-rack .sampei-dial-input {
+  position: absolute;
+  z-index: 2;
+  top: 19px;
+  left: 50%;
+  width: var(--dial-size, 44px);
+  height: var(--dial-size, 44px);
+  margin: 0;
+  padding: 0;
+  transform: translateX(-50%);
+  opacity: 0;
+  cursor: ew-resize;
+  touch-action: pan-y;
+}
+
+.part-rack .sampei-dial:has(.sampei-dial-input:focus-visible) .sampei-knob {
+  outline: 2px solid var(--accent, #ae102b);
+  outline-offset: 3px;
+}
+
+.part-rack .sampei-dial-value,
+.part-rack .sampei-envelope-caption {
+  display: block;
+  min-height: 15px;
+  margin-top: 2px;
+  color: var(--muted, #6e4146);
+  font-size: 10px;
+  line-height: 13px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.part-rack .sampei-dial.is-disabled { opacity: .48; }
+.part-rack .sampei-dial.is-disabled,
+.part-rack .sampei-dial-input:disabled { cursor: default; }
+
+.part-rack .sampei-env-override {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+}
+
+.part-rack .sampei-override-control {
+  display: flex;
+  width: 44px;
+  height: 44px;
+  margin-top: 3px;
+  align-items: center;
+  justify-content: center;
+}
+
+.part-rack .sampei-secondary-controls {
+  display: flex;
+  min-width: 0;
+  align-items: end;
+  gap: 12px;
+  margin-top: 7px;
+}
+
+.part-rack .sampei-key-shift {
+  display: flex;
+  width: 60px;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 4px;
+  text-align: center;
+}
+
+.part-rack .sampei-transpose {
+  width: 100%;
+  min-height: 44px;
+  border: 0;
+  border-radius: 0;
+  padding: 4px;
+  background: var(--key, #fffaf7);
+  color: var(--text, #2b1518);
+  text-align: center;
+  font-size: 14px;
+}
+
+@media (min-width: 900px) {
+  .part-rack .sampei-part { --dial-size: 64px; gap: 14px; padding: 12px; }
+  .part-rack .sampei-part-body {
+    display: grid;
+    grid-template-columns: minmax(260px, .8fr) minmax(340px, 1.2fr);
+    grid-template-areas: 'head mixer' 'secondary envelope';
+    gap: 12px 20px;
+    align-items: start;
+  }
+  .part-rack .sampei-part-head {
+    grid-area: head;
+    grid-template-columns: 44px 60px minmax(0, 1fr) 48px;
+    margin: 0;
+  }
+  .part-rack .sampei-mixer { grid-area: mixer; }
+  .part-rack .sampei-envelope { grid-area: envelope; margin: 0; }
+  .part-rack .sampei-secondary-controls { grid-area: secondary; margin: 0; }
+  .part-rack .sampei-override-control { width: 64px; height: 64px; }
+  .part-rack .sampei-saved-volume { width: 18px; }
+}
+
+@media (max-width: 380px) {
+  .part-rack .sampei-part { gap: 6px; padding: 8px; grid-template-columns: 36px minmax(0, 1fr); }
+  .part-rack .sampei-part-head { grid-template-columns: 44px 45px minmax(0, 1fr) 44px; gap: 4px; }
+  .part-rack .sampei-dial-row { gap: 1px; }
+  .part-rack .sampei-field-caption,
+  .part-rack .sampei-dial-caption { font-size: 10px; }
+  .part-rack .sampei-patch { font-size: 12px; }
+}

@@ -60,7 +60,7 @@ test('untrusted session input clamps finite values and discards invalid data', (
   assert.equal(restored.master.tempo, 1);
   assert.equal(restored.master.root, 11);
   assert.equal(restored.master.mode, 'chromatic');
-  assert.equal(restored.master.theme, 'dark');
+  assert.equal(restored.master.theme, 'rose');
   assert.equal(restored.master.delayFeedback, 0.95);
   assert.equal(restored.parts[0].bankId, null);
   assert.equal(restored.parts[0].volume, 127);
@@ -200,4 +200,63 @@ test('session restoration retains at most the first 2048 unique valid MIDI app-p
   restored.presetMappings![0].preset.part.envelope.release = 9;
   assert.equal(restored.presetMappings![1].preset.part.envelope.release, 0.3);
   assert.equal(preset.part.envelope.release, 0.3);
+});
+
+test('new sessions supply independent patch-browser defaults', () => {
+  const first = createState();
+  const second = createState();
+  assert.deepEqual(first.patchBrowser, { favorites: [], sort: 'none', closeOnSelect: true, favoritesOnly: false });
+  first.patchBrowser!.favorites.push('sha256:bank-a:0:0:0:0');
+  assert.deepEqual(second.patchBrowser!.favorites, []);
+});
+
+test('patch-browser preferences and stable favorite identities survive session storage', () => {
+  const storage = memoryStorage();
+  const state = createState();
+  state.patchBrowser = { favorites: ['sha256:bank-a:0:0:8:0', 'sha256:bank-a:1:0:8:0'], sort: 'bank', closeOnSelect: false, favoritesOnly: true };
+  saveState(state, storage);
+  const restored = loadState(storage);
+  assert.deepEqual(restored.patchBrowser, state.patchBrowser);
+  restored.patchBrowser!.favorites.push('sha256:bank-b:0:0:8:0');
+  assert.equal(state.patchBrowser.favorites.length, 2);
+  for (const sort of ['none', 'name', 'program', 'bank']) {
+    assert.equal(restoreState({ version: 1, patchBrowser: { sort } }).patchBrowser!.sort, sort);
+  }
+});
+
+test('patch-browser restoration validates shape, sorts and strict booleans', () => {
+  const defaults = { favorites: [], sort: 'none', closeOnSelect: true, favoritesOnly: false };
+  for (const patchBrowser of [undefined, null, [], 'name', 42]) {
+    assert.deepEqual(restoreState({ version: 1, patchBrowser }).patchBrowser, defaults);
+  }
+  assert.deepEqual(restoreState({ version: 1, patchBrowser: {
+    favorites: 'bank-a', sort: 'random', closeOnSelect: 'false', favoritesOnly: 1
+  } }).patchBrowser, defaults);
+  assert.deepEqual(restoreState({ version: 1, patchBrowser: { closeOnSelect: false, favoritesOnly: true } }).patchBrowser,
+    { ...defaults, closeOnSelect: false, favoritesOnly: true });
+  assert.deepEqual(restoreState({ version: 2, patchBrowser: { sort: 'name' } }).patchBrowser, defaults);
+});
+
+test('patch-browser restoration keeps the first 8192 unique bounded favorite identities', () => {
+  const maximumLength = 'a'.repeat(400);
+  const favorites: unknown[] = [null, 42, '', 'first', 'first', 'a'.repeat(401), maximumLength,
+    ...Array.from({ length: 8192 }, (_, index) => `favorite-${index}`)];
+  const state = restoreState({ version: 1, patchBrowser: { favorites } });
+  assert.equal(state.patchBrowser!.favorites.length, 8192);
+  assert.deepEqual(state.patchBrowser!.favorites.slice(0, 4), ['first', maximumLength, 'favorite-0', 'favorite-1']);
+  assert.equal(state.patchBrowser!.favorites.at(-1), 'favorite-8189');
+  state.patchBrowser!.favorites.push('new-favorite');
+  assert.equal(favorites.includes('new-favorite'), false);
+});
+
+test('individual preset snapshots exclude global patch-browser preferences', () => {
+  const state = createState();
+  state.patchBrowser = { favorites: ['sha256:bank-a:0:0:8:0'], sort: 'name', closeOnSelect: false, favoritesOnly: true };
+  const preset = createPreset(state, 'Favorite patch');
+  assert.equal('patchBrowser' in preset, false);
+  assert.equal('patchBrowser' in preset.part, false);
+  const applied = applyPreset(state, preset, 1);
+  assert.deepEqual(applied.patchBrowser, state.patchBrowser);
+  applied.patchBrowser!.favorites.push('another-favorite');
+  assert.equal(state.patchBrowser.favorites.length, 1);
 });

@@ -1,8 +1,10 @@
 import './style.css';
 import { PlayerEngine } from './engine';
+import { PartRack } from './part-rack';
+import { matchesPatchQuery, patchIdentity, sortPatchEntries } from './patch-search';
 import { loadState, saveState, restoreState, createPreset, applyPreset, parsePreset } from './state';
 import { SCALES, requiresMicrotonalTuning } from './harmony';
-import type { AppState, BankInfo, PartState, PlayerPosition, SavedPreset, PresetMapping } from './contracts';
+import type { AppState, BankInfo, PartState, PlayerPosition, SavedPreset, PresetMapping, PatchBrowserSettings } from './contracts';
 
 const icons: Record<string, string> = {
   wave: '<path d="M3 12h2l2-7 4 14 3-16 3 14 2-5h2"/>',
@@ -21,6 +23,7 @@ const icons: Record<string, string> = {
   download: '<path d="M12 3v13m-5-5 5 5 5-5M4 17v4h16v-4"/>',
   close: '<path d="m6 6 12 12M6 18 18 6"/>',
   shield: '<path d="m12 3 8 3v6c0 4-8 9-8 9s-8-5-8-9V6Zm-4 9 3 3 5-6"/>',
+  gear: '<circle cx="12" cy="12" r="3"/><path d="m9 3-.5 2-2 1-2-.5-2 3 1.5 1.5v3L2.5 14l2 3 2-.5 2 1 .5 2h4l.5-2 2-1 2 .5 2-3-1.5-1.5v-3L20 8l-2-3-2 .5-2-1-.5-2Z"/>',
 };
 const icon = (name: string) => `<svg class="icon" viewBox="0 0 24 24" aria-hidden="true">${icons[name] || icons.wave}</svg>`;
 const escapeHTML = (value: unknown) => String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]!));
@@ -30,7 +33,7 @@ const formatTime = (seconds: number) => `${Math.floor(Math.max(0, seconds) / 60)
 const formatBytes = (bytes: number) => bytes < 1e6 ? `${(bytes / 1e3).toFixed(0)} kB` : `${(bytes / 1e6).toFixed(1)} MB`;
 const noteName = (note: number) => `${['C','C♯','D','D♯','E','F','F♯','G','G♯','A','A♯','B'][note % 12]}${Math.floor(note / 12) - 1}`;
 const modeNames: Record<string,string> = {chromatic:'Chromatic · bypass',major:'Major',naturalMinor:'Natural minor',harmonicMinor:'Harmonic minor',melodicMinor:'Melodic minor',hijaz:'Hijaz',rast:'Rast · microtonal',bayati:'Bayati · microtonal',hirajoshi:'Hirajoshi',insen:'Insen'};
-const themeNames: Record<string,string> = {dark:'Midnight',slate:'Slate',forest:'Forest',paper:'Paper'};
+const themeNames: Record<string,string> = {rose:'Rose',dark:'Dark',slate:'Slate',forest:'Forest',paper:'Paper'};
 const engine = new PlayerEngine();
 let state = loadState();
 let audioReady = false;
@@ -61,24 +64,24 @@ try {
 $('#app').innerHTML = `
 <div class="app-shell">
   <header class="topbar">
-    <div class="brand"><div class="brand-symbol">${icon('wave')}</div><div><div class="brand-title">PROJECT <span>128</span></div><div class="brand-caption">A LITTLE SPACE FOR EVERY SOUND</div></div></div>
+    <button class="brand" id="panels-home" aria-label="Show panels" title="Show panels"><span class="brand-title">Project <span>128</span></span><span class="brand-caption">PANELS</span></button>
     <div class="topbar-right"><div class="engine-status" id="engine-status"><span class="status-dot"></span><span id="engine-label">AUDIO OFF</span></div><button class="audio-button" id="start-audio">${icon('power')}<span>Start audio</span></button></div>
   </header>
-  <nav class="navigation" aria-label="Main navigation"><div class="tabs" role="tablist"><button class="tab" id="tab-perform" data-tab="perform" role="tab" aria-selected="true" aria-controls="view-perform">Perform</button><button class="tab" id="tab-library" data-tab="library" role="tab" aria-selected="false" aria-controls="view-library">Library</button><button class="tab" id="tab-settings" data-tab="settings" role="tab" aria-selected="false" aria-controls="view-settings">Settings</button></div><span class="version">STANDALONE / 01</span></nav>
+  <nav class="navigation" aria-label="Main navigation"><div class="tabs" role="tablist">${[['library','Presets'],['reset','Reset'],['parameters','Param'],['midi','MIDI'],['settings','⚙'],['player','♫']].map(([id,label])=>`<button class="tab" id="tab-${id}" data-tab="${id}" role="tab" aria-selected="false" aria-label="${id==='settings'?'Preferences':id==='player'?'MIDI file player':label}" title="${id==='settings'?'Preferences':id==='player'?'MIDI file player':label}" aria-controls="view-${id}">${id==='settings'?icon('gear'):id==='player'?icon('music'):label}</button>`).join('')}</div></nav>
   <div class="error-banner" id="error-banner" role="alert" hidden></div>
+  <button id="view-backdrop" aria-label="Close menu" hidden></button>
   <main>
-    <section class="view" id="view-perform" role="tabpanel" aria-labelledby="tab-perform">
-      <div class="page-heading"><div><div class="eyebrow">Your performance space</div><h1>Make room for sound.</h1><p>Eight ports. 128 parts. One instrument.</p></div><div class="heading-meta"><span class="live-dot"></span><span id="assigned-count">000</span> ASSIGNED</div></div>
-      <div class="performance-layout">
-        <div class="performance-main">
-          <section class="panel transport" aria-label="MIDI transport">
-            <div class="transport-top"><div class="track-info"><div class="track-art">${icon('music')}</div><div><div class="track-name" id="track-name">Your next idea starts here</div><div class="track-detail" id="track-detail">Open a MIDI file, or play the keys below.</div></div></div><button class="icon-button" id="open-midi" aria-label="Open MIDI file" title="Open MIDI file">${icon('folder')}</button></div>
-            <div class="transport-timeline"><div class="time-labels mono"><span id="current-time">0:00</span><span id="duration">0:00</span></div><input type="range" id="seek" min="0" max="1" step="0.01" value="0" disabled aria-label="Song position"></div>
-            <div class="transport-bottom"><div class="playback-buttons"><button class="icon-button" id="rewind" aria-label="Return to beginning" title="Return to beginning" disabled>${icon('rewind')}</button><button class="icon-button" id="play" aria-label="Play MIDI" title="Play" disabled>${icon('play')}</button><button class="icon-button" id="pause" aria-label="Pause MIDI" title="Pause" disabled>${icon('pause')}</button><button class="icon-button" id="stop" aria-label="Stop MIDI" title="Stop" disabled>${icon('stop')}</button></div><label class="tempo-inline" for="tempo">TEMPO <input type="range" id="tempo" min="0.25" max="4" step="0.01" value="1"><output id="tempo-value">1.00×</output></label></div><label class="field" id="sequence-control" style="margin-top:15px" hidden>Independent sequence<select id="sequence"></select></label>
-          </section>
-          <section class="panel overview" aria-label="128-part overview"><div class="panel-header"><div class="panel-title">${icon('grid')}Part overview</div><span class="chip">8 PORTS × 16 CH</span></div><div class="overview-caption">Select a part to shape its sound. Numbers are MIDI channels.</div><div class="parts-grid" id="parts-grid"></div><div class="grid-legend"><span><i class="legend-box"></i>Selected</span><span><i class="legend-dot"></i>Bank assigned</span><span>All 128 parts are independent</span></div></section>
-        </div>
-        <aside class="panel part-inspector" aria-label="Selected part controls">
+    <section class="view" id="view-perform" role="tabpanel" aria-label="Part panels">
+      <div class="rack-toolbar"><strong>Panels · 128</strong><label>Go to part <input id="jump-part" type="number" min="1" max="128" value="1"></label><button class="button" id="jump-to-part">Go</button><span class="subtle">Drag dials left / right</span></div>
+      <details class="navigator"><summary>Part navigator · <span id="assigned-count">000</span> assigned</summary><section class="panel overview" aria-label="128-part overview"><div class="panel-header"><div class="panel-title">${icon('grid')}Part overview</div><span class="chip">8 PORTS × 16 CH</span></div><div class="overview-caption">Select a part to shape its sound. Numbers are MIDI channels.</div><div class="parts-grid" id="parts-grid"></div><div class="grid-legend"><span><i class="legend-box"></i>Selected</span><span><i class="legend-dot"></i>Bank assigned</span><span>All 128 parts are independent</span></div></section></details>
+      <div class="part-rack" id="part-rack" aria-label="128 part panels"></div>
+    </section>
+    <section class="view menu-popover" id="view-parameters" role="tabpanel" aria-labelledby="tab-parameters" hidden><button class="popover-close" data-close-view aria-label="Close menu">${icon('close')}</button>
+      <div class="page-heading"><h1>Parameters</h1><button class="text-button" id="back-to-panel">Back to panel</button></div>
+      <div class="parameter-master-grid"><section class="panel settings-panel"><h2>Master parameters</h2><div class="range-field" style="margin-top:20px"><label class="field-label" for="master-gain">Master Volume<output id="master-gain-value"></output></label><input id="master-gain" type="range" min="0" max="2" step="0.01"></div><p class="master-tuning-caption">Pitch overrides apply to melodic parts. Percussion keeps its original tuning.</p><div class="tuning-fields"><label class="field">Master Key Shift · semitones<input id="key-shift" type="number" min="-48" max="48" step="1"></label><label class="field">Master Tune · cents<input id="fine-tune" type="number" min="-100" max="100" step="1"></label></div><div class="tuning-fields"><label class="field">Scale root<select id="root">${['C','C♯ / D♭','D','D♯ / E♭','E','F','F♯ / G♭','G','G♯ / A♭','A','A♯ / B♭','B'].map((name,i) => `<option value="${i}">${name}</option>`).join('')}</select></label><label class="field">Scale / mode<select id="mode">${Object.keys(SCALES).map(name => `<option value="${name}"${requiresMicrotonalTuning(name)?' disabled':''}>${modeNames[name] || name}${requiresMicrotonalTuning(name)?' · unavailable':''}</option>`).join('')}</select></label></div><div class="settings-note" id="harmony-note">Scale mapping changes live and MIDI notes. Chromatic leaves note classes unchanged.</div></section>
+      <section class="panel settings-panel"><h2>Shared effect buses</h2><p>Shape the room around your parts. Each part controls its own send amount.</p>${[['delay-time','Delay time','0.05','2','0.01'],['delay-feedback','Delay feedback','0','0.9','0.01'],['delay-mix','Delay mix','0','1','0.01'],['flanger-mix','Flanger mix','0','1','0.01'],['crusher-bits','Bitcrusher depth','2','16','1']].map(([id,label,min,max,step]) => `<div class="range-field"><label class="field-label" for="${id}">${label}<output id="${id}-value"></output></label><input id="${id}" type="range" min="${min}" max="${max}" step="${step}"></div>`).join('')}</section>
+      </div>
+      <h2 class="part-parameters-heading">Selected part parameters</h2><aside class="panel part-inspector" aria-label="Selected part controls">
           <div class="panel-header"><div class="panel-title">${icon('sliders')}Selected part</div><label class="switch-label"><input type="checkbox" id="part-locked">Lock</label></div>
           <div class="part-identity"><div class="part-number"><span id="part-number">01</span><small id="part-port">PORT 1 · CH 1</small></div><div class="toggle-group"><button class="small-toggle" id="part-mute" aria-pressed="false">Mute</button><button class="small-toggle" id="part-solo" aria-pressed="false">Solo</button></div></div>
           <div class="inspector-section patch-section"><div class="select-stack"><label class="field">Soundbank<select id="part-bank"><option value="">No bank assigned</option></select></label><label class="field">Instrument<select id="part-patch"><option value="">Choose a soundbank first</option></select></label></div><div class="field-grid"><label class="field">BANK MSB<input id="part-msb" type="number" min="0" max="127" value="0"></label><label class="field">BANK LSB<input id="part-lsb" type="number" min="0" max="127" value="0"></label><label class="field">PROGRAM<input id="part-program" type="number" min="0" max="127" value="0"></label></div><div class="envelope-note">Panel values are saved controls; MIDI can recall another preset. Apply displayed settings to restore them.</div><button class="text-button" id="apply-part-settings" style="margin-top:7px">Apply displayed settings ${icon('arrow')}</button><div class="section-heading" style="margin:13px 0 0"><label class="switch-label"><input id="part-drums" type="checkbox">Percussion part</label><span class="subtle" style="font-size:9px">MIDI values 0–127</span></div></div>
@@ -86,32 +89,53 @@ $('#app').innerHTML = `
           <div class="inspector-section envelope-section"><div class="section-heading"><span>Amplitude envelope</span><label class="switch-label"><input id="envelope-enabled" type="checkbox">Override</label></div><svg class="envelope-graph" viewBox="0 0 300 70" preserveAspectRatio="none" aria-label="Amplitude ADSR curve" role="img"><path class="graph-grid" d="M0 65H300M0 35H300M0 5H300M60 0V70M120 0V70M180 0V70M240 0V70"/><path id="envelope-fill" class="curve-fill"/><path id="envelope-curve" class="curve-line"/></svg><div class="envelope-fields"><label>Attack · s<input id="env-attack" type="number" min="0" max="20" step="0.01"></label><label>Decay · s<input id="env-decay" type="number" min="0" max="20" step="0.01"></label><label>Sustain · %<input id="env-sustain" type="number" min="0" max="100" step="1"></label><label>Release · s<input id="env-release" type="number" min="0" max="20" step="0.01"></label></div><div class="envelope-note" id="envelope-note">Original bank envelope. Enable override to use absolute values.</div></div>
           <div class="inspector-footer"><button class="text-button" id="open-drum-map">Drum key map ${icon('arrow')}</button><button class="text-button" id="save-part-preset">Save as preset ${icon('arrow')}</button></div>
         </aside>
-        <section class="panel keyboard-panel" aria-label="Touch keyboard"><div class="keyboard-toolbar"><div class="panel-title">${icon('keys')}Play it your way</div><div class="keyboard-controls"><label class="velocity-control" for="velocity">VEL <input id="velocity" type="range" min="1" max="127" value="100"><output id="velocity-value">100</output></label><div class="octave-control"><button id="octave-down" aria-label="Keyboard octave down">−</button><span id="octave-label">C3 – C5</span><button id="octave-up" aria-label="Keyboard octave up">+</button></div><button class="small-toggle" id="sustain" aria-pressed="false">Sustain</button></div><span class="keyboard-help">A–K on your computer keyboard</span></div><div class="keyboard" id="keyboard"></div><div class="keyboard-bottom"><span id="keyboard-part">Playing part 01 · channel 1</span><button class="text-button" id="panic" style="font-size:9px">${icon('shield')}All notes off</button></div></section>
-      </div>
     </section>
-    <section class="view" id="view-library" role="tabpanel" aria-labelledby="tab-library" hidden>
-      <div class="page-heading"><div><div class="eyebrow">Your sound collection</div><h1>A home for every voice.</h1><p>Load your banks. Keep your own sounds close.</p></div><span class="chip" id="library-count">0 BANKS</span></div>
+    <section class="view" id="view-player" role="tabpanel" aria-labelledby="tab-player" hidden>
+      <div class="page-heading"><h1>MIDI file player</h1></div><section class="panel transport" aria-label="MIDI transport">
+            <div class="transport-top"><div class="track-info"><div class="track-art">${icon('music')}</div><div><div class="track-name" id="track-name">No MIDI file selected</div><div class="track-detail" id="track-detail">Open an SMF or RIFF MIDI file.</div></div></div><button class="icon-button" id="open-midi" aria-label="Open MIDI file" title="Open MIDI file">${icon('folder')}</button></div>
+            <div class="transport-timeline"><div class="time-labels mono"><span id="current-time">0:00</span><span id="duration">0:00</span></div><input type="range" id="seek" min="0" max="1" step="0.01" value="0" disabled aria-label="Song position"></div>
+            <div class="transport-bottom"><div class="playback-buttons"><button class="icon-button" id="rewind" aria-label="Return to beginning" title="Return to beginning" disabled>${icon('rewind')}</button><button class="icon-button" id="play" aria-label="Play MIDI" title="Play" disabled>${icon('play')}</button><button class="icon-button" id="pause" aria-label="Pause MIDI" title="Pause" disabled>${icon('pause')}</button><button class="icon-button" id="stop" aria-label="Stop MIDI" title="Stop" disabled>${icon('stop')}</button></div><label class="tempo-inline" for="tempo">TEMPO <input type="range" id="tempo" min="0.25" max="4" step="0.01" value="1"><output id="tempo-value">1.00×</output></label></div><label class="field" id="sequence-control" style="margin-top:15px" hidden>Independent sequence<select id="sequence"></select></label>
+          </section>
+      <div class="panel player-summary"><strong>128 independent parts</strong><p>Use Panels for the mixer or Param for the selected part. Master tuning stays in place when files change.</p><button class="button" id="player-panels">Show panels</button></div>
+    </section>
+    <section class="view menu-popover" id="view-reset" role="tabpanel" aria-labelledby="tab-reset" hidden><button class="popover-close" data-close-view aria-label="Close menu">${icon('close')}</button><div class="page-heading"><h1>Reset</h1></div><section class="panel reset-actions"><button data-reset-cc="120">All Sound Off<small>CC120 · stop sounding voices</small></button><button data-reset-cc="123">All Notes Off<small>CC123 · release notes; pedals still apply</small></button><button data-reset-cc="121">Reset Controllers<small>CC121 · reset incoming MIDI controllers</small></button></section><p class="subtle">These actions cover all eight ports. Saved banks, presets and master tuning stay in place.</p></section>
+    <section class="view menu-popover" id="view-midi" role="tabpanel" aria-labelledby="tab-midi" hidden><button class="popover-close" data-close-view aria-label="Close menu">${icon('close')}</button>
+      <div class="page-heading"><h1>MIDI input &amp; program maps</h1></div>
+      <section class="panel settings-panel"><h2>Eight input ports</h2><p id="midi-input-status">The iOS shell connects CoreMIDI sources to separate ports. Start audio to receive notes. In the browser, use the touch or computer keyboard.</p><div class="midi-port-list">${Array.from({length:8},(_,i)=>`<div><strong>Port ${i+1}</strong><span>Parts ${i*16+1}–${i*16+16} · channels 1–16</span></div>`).join('')}</div><p class="settings-note">Bank Select MSB / LSB and Program Change address a soundbank patch, or an individual saved preset when a mapping exists. Part locks prevent incoming patch changes.</p><button class="button" id="edit-program-maps">Edit selected part's program map</button></section>
+    </section>
+    <section class="view menu-popover" id="view-library" role="tabpanel" aria-labelledby="tab-library" hidden><button class="popover-close" data-close-view aria-label="Close menu">${icon('close')}</button>
+      <div class="page-heading"><div><div class="eyebrow">Sound sets & presets</div><h1>Sound sets & presets</h1><p>Independent SF2, SF3 and DLS banks; individual part presets.</p></div><span class="chip" id="library-count">0 BANKS</span></div>
       <div class="library-grid"><section class="panel"><div class="panel-header"><div class="panel-title">${icon('folder')}Soundbanks</div><button class="text-button" id="open-bank">${icon('upload')}Import bank</button></div><div id="bank-list"></div><div class="library-note" id="bank-provenance">Bundled sound: GeneralUser GS, a GM/GS bank by S. Christian Collins. This is not a Roland SC-88Pro bank. Imported SF2, SF3, and DLS banks stay independent.</div><div class="library-note"><label class="switch-label"><input id="auto-compress" type="checkbox">Compress imported SF2 to SF3 automatically</label><label class="field" style="margin-top:12px">Vorbis quality<select id="compression-quality"><option value="0.3">Compact · quality 0.3</option><option value="0.5" selected>Balanced · quality 0.5</option><option value="0.7">Higher fidelity · quality 0.7</option></select></label><div style="margin-top:10px">SF3 compression is lossy. The original stays available during this session; download it before closing.</div></div></section>
       <section class="panel"><div class="panel-header"><div class="panel-title">${icon('sliders')}Individual presets</div><button class="text-button" id="open-preset">${icon('upload')}Import</button></div><div class="preset-save"><input id="preset-name" type="text" maxlength="80" placeholder="Name the selected part…" aria-label="Preset name"><button class="button" id="create-preset">Save part</button></div><div id="preset-list"></div><div class="library-note">A preset holds one part’s bank, patch, envelope, sends, and drum map. Export uses the original .p128preset JSON format. KQ preset files are not supported.</div><section class="preset-mapping-section" aria-label="MIDI program mappings"><div class="section-heading"><span>MIDI program map</span><button class="text-button" id="open-preset-mapping">Map a preset ${icon('arrow')}</button></div><div class="subtle" id="mapping-selected-part"></div><p class="mapping-help">An exact saved app preset mapping takes priority over a soundbank patch change. Unmapped program changes select the normal bank patch. Part locks still apply.</p><div id="preset-mapping-list"></div><p class="mapping-help">Each mapping keeps a snapshot of the preset, including its bank, envelope, sends, and drum map. Removing the library preset leaves its mappings intact.</p></section></section></div>
     </section>
-    <section class="view" id="view-settings" role="tabpanel" aria-labelledby="tab-settings" hidden>
-      <div class="page-heading"><div><div class="eyebrow">Keep things in tune</div><h1>Your instrument, your rules.</h1><p>Master settings stay with you when songs change.</p></div></div>
-      <div class="settings-grid"><section class="panel settings-panel"><h2>Tuning & harmony</h2><p>Pitch overrides apply to melodic parts. Percussion keeps its original tuning.</p><div class="tuning-fields"><label class="field">Key shift · semitones<input id="key-shift" type="number" min="-48" max="48" step="1"></label><label class="field">Fine tune · cents<input id="fine-tune" type="number" min="-100" max="100" step="1"></label></div><div class="tuning-fields"><label class="field">Scale root<select id="root">${['C','C♯ / D♭','D','D♯ / E♭','E','F','F♯ / G♭','G','G♯ / A♭','A','A♯ / B♭','B'].map((name,i) => `<option value="${i}">${name}</option>`).join('')}</select></label><label class="field">Scale / mode<select id="mode">${Object.keys(SCALES).map(name => `<option value="${name}"${requiresMicrotonalTuning(name)?' disabled':''}>${modeNames[name] || name}${requiresMicrotonalTuning(name)?' · unavailable':''}</option>`).join('')}</select></label></div><div class="settings-note" id="harmony-note">Scale mapping changes live and MIDI notes. Chromatic leaves note classes unchanged.</div><div class="range-field" style="margin-top:20px"><label class="field-label" for="master-gain">Master output<output id="master-gain-value"></output></label><input id="master-gain" type="range" min="0" max="2" step="0.01"></div></section>
-      <section class="panel settings-panel"><h2>Shared effect buses</h2><p>Shape the room around your parts. Each part controls its own send amount.</p>${[['delay-time','Delay time','0.05','2','0.01'],['delay-feedback','Delay feedback','0','0.9','0.01'],['delay-mix','Delay mix','0','1','0.01'],['flanger-mix','Flanger mix','0','1','0.01'],['crusher-bits','Bitcrusher depth','2','16','1']].map(([id,label,min,max,step]) => `<div class="range-field"><label class="field-label" for="${id}">${label}<output id="${id}-value"></output></label><input id="${id}" type="range" min="${min}" max="${max}" step="${step}"></div>`).join('')}</section>
-      <section class="panel settings-panel"><h2>Find your atmosphere</h2><p>Four palettes for long sessions and changing light.</p><div class="theme-options">${[['dark','#101a2c','#e9bc78'],['slate','#20252d','#b3c5df'],['forest','#182a24','#d9c88e'],['paper','#f8f5ed','#8c5e2f']].map(([id,bg,accent]) => `<button class="theme-option" data-theme-choice="${id}" aria-pressed="false"><span class="theme-swatch" style="--swatch-bg:${bg};--swatch-accent:${accent}"></span>${themeNames[id]}</button>`).join('')}</div><label class="sr-only" for="theme">Theme</label><select id="theme" class="sr-only">${Object.entries(themeNames).map(([id,name])=>`<option value="${id}">${name}</option>`).join('')}</select></section>
-      <section class="panel settings-panel"><h2>A session worth keeping</h2><p>Settings save on this device automatically. Make a backup to take your setup somewhere else.</p><div class="settings-actions"><button class="button" id="export-session">${icon('download')}Back up session</button><button class="button" id="open-session">${icon('upload')}Restore backup</button></div><div class="settings-note">Backups include all 128 parts, master settings, and individual presets. Soundbank and MIDI audio data are separate; import the matching banks after restoring.</div></section></div>
-      <a class="catalog-link" href="docs/features.html" target="_blank" rel="noopener"><span><strong>A bigger picture. 250 possibilities.</strong><small>Explore the feature catalog with honest implementation status.</small></span>${icon('arrow')}</a>
+    <section class="view menu-popover" id="view-settings" role="tabpanel" aria-labelledby="tab-settings" hidden><button class="popover-close" data-close-view aria-label="Close menu">${icon('close')}</button>
+      <div class="page-heading"><div><div class="eyebrow">Preferences</div><h1>Master preferences</h1><p>Master settings stay with you when songs change.</p></div></div>
+      <section class="panel settings-panel"><h2>Sound Set Manager</h2><p>Import, select, compress or export independent sound sets.</p><button class="button" id="settings-sound-manager">Open Sound Set Manager</button></section><div class="settings-grid"><section class="panel settings-panel"><h2>Panel colors</h2><p>Select a palette. Existing saved colors are preserved.</p><div class="theme-options">${[['rose','#f9e6e1','#a50025'],['dark','#101a2c','#e9bc78'],['slate','#20252d','#b3c5df'],['forest','#182a24','#d9c88e'],['paper','#f8f5ed','#8c5e2f']].map(([id,bg,accent]) => `<button class="theme-option" data-theme-choice="${id}" aria-pressed="false"><span class="theme-swatch" style="--swatch-bg:${bg};--swatch-accent:${accent}"></span>${themeNames[id]}</button>`).join('')}</div><label class="sr-only" for="theme">Theme</label><select id="theme" class="sr-only">${Object.entries(themeNames).map(([id,name])=>`<option value="${id}">${name}</option>`).join('')}</select></section>
+      <section class="panel settings-panel"><h2>Session backup</h2><p>Settings save on this device automatically. Make a backup to take your setup somewhere else.</p><div class="settings-actions"><button class="button" id="export-session">${icon('download')}Back up session</button><button class="button" id="open-session">${icon('upload')}Restore backup</button></div><div class="settings-note">Backups include all 128 parts, master settings, and individual presets. Soundbank and MIDI audio data are separate; import the matching banks after restoring.</div></section></div>
+      <a class="catalog-link" href="docs/features.html" target="_blank" rel="noopener"><span><strong>250-feature roadmap</strong><small>Explore the feature catalog with honest implementation status.</small></span>${icon('arrow')}</a>
       <p class="library-note"><a href="licenses/banks/README.txt" target="_blank" rel="noopener">Soundbank credits, licenses and editable-source details</a></p>
     </section>
   </main>
-  <footer class="footer-status"><span id="status" role="status" aria-live="polite">Ready when you are. Start audio to load the bundled soundbank.</span><span class="footer-mark">MADE FOR THE MOMENT</span></footer>
+  <section class="panel keyboard-panel" aria-label="Touch keyboard"><div class="keyboard-toolbar"><div class="keyboard-controls"><label class="velocity-control" for="velocity">Vel: <input id="velocity" type="range" min="1" max="127" value="100"><output id="velocity-value">100</output></label><button class="small-toggle" id="sustain" aria-pressed="false">Hold</button><label class="keyboard-channel-label" for="keyboard-channel">C: <select id="keyboard-channel" aria-label="Keyboard destination part">${Array.from({length:128},(_,i)=>`<option value="${i}">${i+1}</option>`).join('')}</select></label></div><button class="small-toggle" id="toggle-keys" aria-expanded="true" aria-controls="keyboard">KBD</button><button class="icon-button" id="panic" aria-label="All sound off" title="All sound off">${icon('shield')}</button></div><div class="keyboard-register"><button id="octave-down" aria-label="Keyboard octave down">−</button><input id="keyboard-scroll" type="range" min="12" max="96" step="12" value="48" aria-label="Keyboard scroll ruler"><span class="sr-only" id="octave-label">C3 – C5</span><button id="octave-up" aria-label="Keyboard octave up">+</button></div><div class="keyboard" id="keyboard"></div><div class="keyboard-bottom"><span id="keyboard-part">Playing part 01 · channel 1</span><span>128 parts · 8 ports</span></div></section>
+  <footer class="footer-status"><span id="status" role="status" aria-live="polite">Start audio to load Project128 GS.</span><span class="footer-mark">SPESSASYNTH</span></footer>
 </div>
 <input class="file-input" id="import-bank" type="file" accept=".sf2,.sf3,.dls" multiple aria-label="Import soundbank">
 <input class="file-input" id="import-midi" type="file" accept=".mid,.midi,.rmi" aria-label="Import MIDI file">
 <input class="file-input" id="import-preset" type="file" accept=".p128preset,.json" aria-label="Import individual preset">
 <input class="file-input" id="restore-session" type="file" accept=".json,.p128session,.p128backup" aria-label="Restore session backup">
-<dialog id="drum-dialog" aria-labelledby="drum-title"><div class="dialog-header"><h2 id="drum-title">Every key has a place.</h2><button class="icon-button" id="close-drum-map" aria-label="Close drum map">${icon('close')}</button></div><p>Remap an incoming drum note to another key for the selected part. Unmapped notes pass through unchanged.</p><div class="drum-map-fields"><label class="field">Incoming note<input id="drum-source" type="number" min="0" max="127" value="36"></label><label class="field">Play this note<input id="drum-target" type="number" min="0" max="127" value="36"></label></div><button class="button accent" id="add-drum-map">Add mapping</button><div class="drum-list" id="drum-map-list"></div><div class="dialog-buttons"><button class="button" id="clear-drum-map">Clear map</button><button class="button" id="done-drum-map">Done</button></div></dialog>
-<dialog id="preset-map-dialog" aria-labelledby="preset-map-title"><div class="dialog-header"><h2 id="preset-map-title">A program for your sound.</h2><button class="icon-button" id="close-preset-map" aria-label="Close preset mapping">${icon('close')}</button></div><p>Choose the incoming MIDI bank and program address that recalls a saved app preset on this part. All incoming MIDI values below are zero-based, from 0 to 127.</p><div class="mapping-dialog-fields"><label class="field">Selected part · 1–128<input id="mapping-part" type="number" min="1" max="128" readonly></label><label class="field">Saved app preset<select id="mapping-preset"></select></label></div><div class="field-grid mapping-address-fields"><label class="field">BANK MSB<input id="mapping-msb" type="number" min="0" max="127" step="1"></label><label class="field">BANK LSB<input id="mapping-lsb" type="number" min="0" max="127" step="1"></label><label class="field">PROGRAM<input id="mapping-program" type="number" min="0" max="127" step="1"></label></div><p>The saved preset takes priority at this exact address. Saving an existing address replaces its snapshot.</p><div class="dialog-buttons"><button class="button" id="cancel-preset-map">Cancel</button><button class="button accent" id="save-preset-mapping">Save mapping</button></div></dialog>`;
+
+<dialog id="patch-dialog" class="patch-dialog" aria-labelledby="patch-title"><div class="dialog-header"><h2 id="patch-title">Patch select</h2><button class="icon-button" id="close-patch-dialog" aria-label="Close patch selection">${icon('close')}</button></div><div class="patch-browser"><aside class="patch-collections"><button class="text-button" id="patch-manage-banks">Manager ${icon('arrow')}</button><h3>Collections</h3><div id="patch-banks"></div></aside><section class="patch-list-section"><div class="patch-controls"><button class="icon-button" id="patch-favorites" aria-label="Favorites only" aria-pressed="false">★</button><label class="sr-only" for="patch-sort">Sort patches</label><select id="patch-sort"><option value="none">Sort: None</option><option value="name">Name</option><option value="program">Program</option><option value="bank">Bank</option></select><label class="switch-label"><input type="checkbox" id="patch-auto-close" checked>Close</label></div><label class="patch-search-label">Search patches<input id="patch-search" type="search" placeholder="e.g. prog8-15 bank0" autocomplete="off"></label><div id="patch-results" class="patch-results"></div></section></div></dialog>
+<dialog id="drum-dialog" aria-labelledby="drum-title"><div class="dialog-header"><h2 id="drum-title">Drum key map</h2><button class="icon-button" id="close-drum-map" aria-label="Close drum map">${icon('close')}</button></div><p>Remap an incoming drum note to another key for the selected part. Unmapped notes pass through unchanged.</p><div class="drum-map-fields"><label class="field">Incoming note<input id="drum-source" type="number" min="0" max="127" value="36"></label><label class="field">Play this note<input id="drum-target" type="number" min="0" max="127" value="36"></label></div><button class="button accent" id="add-drum-map">Add mapping</button><div class="drum-list" id="drum-map-list"></div><div class="dialog-buttons"><button class="button" id="clear-drum-map">Clear map</button><button class="button" id="done-drum-map">Done</button></div></dialog>
+<dialog id="preset-map-dialog" aria-labelledby="preset-map-title"><div class="dialog-header"><h2 id="preset-map-title">MIDI program mapping</h2><button class="icon-button" id="close-preset-map" aria-label="Close preset mapping">${icon('close')}</button></div><p>Choose the incoming MIDI bank and program address that recalls a saved app preset on this part. All incoming MIDI values below are zero-based, from 0 to 127.</p><div class="mapping-dialog-fields"><label class="field">Selected part · 1–128<input id="mapping-part" type="number" min="1" max="128" readonly></label><label class="field">Saved app preset<select id="mapping-preset"></select></label></div><div class="field-grid mapping-address-fields"><label class="field">BANK MSB<input id="mapping-msb" type="number" min="0" max="127" step="1"></label><label class="field">BANK LSB<input id="mapping-lsb" type="number" min="0" max="127" step="1"></label><label class="field">PROGRAM<input id="mapping-program" type="number" min="0" max="127" step="1"></label></div><p>The saved preset takes priority at this exact address. Saving an existing address replaces its snapshot.</p><div class="dialog-buttons"><button class="button" id="cancel-preset-map">Cancel</button><button class="button accent" id="save-preset-mapping">Save mapping</button></div></dialog>`;
+
+let patchPartId = state.selectedPart;
+let patchBankId = '';
+const rack = new PartRack($('#part-rack'), {
+  select: id => selectPart(id),
+  edit: (id, patch, fields) => commitPartFor(id, patch, fields),
+  choosePatch: id => openPatchBrowser(id),
+  parameters: id => { selectPart(id); showTab('parameters'); },
+});
 
 function setStatus(message: string, working = false) {
   $('#status').replaceChildren();
@@ -146,15 +170,66 @@ function commitMaster(patch: Partial<AppState['master']>) {
   renderMaster();
 }
 function commitPart(patch: Partial<PartState>, changedFields: string[] = Object.keys(patch)) {
-  Object.assign(selectedPart(), patch);
+  commitPartFor(state.selectedPart, patch, changedFields);
+}
+function commitPartFor(id: number, patch: Partial<PartState>, changedFields: string[] = Object.keys(patch)) {
+  if (!Number.isInteger(id) || id < 0 || id >= state.parts.length) return;
+  state.selectedPart = id;
+  Object.assign(state.parts[id], patch);
   persist();
   if (audioReady) engine.applyPart(selectedPart(), changedFields);
   renderPart(); renderGrid();
 }
+function selectPart(id: number) {
+  if (!Number.isInteger(id) || id < 0 || id >= state.parts.length) return;
+  state.selectedPart = id; persist(); renderPart(); renderGrid();
+}
 function showTab(tab: string) {
+  if (!document.getElementById(`view-${tab}`)) return;
+  const changed = currentTab !== tab;
   currentTab = tab;
-  document.querySelectorAll<HTMLElement>('[data-tab]').forEach(button => button.setAttribute('aria-selected', String(button.dataset.tab === tab)));
-  document.querySelectorAll<HTMLElement>('.view').forEach(view => view.hidden = view.id !== `view-${tab}`);
+  document.querySelectorAll<HTMLElement>('[data-tab]').forEach((button,index) => {
+    button.setAttribute('aria-selected', String(button.dataset.tab === tab));
+    button.tabIndex = button.dataset.tab === tab || (tab === 'perform' && index === 0) ? 0 : -1;
+  });
+  const popover = ['library','reset','parameters','midi','settings'].includes(tab);
+  document.querySelectorAll<HTMLElement>('.view').forEach(view => view.hidden = view.id !== `view-${tab}` && !(popover && view.id === 'view-perform'));
+  $('#view-perform').inert = popover;
+  $('.keyboard-panel').inert = popover;
+  $('#view-backdrop').hidden = !popover;
+  document.body.classList.toggle('has-popover',popover);
+  if (changed) {
+    $('main').scrollTop = 0;
+    $(`#view-${tab}`).scrollTop = 0;
+    if(popover)$(`#view-${tab}`).querySelector<HTMLButtonElement>('[data-close-view]')?.focus({preventScroll:true});
+    else if(tab==='perform')$('#panels-home').focus({preventScroll:true});
+  }
+}
+function patchSettings(): PatchBrowserSettings {
+  return state.patchBrowser ||= {favorites:[],sort:'none',closeOnSelect:true,favoritesOnly:false};
+}
+function openPatchBrowser(id: number) {
+  selectPart(id); patchPartId = id;
+  patchBankId = banks.some(bank => bank.id === selectedPart().bankId) ? selectedPart().bankId! : banks[0]?.id || '';
+  $<HTMLInputElement>('#patch-search').value = '';
+  $('#patch-title').textContent = `Patch select · part ${id + 1}`;
+  renderPatchBrowser(); $<HTMLDialogElement>('#patch-dialog').showModal();
+  $<HTMLInputElement>('#patch-search').focus();
+}
+function renderPatchBrowser() {
+  const bank = banks.find(bank => bank.id === patchBankId);
+  const settings=patchSettings();
+  $('#patch-favorites').setAttribute('aria-pressed',String(settings.favoritesOnly));
+  $<HTMLInputElement>('#patch-auto-close').checked=settings.closeOnSelect;
+  $<HTMLSelectElement>('#patch-sort').value=settings.sort;
+  $('#patch-banks').innerHTML = banks.map(item => `<button class="patch-bank" data-patch-bank="${escapeHTML(item.id)}" aria-pressed="${item.id === patchBankId}">${escapeHTML(item.name)}<small>${item.presets.length} patches</small></button>`).join('') || '<p class="subtle">No sound sets loaded. Start audio or import a bank.</p>';
+  const query = $<HTMLInputElement>('#patch-search').value.trim().toLowerCase();
+  const part = state.parts[patchPartId];
+  const patches = sortPatchEntries(bank?.presets.map((patch,index) => ({patch,index})) || [],settings.sort).filter(({patch}) => matchesPatchQuery(patch,query) && (!settings.favoritesOnly || settings.favorites.includes(patchIdentity(bank!.id,patch))));
+  $('#patch-results').innerHTML = patches.map(({patch,index}) => {
+    const favorite=settings.favorites.includes(patchIdentity(bank!.id,patch));
+    return `<div class="patch-result-row"><button class="patch-choice" data-patch-index="${index}" aria-pressed="${part.bankId === bank!.id && part.msb === patch.msb && part.lsb === patch.lsb && part.program === patch.program && part.drums === patch.drums}"><strong>${escapeHTML(patch.name)}</strong><small>Prog: ${patch.program} · Bank: ${patch.msb}/${patch.lsb}${patch.drums ? ' · drums' : ''}<br>${escapeHTML(bank!.name)}</small></button><button class="patch-star" data-patch-favorite="${index}" aria-label="${favorite?'Unstar':'Star'} ${escapeHTML(patch.name)}" aria-pressed="${favorite}">${favorite?'★':'☆'}</button></div>`;
+  }).join('') || '<p class="patch-empty">No patches match. Choose a loaded sound set or change the search.</p>';
 }
 function renderGrid() {
   const grid = $('#parts-grid');
@@ -165,7 +240,7 @@ function renderGrid() {
       for (let channel = 0; channel < 16; channel++) {
         const id = port * 16 + channel;
         const button = document.createElement('button'); button.className = 'part-cell'; button.dataset.part = String(id); button.textContent = String(channel + 1).padStart(2,'0');
-        button.addEventListener('click', () => { state.selectedPart = id; persist(); renderPart(); renderGrid(); });
+        button.addEventListener('click', () => { selectPart(id); $(`[data-panel-part="${id}"]`).scrollIntoView({block:'nearest'}); });
         row.append(button);
       }
       grid.append(row);
@@ -181,13 +256,16 @@ function renderGrid() {
     button.title = button.getAttribute('aria-label')!;
   });
   $('#assigned-count').textContent = String(state.parts.filter(part => part.bankId).length).padStart(3,'0');
+  rack.update(state, banks);
 }
 function renderPart() {
   const part = selectedPart();
   const bank = banks.find(bank => bank.id === part.bankId);
   $('#part-number').textContent = String(part.id + 1).padStart(2,'0');
+  $<HTMLInputElement>('#jump-part').value = String(part.id + 1);
   $('#part-port').textContent = `PORT ${Math.floor(part.id/16)+1} · CH ${part.id%16+1}`;
   $('#keyboard-part').textContent = `Playing part ${String(part.id+1).padStart(2,'0')} · channel ${part.id%16+1}`;
+  $<HTMLSelectElement>('#keyboard-channel').value=String(part.id);
   const bankSelect = $<HTMLSelectElement>('#part-bank');
   bankSelect.innerHTML = '<option value="">No bank assigned</option>' + banks.map(bank => `<option value="${escapeHTML(bank.id)}">${escapeHTML(bank.name)}</option>`).join('') + (part.bankId && !bank ? `<option value="${escapeHTML(part.bankId)}">Missing bank · import to relink</option>`:'');
   bankSelect.value = part.bankId || '';
@@ -250,6 +328,10 @@ function renderLibrary() {
   $('#bank-list').innerHTML = banks.map(bank => `<div class="bank-item"><div class="item-title">${escapeHTML(bank.name)}</div><div class="item-meta">${escapeHTML(bank.format.toUpperCase())} · ${bank.presets.length} patches · ${formatBytes(bank.bytes)}</div><div class="item-actions"><button class="text-button" data-bank-use="${escapeHTML(bank.id)}">Use on selected part ${icon('arrow')}</button>${bankSources.has(bank.id)?`<button class="text-button" data-bank-download="${escapeHTML(bank.id)}">${icon('download')}Original</button>`:''}${bankSources.get(bank.id)?.name.toLowerCase().endsWith('.sf2')?`<button class="text-button" data-bank-compress="${escapeHTML(bank.id)}">Compress to SF3</button>`:''}${bankSources.get(bank.id)?.converted?`<button class="text-button" data-bank-sf3="${escapeHTML(bank.id)}">${icon('download')}SF3</button>`:''}<button class="text-button" data-bank-remove="${escapeHTML(bank.id)}">Remove</button></div></div>`).join('') + pendingMarkup || `<div class="empty-state"><div class="empty-symbol">${icon('folder')}</div><h3>Start with a little possibility.</h3><p>Start audio to load GeneralUser GS, or bring an SF2, SF3, or DLS bank from your files.</p><button class="button" id="empty-import-bank">${icon('upload')}Import a soundbank</button></div>`;
   $('#preset-list').innerHTML = savedPresets.map(preset => `<div class="preset-item"><div class="item-title">${escapeHTML(preset.name)}</div><div class="item-meta">Program ${preset.part.program} · ${preset.part.drums?'percussion':'melodic'} · ${banks.some(bank => bank.id === preset.bankId)?'bank available':preset.bankId?'bank needs importing':'no bank assigned'}</div><div class="item-actions"><button class="text-button" data-preset-use="${escapeHTML(preset.id)}">Load into selected part ${icon('arrow')}</button><button class="text-button" data-preset-map="${escapeHTML(preset.id)}">Map program</button><button class="text-button" data-preset-export="${escapeHTML(preset.id)}">${icon('download')}Export</button><button class="text-button" data-preset-remove="${escapeHTML(preset.id)}">Delete</button></div></div>`).join('') || `<div class="empty-state"><div class="empty-symbol">${icon('sliders')}</div><h3>That sound you keep coming back to.</h3><p>Give your selected part a name and save it here. Every preset remembers its own settings.</p></div>`;
   renderPresetMappings();
+  if ($<HTMLDialogElement>('#patch-dialog').open) {
+    if (!banks.some(bank => bank.id === patchBankId)) patchBankId = banks[0]?.id || '';
+    renderPatchBrowser();
+  }
 }
 function renderPresetMappings() {
   const part=selectedPart();
@@ -279,12 +361,13 @@ function savePresetMapping() {
 }
 function renderKeyboard() {
   const keyboard = $('#keyboard'); keyboard.replaceChildren();
-  const whites = Array.from({length:25},(_,i)=>baseNote+i).filter(note => ![1,3,6,8,10].includes(note%12));
+  const span = innerWidth >= 760 ? Math.min(48,127-baseNote) : 24;
+  const whites = Array.from({length:span+1},(_,i)=>baseNote+i).filter(note => ![1,3,6,8,10].includes(note%12));
   let whiteIndex = 0;
-  for (let note=baseNote;note<=baseNote+24;note++) {
+  for (let note=baseNote;note<=baseNote+span;note++) {
     const black = [1,3,6,8,10].includes(note%12);
     const key = document.createElement('button'); key.className=`key ${black?'black':'white'}`; key.dataset.note=String(note); key.setAttribute('aria-label',`Play ${noteName(note)}`); key.setAttribute('aria-pressed','false');
-    if (black) key.style.left=`calc(${(whiteIndex-.33)/whites.length*100}% + 2px)`;
+    if (black) {key.style.left=`calc(${(whiteIndex-.33)/whites.length*100}% + 2px)`;key.style.width=`${.66/whites.length*100}%`;}
     else { whiteIndex++; if(note%12===0) key.textContent=noteName(note); }
     key.addEventListener('pointerdown', event => {
       event.preventDefault(); if (!audioReady) {setStatus('Start audio first, then play a note.');return;}
@@ -294,7 +377,8 @@ function renderKeyboard() {
     key.addEventListener('pointerup',release); key.addEventListener('pointercancel',release); key.addEventListener('lostpointercapture',release);
     keyboard.append(key);
   }
-  $('#octave-label').textContent=`${noteName(baseNote)} – ${noteName(baseNote+24)}`;
+  $('#octave-label').textContent=`${noteName(baseNote)} – ${noteName(baseNote+span)}`;
+  $<HTMLInputElement>('#keyboard-scroll').value=String(baseNote);
   $<HTMLButtonElement>('#octave-down').disabled=baseNote<=12; $<HTMLButtonElement>('#octave-up').disabled=baseNote>=96;
 }
 function updateKeyVisual(note:number) {
@@ -306,17 +390,25 @@ function pressNote(part:number,note:number) {
   const existing=sounding.get(token);
   if(existing) existing.count++; else {sounding.set(token,{part,note,count:1});engine.noteOn(part,note,velocity);}
   $(`[data-part="${part}"]`).classList.add('is-playing');
+  rack.setPlaying(part,true);
 }
 function releaseNote(part:number,note:number) {
   const token=`${part}:${note}`,active=sounding.get(token);if(!active)return;
   active.count--;if(active.count>0)return;sounding.delete(token);
   if(sustain)sustained.set(token,{part,note});else engine.noteOff(part,note);
-  if(!Array.from(sounding.values()).some(item=>item.part===part))$(`[data-part="${part}"]`).classList.remove('is-playing');
+  if(!Array.from(sounding.values()).some(item=>item.part===part)){$(`[data-part="${part}"]`).classList.remove('is-playing');rack.setPlaying(part,false);}
 }
 function releaseAll() {
   if(audioReady) engine.panic();
+  clearKeyboardVisuals();
+}
+function clearKeyboardVisuals() {
   heldPointers.clear();heldKeys.clear();sounding.clear();sustained.clear();
   document.querySelectorAll('.is-down,.is-playing').forEach(key=>{key.classList.remove('is-down','is-playing');if(key.hasAttribute('data-note'))key.setAttribute('aria-pressed','false');});
+}
+function releaseLiveNotes() {
+  if(audioReady){sounding.forEach(({part,note})=>engine.noteOff(part,note));sustained.forEach(({part,note})=>engine.noteOff(part,note));}
+  clearKeyboardVisuals();setSustain(false);
 }
 function setSustain(enabled:boolean) {
   sustain=enabled;$('#sustain').setAttribute('aria-pressed',String(enabled));
@@ -363,11 +455,11 @@ async function importBank(data:ArrayBuffer,name:string) {
   if(name.toLowerCase().endsWith('.sf2')&&$<HTMLInputElement>('#auto-compress').checked)await compressBank(bank.id);
 }
 async function importMidi(data:ArrayBuffer,name:string) {
-  if(!audioReady){const {parseMidiTimeline}=await import('./midi-timeline');parseMidiTimeline(data);midiName=name;$('#track-name').textContent=name;pendingMidi={data,name};$('#track-detail').textContent='MIDI queued · start audio when you’re ready';setStatus(`${name} is queued. Start audio to prepare playback.`);renderTransport();return;}
+  if(!audioReady){const {parseMidiTimeline}=await import('./midi-timeline');parseMidiTimeline(data);midiName=name;$('#track-name').textContent=name;pendingMidi={data,name};$('#track-detail').textContent='MIDI queued · start audio when you’re ready';setStatus(`${name} is queued. Start audio to prepare playback.`);renderTransport();showTab('player');return;}
   const result=await engine.loadMidi(data,name);midiName=name;$('#track-name').textContent=name;position={current:0,duration:result.duration,playing:false};
   sequenceCount=result.sequenceCount;$('#sequence-control').hidden=result.format!==2||sequenceCount<2;$<HTMLSelectElement>('#sequence').innerHTML=Array.from({length:sequenceCount},(_,index)=>`<option value="${index}">Sequence ${index+1}</option>`).join('');
   $('#track-detail').textContent=`MIDI format ${result.format} · ${formatTime(result.duration)} · ready to play`;
-  engine.applyState(state);engine.setTempo(state.master.tempo);renderTransport();setStatus(`${name} ready. Master settings preserved.`);
+  engine.applyState(state);engine.setTempo(state.master.tempo);renderTransport();showTab('player');setStatus(`${name} ready. Master settings preserved.`);
 }
 function download(data:BlobPart,name:string,type='application/json') {
   const blob=new Blob([data],{type});
@@ -410,7 +502,50 @@ function validNumber(id:string,min:number,max:number,integer=false) {
 }
 
 on('#start-audio','click',()=>void startAudio());
+on('#panels-home','click',()=>showTab('perform'));
+on('#view-backdrop','click',()=>showTab('perform'));
+document.querySelectorAll('[data-close-view]').forEach(button=>button.addEventListener('click',()=>showTab('perform')));
+on('#settings-sound-manager','click',()=>showTab('library'));
+document.addEventListener('keydown',event=>{if(event.key==='Escape'&&document.body.classList.contains('has-popover')&&!document.querySelector('dialog[open]')){event.preventDefault();showTab('perform');}});
 document.querySelectorAll<HTMLElement>('[data-tab]').forEach(button=>button.addEventListener('click',()=>showTab(button.dataset.tab!)));
+$('.tabs').addEventListener('keydown',event=>{
+  const key=(event as KeyboardEvent).key;
+  if(!['ArrowLeft','ArrowRight','Home','End'].includes(key))return;
+  const tabs=Array.from(document.querySelectorAll<HTMLButtonElement>('[data-tab]'));
+  const index=tabs.indexOf(event.target as HTMLButtonElement);if(index<0)return;
+  event.preventDefault();const next=key==='Home'?0:key==='End'?tabs.length-1:(index+(key==='ArrowRight'?1:-1)+tabs.length)%tabs.length;
+  showTab(tabs[next].dataset.tab!);tabs[next].focus();
+});
+function goToSelectedPanel(){showTab('perform');$(`[data-panel-part="${state.selectedPart}"]`).scrollIntoView({block:'nearest'});}
+on('#back-to-panel','click',goToSelectedPanel);on('#player-panels','click',goToSelectedPanel);
+on('#jump-to-part','click',()=>{selectPart(validNumber('jump-part',1,128,true)-1);goToSelectedPanel();});
+on('#jump-part','keydown',event=>{if((event as KeyboardEvent).key==='Enter'){selectPart(validNumber('jump-part',1,128,true)-1);goToSelectedPanel();}});
+on('#toggle-keys','click',()=>{const keyboard=$('#keyboard');keyboard.hidden=!keyboard.hidden;$('#toggle-keys').setAttribute('aria-expanded',String(!keyboard.hidden));$('.keyboard-panel').classList.toggle('is-collapsed',keyboard.hidden);if(keyboard.hidden)releaseLiveNotes();});
+on('#close-patch-dialog','click',()=>$<HTMLDialogElement>('#patch-dialog').close());
+on('#patch-manage-banks','click',()=>{$<HTMLDialogElement>('#patch-dialog').close();showTab('library');});
+on('#patch-search','input',renderPatchBrowser);
+on('#patch-search','keydown',event=>{if((event as KeyboardEvent).key==='Escape'){event.preventDefault();$<HTMLDialogElement>('#patch-dialog').close();}});
+on('#patch-banks','click',event=>{const button=(event.target as HTMLElement).closest<HTMLButtonElement>('[data-patch-bank]');if(!button)return;patchBankId=button.dataset.patchBank!;renderPatchBrowser();});
+on('#patch-favorites','click',()=>{const settings=patchSettings();settings.favoritesOnly=!settings.favoritesOnly;persist();renderPatchBrowser();});
+on('#patch-sort','change',()=>{patchSettings().sort=$<HTMLSelectElement>('#patch-sort').value as PatchBrowserSettings['sort'];persist();renderPatchBrowser();});
+on('#patch-auto-close','change',()=>{patchSettings().closeOnSelect=$<HTMLInputElement>('#patch-auto-close').checked;persist();});
+on('#patch-results','click',event=>{
+  const star=(event.target as HTMLElement).closest<HTMLButtonElement>('[data-patch-favorite]');
+  if(star){const bank=banks.find(bank=>bank.id===patchBankId),patch=bank?.presets[Number(star.dataset.patchFavorite)];if(!bank||!patch)return;const identity=patchIdentity(bank.id,patch),settings=patchSettings();settings.favorites=settings.favorites.includes(identity)?settings.favorites.filter(value=>value!==identity):[...settings.favorites,identity].slice(-8192);persist();renderPatchBrowser();return;}
+  const button=(event.target as HTMLElement).closest<HTMLButtonElement>('[data-patch-index]');if(!button)return;
+  const bank=banks.find(bank=>bank.id===patchBankId),patch=bank?.presets[Number(button.dataset.patchIndex)];if(!bank||!patch)return;
+  commitPartFor(patchPartId,{bankId:bank.id,msb:patch.msb,lsb:patch.lsb,program:patch.program,drums:patch.drums});
+  if(patchSettings().closeOnSelect)$<HTMLDialogElement>('#patch-dialog').close();else renderPatchBrowser();setStatus(`${patch.name} · part ${patchPartId+1}.`);
+});
+$('.reset-actions').addEventListener('click',event=>{
+  const button=(event.target as HTMLElement).closest<HTMLButtonElement>('[data-reset-cc]');if(!button)return;
+  if(!audioReady){setStatus('Start audio before resetting MIDI controllers.');return;}
+  const cc=Number(button.dataset.resetCc);if(![120,121,123].includes(cc))return;
+  for(let port=0;port<8;port++)for(let channel=0;channel<16;channel++)engine.sendMIDI([0xb0|channel,cc,0],port);
+  if(cc!==121)clearKeyboardVisuals();else setSustain(false);
+  setStatus(`${button.firstChild?.textContent} sent to all 128 parts. Master tuning preserved.`);
+});
+on('#edit-program-maps','click',()=>{showTab('library');$('.preset-mapping-section').scrollIntoView({block:'start'});});
 for(const [button,input] of [['#open-midi','#import-midi'],['#open-bank','#import-bank'],['#open-preset','#import-preset'],['#open-session','#restore-session']])on(button,'click',()=>$(input).click());
 function bindFileInput(id:string,handler:(data:ArrayBuffer,name:string)=>unknown|Promise<unknown>) {
   on(id,'change',event=>{const input=event.target as HTMLInputElement;const files=Array.from(input.files||[]);input.value='';if(!files.length)return;void run('Reading imported files…',async()=>{for(const file of files)await handler(await file.arrayBuffer(),file.name);});});
@@ -437,9 +572,13 @@ on('#master-gain','input',()=>commitMaster({gain:validNumber('master-gain',0,2)}
 for(const [id,property,min,max] of [['delay-time','delayTime',.05,2],['delay-feedback','delayFeedback',0,.9],['delay-mix','delayMix',0,1],['flanger-mix','flangerMix',0,1],['crusher-bits','crusherBits',2,16]] as const)on(`#${id}`,'input',()=>commitMaster({[property]:validNumber(id,min,max)}));
 on('#theme','change',()=>commitMaster({theme:$<HTMLSelectElement>('#theme').value}));document.querySelectorAll<HTMLElement>('[data-theme-choice]').forEach(button=>button.addEventListener('click',()=>commitMaster({theme:button.dataset.themeChoice!})));
 on('#velocity','input',()=>{velocity=validNumber('velocity',1,127,true);$('#velocity-value').textContent=String(velocity);});
-on('#octave-down','click',()=>{releaseAll();baseNote=Math.max(12,baseNote-12);renderKeyboard();});on('#octave-up','click',()=>{releaseAll();baseNote=Math.min(96,baseNote+12);renderKeyboard();});
+on('#octave-down','click',()=>{releaseLiveNotes();baseNote=Math.max(12,baseNote-12);renderKeyboard();});on('#octave-up','click',()=>{releaseLiveNotes();baseNote=Math.min(96,baseNote+12);renderKeyboard();});
+on('#keyboard-scroll','input',()=>{releaseLiveNotes();baseNote=validNumber('keyboard-scroll',12,96,true);renderKeyboard();});
+on('#keyboard-channel','change',()=>selectPart(validNumber('keyboard-channel',0,127,true)));
+let keyboardWide=innerWidth>=760;
+window.addEventListener('resize',()=>{if(keyboardWide!==(innerWidth>=760)){keyboardWide=innerWidth>=760;releaseLiveNotes();renderKeyboard();}});
 on('#sustain','click',()=>setSustain(!sustain));on('#panic','click',()=>{releaseAll();setSustain(false);setStatus('All notes released.');});
-document.addEventListener('keydown',event=>{if(event.repeat||event.metaKey||event.ctrlKey||event.altKey||currentTab!=='perform'||!audioReady||event.target instanceof HTMLInputElement||event.target instanceof HTMLSelectElement||$<HTMLDialogElement>('#drum-dialog').open||$<HTMLDialogElement>('#preset-map-dialog').open)return;const offset=physicalKeys[event.key.toLowerCase()];if(offset===undefined)return;event.preventDefault();const note=baseNote+offset;heldKeys.set(event.code,{part:state.selectedPart,note});pressNote(state.selectedPart,note);updateKeyVisual(note);});
+document.addEventListener('keydown',event=>{if(event.repeat||event.metaKey||event.ctrlKey||event.altKey||document.body.classList.contains('has-popover')||!audioReady||event.target instanceof HTMLInputElement||event.target instanceof HTMLSelectElement||document.querySelector('dialog[open]'))return;const offset=physicalKeys[event.key.toLowerCase()];if(offset===undefined)return;event.preventDefault();const note=baseNote+offset;heldKeys.set(event.code,{part:state.selectedPart,note});pressNote(state.selectedPart,note);updateKeyVisual(note);});
 document.addEventListener('keyup',event=>{const active=heldKeys.get(event.code);if(!active)return;heldKeys.delete(event.code);releaseNote(active.part,active.note);updateKeyVisual(active.note);});
 window.addEventListener('blur',()=>{releaseAll();setSustain(false);});document.addEventListener('visibilitychange',()=>{if(document.hidden){releaseAll();setSustain(false);}});
 on('#save-part-preset','click',()=>{showTab('library');$<HTMLInputElement>('#preset-name').focus();setStatus('Name your selected part to save an individual preset.');});on('#create-preset','click',()=>void run('Saving preset…',saveCurrentPreset));
@@ -516,11 +655,11 @@ nativeWindow.nativeImport=async(file:NativeImport)=>run(`Importing ${file.name}�
   else if(kind==='preset'||file.name.endsWith('.p128preset'))importPreset(new TextDecoder().decode(bytes));
   else throw new Error(`Unsupported import: ${file.name}. Choose a soundbank, MIDI, Project 128 preset, or session backup.`);
 });
-nativeWindow.nativeMIDI=(bytes,_timestamp,port=0)=>{if(audioReady)decodeNativeMIDI(bytes,port);};
+nativeWindow.nativeMIDI=(bytes,_timestamp,port=0)=>{if(audioReady){decodeNativeMIDI(bytes,port);if(Number.isInteger(port)&&port>=0&&port<8)$('#midi-input-status').textContent=`Receiving MIDI on port ${port+1} · parts ${port*16+1}–${port*16+16}. Native connection details are available from the iOS MIDI status button.`;}};
 nativeWindow.nativeAudioInterruption=interrupted=>{if(interrupted){releaseAll();void run('Audio interrupted…',async()=>{await engine.pause();renderTransport(engine.position());setStatus('Audio was interrupted. Tap play when you’re ready to continue.');});}};
 window.addEventListener('nativeAudioInterruption',event=>{
   const detail=(event as CustomEvent<{began?:boolean}>).detail;
   nativeWindow.nativeAudioInterruption?.(detail?.began===true);
 });
 window.addEventListener('unhandledrejection',event=>{event.preventDefault();reportError(event.reason);});
-renderGrid();renderPart();renderMaster();renderLibrary();renderKeyboard();renderTransport();
+renderGrid();renderPart();renderMaster();renderLibrary();renderKeyboard();renderTransport();showTab('perform');

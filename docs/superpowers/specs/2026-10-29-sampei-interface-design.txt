@@ -1,0 +1,58 @@
+PROJECT128 — developer-website interface reconstruction, 2026-10-29
+
+Intent: bring the working instrument closer to KQ Sampei using ONLY the product
+page, English manual and screenshots hosted on kiraqtech.jp as design references.
+The user's latest instruction supersedes the earlier broader source search.
+Original TypeScript/CSS and SpessaSynth remain the implementation. No Sampei
+source fork, leaked code, App Store screenshots or third-party UI assets form the
+basis of this revision. Previously inspected public helper code is not bundled.
+
+Visual/interaction contract from the website:
+- Presets, Reset, Param, MIDI, settings and music menu order.
+- Flat rose rectangular panels, thin selected border, square fields, ring dials.
+- One wide panel per row on large screens; wrapped controls on a phone.
+- M tap mutes, M hold solos; an accessible Shift+Enter/Space alternative exists.
+- Master Volume/Key Shift/Tune belong in Param. Appearance/backup belong in Prefs.
+- Menus use rounded grouped popovers above visible panels and keys.
+- Patch collections at left; patches with name/program/bank/source and stars at
+  right. Search supports name terms, prog8-15 and bank0. Sort None preserves
+  source order. Close is an auto-dismiss toggle distinct from the X button.
+- Keyboard remains docked with a ruler/register control, velocity, destination
+  and KBD visibility. Wide screens expose four octaves; phones expose two.
+- All Sound Off, All Notes Off and Reset Controllers dispatch distinct CC120,
+  CC123 and CC121 messages, preserving user master tuning and bank settings.
+
+Explicit retained user upgrades: all128 independently editable scrolling panels;
+SpessaSynth; independent banks; absolute amplitude ADSR including sustain; delay;
+extra effects; five palettes; individual presets; persistent master overrides.
+The site documents only1–16 panels. We keep128 because the user required them.
+All128 are scrollable full panels, with a compact128-button navigator.
+
+Builder choices: Name/Program/Bank are practical additional sort options; only
+None/source-order is explicitly specified in the manual. Bank search targets MSB.
+A decorative left strip shows saved volume, not an alleged live audio meter.
+No fake Low/High, pitch/filter/vibrato/portamento/pedal controls are added to mimic
+unsupported behavior. Full Sampei feature parity remains incomplete. Pinch zoom,
+advanced controller panels, all original preferences and AUv3 remain future work.
+Native compilation/signing/device validation remain pending.
+
+Exact interface edits retain concrete part IDs and changed-field intent; envelope
+leaves remain independent; selecting a patch commits one complete bank tuple.
+Favorites use bank fingerprints plus complete patch addresses, not display names,
+and persist in the existing native-mirrored session storage.
+
+Verification: core behavior tests, portrait/landscape/small-phone browser tests,
+patch favorites/search/Close restoration, M hold, ruler, reset menu, popover bounds,
+master persistence across MIDI0/1/2, native-CSP production audio/conversion, binary
+resource synchronization, screenshots and source ZIP CRC/byte comparison <20 MB.
+
+Sole design references (developer website, inspected 2026-10-29):
+https://www.kiraqtech.jp/blog/kq-sampei/
+https://www.kiraqtech.jp/blog/kq-sampei/kq-sampei-manual/
+https://www.kiraqtech.jp/blog/wp-content/uploads/2022/10/IMG_0205-fs8.png
+https://www.kiraqtech.jp/blog/wp-content/uploads/2022/10/IMG_0206-fs8.png
+https://www.kiraqtech.jp/blog/wp-content/uploads/2022/10/IMG_0213-fs8.png
+https://www.kiraqtech.jp/blog/wp-content/uploads/2022/10/IMG_0214-fs8.png
+https://www.kiraqtech.jp/blog/wp-content/uploads/2022/10/IMG_0216-fs8.png
+https://www.kiraqtech.jp/blog/wp-content/uploads/2022/10/IMG_0217-fs8.png
+Screenshots are research references only and are not included as app assets.
