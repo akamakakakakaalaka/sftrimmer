@@ -1,5 +1,6 @@
-import type { AppState, Envelope, MasterState, PartState, PatchBrowserSettings, PresetMapping, SavedPreset } from './contracts.ts';
+import type { AppState, Envelope, MasterState, PartState, PatchBrowserSettings, PresetMapping, SavedPreset, ProgramPortamentoSetting } from './contracts.ts';
 import { normalizeMode } from './harmony.ts';
+import { createPerformanceControls, normalizePerformanceControls, PERFORMANCE_KEYS } from './performance.ts';
 
 const SESSION_KEY = 'project128.session';
 const PART_COUNT = 128;
@@ -30,11 +31,11 @@ function createEnvelope(): Envelope {
 function createPart(id: number): PartState {
   return { id, bankId: null, msb: 0, lsb: 0, program: 0, drums: id % 16 === 9,
     volume: 100, pan: 64, reverb: 25, chorus: 0, delay: 0, mute: false, solo: false,
-    transpose: 0, envelope: createEnvelope(), drumMap: {}, locked: false };
+    transpose: 0, envelope: createEnvelope(), drumMap: {}, locked: false, performance:createPerformanceControls() };
 }
 
 function createMaster(): MasterState {
-  return { keyShift: 0, fineTune: 0, gain: 0.7, tempo: 1, root: 0, mode: 'chromatic', theme: 'rose',
+  return { keyShift: 0, fineTune: 0, gain: 0.7, tempo: 1, root: 0, mode: 'chromatic', theme: 'rose', balance:0, reverbGain:1, chorusGain:1,
     delayTime: 0.3, delayFeedback: 0.25, delayMix: 0, flangerMix: 0, crusherBits: 16 };
 }
 
@@ -43,7 +44,24 @@ function createPatchBrowser(): PatchBrowserSettings {
 }
 
 export function createState(): AppState {
-  return { version: 1, master: createMaster(), parts: Array.from({ length: PART_COUNT }, (_, id) => createPart(id)), selectedPart: 0, presetMappings: [], patchBrowser: createPatchBrowser() };
+  return { version: 1, master: createMaster(), parts: Array.from({ length: PART_COUNT }, (_, id) => createPart(id)), selectedPart: 0, presetMappings: [], patchBrowser: createPatchBrowser(), programPortamento:[] };
+}
+
+function restoreProgramPortamento(raw:unknown):ProgramPortamentoSetting[] {
+  const result:ProgramPortamentoSetting[]=[];
+  if(!Array.isArray(raw))return result;
+  const seen=new Set<string>();
+  for(const setting of raw){
+    if(!record(setting)||typeof setting.bankId!=='string'||bankId(setting.bankId)!==setting.bankId
+      ||![setting.msb,setting.lsb,setting.program].every(value=>typeof value==='number'&&Number.isInteger(value)&&value>=0&&value<=127)
+      ||typeof setting.drums!=='boolean'||typeof setting.portamento!=='boolean'||typeof setting.portamentoTime!=='number'||!Number.isFinite(setting.portamentoTime))continue;
+    const key=JSON.stringify([setting.bankId,setting.msb,setting.lsb,setting.program,setting.drums]);
+    if(seen.has(key))continue;seen.add(key);
+    result.push({bankId:setting.bankId,msb:setting.msb as number,lsb:setting.lsb as number,program:setting.program as number,drums:setting.drums,
+      portamento:setting.portamento,portamentoTime:bounded(setting.portamentoTime,0,0,127,true)});
+    if(result.length===8192)break;
+  }
+  return result;
 }
 
 function restorePatchBrowser(raw: unknown): PatchBrowserSettings {
@@ -74,6 +92,9 @@ function restoreMaster(raw: unknown): MasterState {
     keyShift: bounded(raw.keyShift, defaults.keyShift, -48, 48, true),
     fineTune: bounded(raw.fineTune, defaults.fineTune, -100, 100),
     gain: bounded(raw.gain, defaults.gain, 0, 2),
+    balance: bounded(raw.balance, defaults.balance??0, -1, 1),
+    reverbGain: bounded(raw.reverbGain, defaults.reverbGain??1, 0, 2),
+    chorusGain: bounded(raw.chorusGain, defaults.chorusGain??1, 0, 2),
     tempo: bounded(raw.tempo, defaults.tempo, 0.25, 4),
     root: bounded(raw.root, defaults.root, 0, 11, true),
     mode: normalizeMode(raw.mode),
@@ -117,7 +138,7 @@ function restorePart(raw: RecordValue, id: number): PartState {
       release: bounded(envelope.release, defaults.envelope.release, 0, 30),
       enabled: boolean(envelope.enabled, defaults.envelope.enabled)
     },
-    drumMap, locked: boolean(raw.locked, defaults.locked)
+    drumMap, locked: boolean(raw.locked, defaults.locked), performance:normalizePerformanceControls(raw.performance)
   };
 }
 
@@ -137,6 +158,7 @@ export function restoreState(raw: unknown): AppState {
   }
   state.presetMappings = restoreMappings(raw.presetMappings);
   state.patchBrowser = restorePatchBrowser(raw.patchBrowser);
+  state.programPortamento = restoreProgramPortamento(raw.programPortamento);
   return state;
 }
 
@@ -170,7 +192,12 @@ function validPreset(raw: unknown): raw is SavedPreset {
   // Import rejects invalid values instead of silently turning an unrelated
   // record into a plausible preset. Session recovery is deliberately gentler.
   for (const key of Object.keys(clean) as (keyof PartState)[]) {
-    if (key !== 'envelope' && key !== 'drumMap' && part[key] !== clean[key]) return false;
+    if (key !== 'envelope' && key !== 'drumMap' && key !== 'performance' && part[key] !== clean[key]) return false;
+  }
+  // Version-1 presets made before the controller panel remain importable.
+  if(part.performance!==undefined){
+    if(!record(part.performance))return false;
+    for(const key of PERFORMANCE_KEYS)if(part.performance[key]!==clean.performance![key])return false;
   }
   for (const key of Object.keys(clean.envelope) as (keyof Envelope)[]) {
     if (part.envelope[key] !== clean.envelope[key]) return false;

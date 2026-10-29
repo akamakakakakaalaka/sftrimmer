@@ -1,0 +1,94 @@
+{
+  "layouts": [
+    {
+      "name": "phone",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "panel": {
+        "x": 7,
+        "y": 109.6875,
+        "width": 376,
+        "height": 244.1875
+      },
+      "menu": {
+        "x": 61.796875,
+        "y": 56.984375,
+        "width": 266.40625,
+        "height": 34
+      },
+      "knob": {
+        "x": 39.7109375,
+        "y": 193.28125,
+        "width": 36.359375,
+        "height": 36.359375
+      },
+      "reference_delta_under_1px": true
+    },
+    {
+      "name": "tablet_portrait",
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      },
+      "panel": {
+        "x": 49.3125,
+        "y": 144,
+        "width": 669.375,
+        "height": 124.9375
+      },
+      "menu": {
+        "x": 271.65625,
+        "y": 25.09375,
+        "width": 224.6875,
+        "height": 28.796875
+      },
+      "knob": {
+        "x": 298.4609375,
+        "y": 163.703125,
+        "width": 41.640625,
+        "height": 41.640625
+      },
+      "reference_delta_under_1px": true
+    },
+    {
+      "name": "tablet_landscape",
+      "viewport": {
+        "width": 1024,
+        "height": 768
+      },
+      "panel": {
+        "x": 62,
+        "y": 69,
+        "width": 900,
+        "height": 168
+      },
+      "menu": {
+        "x": 361.2578125,
+        "y": 21.984375,
+        "width": 301.484375,
+        "height": 39
+      },
+      "knob": {
+        "x": 397,
+        "y": 95.5,
+        "width": 56,
+        "height": 56
+      },
+      "reference_delta_under_1px": true
+    }
+  ],
+  "typography": {
+    "regular_loaded": true,
+    "medium_loaded": true,
+    "stack": "-apple-system, BlinkMacSystemFont, \"Fidelity Sans\", Arial, sans-serif"
+  },
+  "Apple_font_bundled": false,
+  "exact_KQ_font_identity_verified": false,
+  "parameter_sheet_overlays_keyboard": true,
+  "full_documented_controller_grid": true,
+  "source_video_frames_inspected": false,
+  "native_iOS_verified": false,
+  "measurement_scope": "Panel/menu template bounds and normalized rotary diameters; not a complete pixel, font-rasterization or proprietary-DSP equivalence check."
+}

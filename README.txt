@@ -2,22 +2,24 @@ PROJECT 128 — original iOS MIDI player source, v0.1
 
 This is a source project, not a signed/installed iPhone app. The embedded player is also testable in a desktop browser. The full 250-item feature catalog is in docs/features-250.html and JSON; proposed items are not claims of completed features. See docs/IMPLEMENTED.txt for the actual build scope and verification results.
 
-INTERFACE REVISION — 29 OCTOBER 2026
-This revision uses ONLY the developer's own product page, manual and hosted
-screenshots as its design references. It includes128 editable scrolling panels,
-rotary mixer/ADSR controls, M tap/hold-solo, documented six-menu order, grouped
-popovers, master controls under Param, three distinct MIDI reset actions, patch
-favorites and prog/bank search, a Close toggle, and a docked keyboard with ruler.
-The rose default follows the website; four previous palettes remain available.
-This is original code using SpessaSynth, not a Sampei source fork. Full behavior
-parity is incomplete. See docs/superpowers/specs/2026-10-29-sampei-interface-design.txt
-for the exact website references and retained user-requested extensions.
+FIDELITY REVISION — 29 OCTOBER2026
+The playing surface now uses the full Sampei-style controller grid and separate
+measured phone/tablet layouts, with the original proportions, native-style menus,
+soft keyboard and compact MIDI player. The iOS system font is selected on Apple
+platforms; Linux previews use a bundled licensed Inter fallback. Absolute ADSR,
+conversion and the added effects remain in secondary controls. Per-program Por
+and P.Time settings persist independently by exact soundbank and MIDI address.
+This is original SpessaSynth-based source, not a Sampei source fork. References,
+measurement limits and video-access limitations are in docs/UI_REFERENCE_EVIDENCE.txt;
+current tests/geometry are recorded in docs/VERIFICATION.json and output reports.
+Full Sampei feature parity and native iOS compile/sign/device validation remain
+incomplete. The250-item catalog remains a roadmap, not250 finished features.
 
 START ON A COMPUTER
 Install Node.js 22.12+ (Node24 recommended).
   npm ci
   npm run dev
-Open the local address printed by Vite. Press Start Audio once, then use the keyboard or import a MIDI file. All runtime synthesis and bank conversion run locally. The included GS bank is accurately named in its metadata and notices; it is not authentic Roland SC-88Pro hardware emulation.
+Open the local address printed by Vite. Press Start Audio once, or touch a control to initialize audio, then play or import a MIDI file. All runtime synthesis and bank conversion run locally. The included GS bank is accurately named in its metadata and notices; it is not authentic Roland SC-88Pro hardware emulation.
 
 BUILD THE IOS PROJECT
   npm ci

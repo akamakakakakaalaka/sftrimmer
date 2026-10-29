@@ -1,0 +1,352 @@
+.native-parameters {
+  --native-parameter-bg: var(--menu-bg, #f2f2f6);
+  --native-parameter-surface: var(--menu-surface, #fff);
+  --native-parameter-text: var(--menu-text, #171719);
+  --native-parameter-line: var(--menu-line, #d0d0d0);
+  --native-parameter-muted: #8e8e93;
+  --native-stepper-bg: #eeeef0;
+  --native-slider-empty: #e4e4e7;
+  --native-blue: #007aff;
+  width: 100%;
+  min-width: 0;
+  background: var(--native-parameter-bg);
+  color: var(--native-parameter-text);
+  font-family: var(--font-ui, -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif);
+  font-size: 17px;
+  font-weight: 400;
+  line-height: 1.25;
+  letter-spacing: 0;
+}
+
+:root[data-theme="rose"] .native-parameters {
+  --native-parameter-bg: #f2f2f6;
+  --native-parameter-surface: #fff;
+  --native-parameter-text: #171719;
+  --native-parameter-line: #d0d0d0;
+}
+
+:root:not([data-theme="rose"]):not([data-theme="paper"]) .native-parameters {
+  --native-stepper-bg: var(--menu-bg, #eeeef0);
+  --native-slider-empty: var(--menu-line, #e4e4e7);
+  --native-parameter-muted: var(--muted, #8e8e93);
+}
+
+.native-parameters .native-parameter-home {
+  padding: 37px 16px 30px;
+}
+
+.native-parameters .native-parameter-group {
+  overflow: hidden;
+  border: 0;
+  border-radius: 11px;
+  background: var(--native-parameter-surface);
+}
+
+.native-parameters .native-control-row {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 83px;
+  min-width: 0;
+  padding: 11px 16px 10px;
+}
+
+.native-parameters .native-control-row::after,
+.native-parameters .native-parameter-link::after {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 16px;
+  height: 0.5px;
+  background: var(--native-parameter-line);
+  content: "";
+}
+
+.native-parameters .native-parameter-group > :last-child::after {
+  display: none;
+}
+
+.native-parameters .native-control-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 5px;
+  min-width: 0;
+  height: 23px;
+}
+
+.native-parameters .native-control-heading label,
+.native-parameters .native-parameter-value {
+  margin: 0;
+  color: var(--native-parameter-text);
+  font-family: inherit;
+  font-size: 17px;
+  font-weight: 400;
+  line-height: 23px;
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+
+.native-parameters .native-control-heading label {
+  flex: 1;
+  min-width: 0;
+}
+
+.native-parameters .native-parameter-value {
+  flex-shrink: 0;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.native-parameters .native-parameter-number {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: baseline;
+  justify-content: flex-end;
+  max-width: 46%;
+}
+
+.native-parameters input.native-number-value {
+  appearance: textfield;
+  -moz-appearance: textfield;
+  width: 74px;
+  min-width: 0;
+  min-height: 0;
+  height: 23px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.native-parameters input.native-number-value::-webkit-inner-spin-button,
+.native-parameters input.native-number-value::-webkit-outer-spin-button {
+  margin: 0;
+  -webkit-appearance: none;
+}
+
+.native-parameters .native-parameter-unit {
+  margin-left: 4px;
+  color: var(--native-parameter-text);
+  font-size: 17px;
+  line-height: 23px;
+  white-space: nowrap;
+}
+
+.native-parameters .native-control-adjusters {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+  height: 32px;
+}
+
+.native-parameters input.native-parameter-range {
+  appearance: none;
+  -webkit-appearance: none;
+  flex: 1;
+  width: 0;
+  min-width: 0;
+  height: 32px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  cursor: pointer;
+  accent-color: var(--native-blue);
+}
+
+.native-parameters input.native-parameter-range::-webkit-slider-runnable-track {
+  height: 3px;
+  border: 0;
+  border-radius: 2px;
+  background: linear-gradient(to right, var(--native-blue) 0 var(--native-range-progress, 50%), var(--native-slider-empty) var(--native-range-progress, 50%) 100%);
+}
+
+.native-parameters input.native-parameter-range::-webkit-slider-thumb {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 28px;
+  height: 28px;
+  margin-top: -12.5px;
+  border: 0.5px solid #e9e9ec;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 3px 7px #0002, 0 1px 2px #0001;
+}
+
+.native-parameters input.native-parameter-range::-moz-range-track {
+  height: 3px;
+  border: 0;
+  border-radius: 2px;
+  background: var(--native-slider-empty);
+}
+
+.native-parameters input.native-parameter-range::-moz-range-progress {
+  height: 3px;
+  border: 0;
+  border-radius: 2px;
+  background: var(--native-blue);
+}
+
+.native-parameters input.native-parameter-range::-moz-range-thumb {
+  width: 28px;
+  height: 28px;
+  border: 0.5px solid #e9e9ec;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 3px 7px #0002, 0 1px 2px #0001;
+}
+
+.native-parameters .native-parameter-stepper {
+  position: relative;
+  display: flex;
+  flex: 0 0 94px;
+  overflow: hidden;
+  width: 94px;
+  height: 32px;
+  border-radius: 8px;
+  background: var(--native-stepper-bg);
+}
+
+.native-parameters .native-parameter-stepper::after {
+  position: absolute;
+  top: 7px;
+  bottom: 7px;
+  left: 50%;
+  width: 1px;
+  background: var(--native-parameter-line);
+  content: "";
+  pointer-events: none;
+}
+
+.native-parameters .native-parameter-stepper button {
+  display: grid;
+  flex: 1;
+  place-items: center;
+  min-width: 0;
+  height: 32px;
+  margin: 0;
+  padding: 0 0 2px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--native-parameter-text);
+  font-family: inherit;
+  font-size: 27px;
+  font-weight: 300;
+  line-height: 1;
+}
+
+.native-parameters .native-parameter-stepper button:active {
+  background: #80808020;
+}
+
+.native-parameters .native-parameter-link {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  height: 44px;
+  margin: 0;
+  padding: 0 17px 0 16px;
+  border: 0;
+  background: transparent;
+  color: var(--native-parameter-text);
+  font-family: inherit;
+  font-size: 17px;
+  font-weight: 400;
+  text-align: left;
+  letter-spacing: 0;
+}
+
+.native-parameters .native-parameter-link:active {
+  background: #80808014;
+}
+
+.native-parameters .native-parameter-chevron {
+  flex-shrink: 0;
+  width: 9px;
+  height: 9px;
+  transform: rotate(-45deg);
+  border-right: 2px solid #c7c7cc;
+  border-bottom: 2px solid #c7c7cc;
+  border-radius: 1px;
+}
+
+.native-parameters .native-effect-section {
+  margin-top: 33px;
+}
+
+.native-parameters .native-parameter-section-heading {
+  margin: 0 16px 7px;
+  color: var(--native-parameter-muted);
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 16px;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.native-parameters .native-parameter-back {
+  position: absolute;
+  z-index: 6;
+  top: 0;
+  left: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 50px;
+  margin: 0;
+  padding: 0 3px;
+  border: 0;
+  background: transparent;
+  color: var(--native-blue);
+  font-family: inherit;
+  font-size: 17px;
+  font-weight: 400;
+}
+
+.native-parameters .native-back-chevron {
+  width: 10px;
+  height: 10px;
+  transform: rotate(45deg);
+  border-bottom: 2px solid currentColor;
+  border-left: 2px solid currentColor;
+}
+
+.native-parameters .native-parameter-subpage {
+  min-width: 0;
+  padding: 24px 16px 30px;
+}
+
+.native-parameters button:focus-visible,
+.native-parameters input:focus-visible {
+  outline: 2px solid var(--native-blue);
+  outline-offset: -2px;
+}
+
+@media (max-width: 375px) {
+  .native-parameters .native-parameter-home {
+    padding-right: 12px;
+    padding-left: 12px;
+  }
+
+  .native-parameters .native-control-row {
+    padding-right: 12px;
+    padding-left: 12px;
+  }
+
+  .native-parameters .native-control-heading label,
+  .native-parameters .native-parameter-value,
+  .native-parameters .native-parameter-unit,
+  .native-parameters .native-parameter-link {
+    font-size: 16px;
+  }
+}

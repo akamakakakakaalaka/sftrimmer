@@ -2,7 +2,7 @@
   "version": "0.1.0",
   "status": "Source foundation; native compile/sign/device validation pending",
   "node_behavior_tests": {
-    "passed": 73,
+    "passed": 126,
     "failed": 0
   },
   "asset_sync_tests": {
@@ -10,7 +10,7 @@
     "failed": 0
   },
   "chromium_UI_tests": {
-    "passed": 11,
+    "passed": 14,
     "failed": 0
   },
   "production": {
@@ -21,8 +21,10 @@
     "parts": 128,
     "editable_part_panels": 128,
     "docked_keyboard": true,
+    "local_font_under_native_CSP": true,
+    "reference_geometry_layouts_verified": 3,
     "starter_presets": 295,
-    "actual_audio_peak": 0.06297805905342102,
+    "actual_audio_peak": 0.062172215431928635,
     "user_gesture_audio": true,
     "portrait_horizontal_overflow": false,
     "catalog_count": 250,
@@ -131,40 +133,43 @@
   "features_all_completed": false,
   "verified_date": "2026-10-29",
   "interface_revision": {
-    "design_reference_scope": "Developer website manual and hosted screenshots only",
-    "reference_urls": [
-      "https://www.kiraqtech.jp/blog/kq-sampei/",
-      "https://www.kiraqtech.jp/blog/kq-sampei/kq-sampei-manual/"
-    ],
+    "revision": 2,
+    "design_reference_scope": "Official historical/current screenshots and directly inspected 2022 review images; indexed video metadata distinguished from blocked playback",
+    "reference_evidence": "UI_REFERENCE_EVIDENCE.txt",
+    "geometry_evidence": "FIDELITY_VERIFICATION.json",
     "original_source_reconstruction": true,
     "Sampei_source_fork": false,
     "editable_scrolling_panels": 128,
+    "full_panel_controller_grid": true,
     "themes": 5,
-    "documented_menu_order": [
-      "Presets",
-      "Reset",
-      "Param",
-      "MIDI",
-      "Preferences",
-      "SMF"
-    ],
-    "patch_query_syntax": [
-      "name terms",
-      "prog8-15",
-      "bank0"
-    ],
-    "persistent_patch_favorites": true,
-    "source_order_sorting": true,
-    "close_after_selection_toggle": true,
-    "keyboard_scroll_ruler": true,
-    "mute_hold_solo": true,
-    "reset_CC_messages": [
-      120,
-      123,
-      121
-    ],
+    "native_typography": "Apple system font stack; exact original family not independently verified",
+    "browser_typography": "Licensed local Inter variable fallback, 48256 bytes",
+    "native_duplicate_titlebar_removed": true,
+    "program_portamento_memory": {
+      "key": [
+        "bankId",
+        "msb",
+        "lsb",
+        "program",
+        "drums"
+      ],
+      "settings": [
+        "portamento",
+        "portamentoTime"
+      ],
+      "saved_per_program": true,
+      "snapshot_override_priority": true
+    },
+    "actual_PCM_meters": true,
+    "actual_pressed_key_telemetry": true,
+    "pinch_zoom_and_drag_modes": true,
+    "video_frames_inspected": false,
     "full_original_behavior_parity": false,
-    "independent_review_critical_or_important_findings": 0,
-    "reviewed_popup_focus_and_scroll_fixed": true
+    "important_review_findings_fixed": [
+      "mono collision release order",
+      "mute/solo stale sostenuto capture IDs",
+      "history-dependent reset controllers"
+    ],
+    "new_real_PCM_regressions_red_to_green": true
   }
 }

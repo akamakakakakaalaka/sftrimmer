@@ -1,0 +1,261 @@
+/* SMF player strips follow the native two-column, eight-row presentation. */
+.player-parts {
+  container: smf-parts / inline-size;
+  display: grid;
+  grid-auto-flow: column;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: repeat(8, auto);
+  align-items: start;
+  gap: 8px;
+  min-width: 0;
+  color: var(--text, #191313);
+  font-family: var(--font-ui, -apple-system, BlinkMacSystemFont, Arial, sans-serif);
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: normal;
+}
+
+.player-parts .smf-part {
+  --smf-field: var(--surface-soft, #fff);
+  --smf-ink: var(--text, #191313);
+  --smf-accent: var(--accent, #990019);
+  --smf-key-black: var(--key-black, #e3412c);
+  container: smf-part / inline-size;
+  position: relative;
+  min-width: 0;
+  margin: 0;
+  background: var(--surface, #fac1b8);
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.player-parts .smf-part-body {
+  position: relative;
+  display: grid;
+  grid-template-columns: 18px 18px minmax(85px, 106px) 63px 63px 76px 70px;
+  align-items: start;
+  column-gap: 6px;
+  min-width: 0;
+  height: 53px;
+  padding: 6px 13px 0 14px;
+}
+
+.player-parts .smf-part button {
+  display: block;
+  min-width: 0;
+  min-height: 0;
+  height: 18px;
+  margin: 0;
+  padding: 0 2px;
+  overflow: hidden;
+  border: 0;
+  border-radius: 0;
+  background: var(--smf-field);
+  color: var(--smf-ink);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 18px;
+  text-align: center;
+  white-space: nowrap;
+  text-overflow: clip;
+  box-shadow: none;
+}
+
+.player-parts .smf-part button:focus-visible,
+.player-parts .smf-part-pedal-input:focus-visible {
+  outline: 1px solid var(--smf-accent);
+  outline-offset: 2px;
+}
+
+.player-parts .smf-part-mute[aria-pressed="true"] {
+  color: var(--smf-field);
+  background: var(--smf-accent);
+}
+
+.player-parts .smf-part-peak {
+  position: absolute;
+  top: 3px;
+  bottom: 3px;
+  left: 5px;
+  width: 3px;
+  overflow: hidden;
+  background: var(--smf-field);
+}
+
+.player-parts .smf-part-peak-fill {
+  position: absolute;
+  right: 1px;
+  bottom: 1px;
+  left: 1px;
+  height: max(1px, calc(var(--smf-audio-level, 0%) - 2px));
+  background: var(--smf-accent);
+}
+
+.player-parts .smf-part-control {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 1px;
+  min-width: 0;
+  height: 18px;
+  margin: 0;
+  color: var(--smf-ink);
+  font: inherit;
+  line-height: 18px;
+  white-space: nowrap;
+}
+
+.player-parts .smf-part-control-caption { flex: none; }
+
+.player-parts .smf-part-meter {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  height: 14px;
+  overflow: hidden;
+  border: 1px solid var(--smf-field);
+  background: var(--smf-field);
+}
+
+.player-parts .smf-part-meter-fill {
+  position: absolute;
+  top: 1px;
+  bottom: 1px;
+  left: var(--smf-meter-start, 0%);
+  width: max(1px, var(--smf-meter-size, 0%));
+  max-width: 100%;
+  background: var(--smf-accent);
+}
+
+.player-parts input.smf-part-range {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  min-width: 0;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  opacity: 0;
+  cursor: ew-resize;
+  touch-action: pan-y;
+}
+
+.player-parts .smf-part-control:focus-within .smf-part-meter {
+  outline: 1px solid var(--smf-accent);
+  outline-offset: 1px;
+}
+
+.player-parts .smf-part-control-modulation {
+  position: absolute;
+  bottom: 6px;
+  left: 14px;
+  width: 70px;
+}
+
+.player-parts .smf-part-pedals {
+  position: absolute;
+  bottom: 6px;
+  left: 91px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  height: 18px;
+}
+
+.player-parts .smf-part-pedal {
+  display: block;
+  height: 18px;
+  margin: 0;
+  line-height: 0;
+}
+
+.player-parts .smf-part-pedal-portamento {
+  margin-right: 1px;
+  padding-right: 7px;
+  border-right: 1px solid var(--line, #d9958a);
+}
+
+.player-parts input.smf-part-pedal-input {
+  display: block;
+  appearance: none;
+  -webkit-appearance: none;
+  width: 11px;
+  height: 18px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: var(--smf-field);
+  cursor: pointer;
+}
+
+.player-parts input.smf-part-pedal-input:checked { background: var(--smf-accent); }
+
+.player-parts .smf-part-keyboard {
+  display: block;
+  width: 100%;
+  height: 12px;
+  overflow: hidden;
+  border: 0;
+  background: var(--smf-field);
+}
+
+.player-parts .smf-part-key-white {
+  fill: var(--smf-field);
+  stroke: var(--smf-key-black);
+  stroke-width: 0.8;
+}
+
+.player-parts .smf-part-key-black { fill: var(--smf-key-black); }
+.player-parts .smf-part-key.is-active { fill: var(--smf-accent); }
+
+/* Column widths, rather than viewport orientation, determine meter wrapping. */
+@container smf-part (max-width: 484px) {
+  .player-parts .smf-part-body {
+    grid-template-columns: 18px 18px minmax(85px, 106px) 63px 63px 76px;
+  }
+  .player-parts .smf-part-control-pitchBend {
+    position: absolute;
+    bottom: 6px;
+    left: 14px;
+    width: 70px;
+  }
+  .player-parts .smf-part-control-modulation { left: 92px; }
+  .player-parts .smf-part-pedals { left: 169px; }
+}
+
+/* The rack changes to sixteen consecutive strips on a phone. */
+@media (max-width: 700px) {
+  .player-parts {
+    grid-auto-flow: row;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: none;
+    gap: 7px;
+  }
+}
+
+@container smf-part (max-width: 410px) {
+  .player-parts .smf-part-body {
+    grid-template-columns: 18px 18px minmax(85px, 106px) 58px 58px;
+    height: 66px;
+    padding-top: 9px;
+  }
+  .player-parts .smf-part-control-pan { position: absolute; inset: auto; bottom: 10px; left: 14px; width: 71px; }
+  .player-parts .smf-part-control-pitchBend { bottom: 10px; left: 91px; width: 65px; }
+  .player-parts .smf-part-control-modulation { bottom: 10px; left: 162px; width: 63px; }
+  .player-parts .smf-part-pedals { bottom: 10px; left: 232px; gap: 6px; }
+}
+
+@container smf-part (max-width: 345px) {
+  .player-parts .smf-part-body {
+    grid-template-columns: 18px 18px minmax(65px, 1fr) 52px 52px;
+    column-gap: 5px;
+    padding-right: 8px;
+  }
+  .player-parts .smf-part-control-pan { width: 64px; }
+  .player-parts .smf-part-control-pitchBend { left: 83px; width: 59px; }
+  .player-parts .smf-part-control-modulation { left: 147px; width: 58px; }
+  .player-parts .smf-part-pedals { left: 212px; gap: 5px; }
+}

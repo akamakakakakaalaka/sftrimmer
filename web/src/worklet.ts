@@ -39,7 +39,7 @@ class Project128Processor extends AudioWorkletProcessor {
   }
 
   private publishPosition(): void {
-    this.port.postMessage({ type: 'position', position: this.engine.position() });
+    this.port.postMessage({ type: 'position', position: this.engine.position(), levels: this.engine.getPartLevels(), notes:this.engine.getHeldNotes() });
   }
 
   private async receive(request: EngineRequest): Promise<void> {

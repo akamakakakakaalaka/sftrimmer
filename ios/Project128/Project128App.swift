@@ -10,36 +10,19 @@ struct Project128App: App {
 
     var body: some Scene {
         WindowGroup {
-            NavigationStack {
-                Group {
-                    if let url = model.localURL {
-                        PlayerWebView(model: model, url: url)
-                    } else if let error = model.startupError {
-                        ContentUnavailableView("Player unavailable", systemImage: "exclamationmark.triangle",
-                                               description: Text(error))
-                    } else {
-                        ProgressView("Opening offline player…")
-                    }
-                }
-                .navigationTitle("Project 128")
-                .navigationBarTitleDisplayMode(.inline)
-                .toolbar {
-                    ToolbarItem(placement: .topBarLeading) {
-                        Button { model.notice = "\(model.midiStatus)\n\nUp to eight CoreMIDI sources use separate ports, stable while connected. WebKit delivery is batched and is not a hard real-time transport. Physical-device latency and background synthesis still need validation." } label: {
-                            Image(systemName: "pianokeys")
-                        }
-                        .accessibilityLabel("MIDI connection status")
-                    }
-                    ToolbarItem(placement: .topBarTrailing) {
-                        Button { model.importRequested = true } label: {
-                            if model.importing { ProgressView() }
-                            else { Label("Files", systemImage: "folder") }
-                        }
-                        .disabled(!model.webReady || model.importing)
-                        .accessibilityLabel("Import MIDI, soundbank, or Project 128 preset")
-                    }
+            Group {
+                if let url = model.localURL {
+                    PlayerWebView(model: model, url: url)
+                        .ignoresSafeArea(.container, edges: .all)
+                } else if let error = model.startupError {
+                    ContentUnavailableView("Player unavailable", systemImage: "exclamationmark.triangle",
+                                           description: Text(error))
+                } else {
+                    ProgressView("Opening offline player…")
                 }
             }
+            // The web layout owns screen-relative toolbar geometry and safe-area padding.
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
             .task { model.start() }
             .fileImporter(isPresented: $model.importRequested, allowedContentTypes: [.data], allowsMultipleSelection: false) { result in
                 switch result {

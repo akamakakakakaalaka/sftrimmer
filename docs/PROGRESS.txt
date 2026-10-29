@@ -40,3 +40,37 @@ actual AudioWorklet audio with nonzero PCM, and SF3 conversion/export/finite dec
 under exact native CSP/token prefix all passed. Portrait/desktop/tablet, Param
 popover and patch-browser previews regenerated. Native compile/sign/device tests
 remain pending; output/package-verification.json records the exact source archive.
+
+Full fidelity revision2, 29 October2026:
+User rejected the prior sparse approximation and authorized broader screenshot/
+video research and comparable MIDI-player precedents. Diagnosis: missing control
+slots, added chrome, incorrect tablet wrapping, keyboard scale and genericforms.
+Implemented the complete reference grid with real controllers; measured separate
+phone/tablet templates; Apple-first typography/licensed Inter fallback; removed
+duplicate native titlebar; corrected full-bleed safe-area ownership; rebuilt
+native parameter rows and compact SMF strips with real peak/key telemetry.
+Additional explicit request: each program's portamento. Added exact bank/patch
+keyed saved enabled/time defaults, UI autosave and actual MIDI-selection recalls,
+while preserving individual app-preset explicit overrides.
+Review caught3 important lifetime/reset bugs: mono quantized release collisions,
+mono/mute/sostenuto reused capture IDs, and history-dependent pedals after system
+reset. New real-PCM regressions observed RED and then GREEN for all3; node suite
+126 passed. Root removed raw fallback address suppression in program defaults.
+Visual review caught popovers clipped by rack overflow; portaled menus outside
+rack and added overlay regression. Reference key width/vertical offsets, label
+weight/register, pointer and sheet height were then matched to measured images.
+Ruling: native iOS uses the system face; Inter is an explicit Linux fallback.
+Exact original font identity is not proven by raster screenshots. Cost: glyph
+rasterization cannot be promised pixel-identical on every platform.
+Ruling: no watched video-frame/timestamp claim; public video access returned403.
+Historical/current inspected images and indexed metadata are distinguished.
+Ruling: keep128 scrollable parts and supported absoluteADSR/new effects behind
+secondary controls; no Omni/None selector is fabricated over fixed MIDI routing.
+Final geometry, browser, source archive and native-static results are recorded
+in the current verification files. Native compilation/signing/device pending.
+Final checks:126 Node tests,14 browser tests,2 binary-resource tests all passed.
+Native Swift8-file syntax/PBX59-object static checks passed; no Mac compilation.
+Built native-prefix/CSP playback,48KB font fallback loading, SF3 conversion/export
+and all3 measured layout templates passed. PNG/HTML reference comparison and new
+phone/tablet/Parameters/patch/SMF previews generated. Repacking includes current
+verification and licensed font assets; source archive CRC/bytes/20MB checked.

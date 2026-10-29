@@ -1,0 +1,106 @@
+Project128 UI reference evidence — fidelity revision 2
+Research date: 2026-10-29
+
+Purpose and implementation boundary
+This revision reconstructs the documented KQ Sampei interface from public
+references. No public Sampei application source or .kqspreset format specification
+was located. This is original Project128 code retaining SpessaSynth, not a Sampei
+source fork. The runtime Project128 GS bank is derived from credited GeneralUser
+GS/TimGM material; it is not an authentic Roland SC-88Pro bank or hardware engine.
+
+Primary Sampei references
+Product: https://www.kiraqtech.jp/blog/kq-sampei/
+Manual: https://www.kiraqtech.jp/blog/kq-sampei/kq-sampei-manual/
+FAQ: https://www.kiraqtech.jp/blog/kq-sampei/kq-sampei-faq-en/
+Current edition: https://apps.apple.com/us/app/kq-sampei-26/id6753167404
+Edition announcement: https://www.kiraqtech.jp/blog/released-26-edition/
+The announcement dates the 26 edition to 2025-10-02. The product history records
+later appearance, text-size and controller fixes through 2026. Those dates do
+not establish when any individual screenshot was captured or its exact build.
+
+Official product images still presented on the current product page:
+https://www.kiraqtech.jp/blog/wp-content/uploads/2022/05/KQ-Sampei1.png
+https://www.kiraqtech.jp/blog/wp-content/uploads/2022/05/KQ-Sampei2.png
+https://www.kiraqtech.jp/blog/wp-content/uploads/2022/05/KQ-Sampei3.png
+Their URL paths indicate May 2022 upload organization, not certified capture
+dates. Each is 1728x2360 PNG; HTTP Last-Modified headers are 2022-05-30
+(10:28:32, 10:28:05, 10:28:08 GMT respectively), not proof of app capture time.
+The page describes the images as development material. Current App Store
+listing metadata and these historical images are separate evidence classes.
+
+Direct documentation and screenshot observations
+The manual specifies the full panel control set, M tap/hold for mute/solo,
+keyboard scroll strip, pinch zoom, Glide/Scroll/Fixed touch modes, selecting a
+panel for keyboard channel, patch sorting/search/favorites and Close-on-select.
+It specifies player controls, seeking without processing SysEx, and presets
+saving patch names and panel parameters while excluding sound-set state.
+Screens show dense flat panels, square value fields, arc knobs, a compact
+centered toolbar, bottom keyboard controls, and grouped native-style sheets.
+Phone wraps controls into four rows; tablet uses two rows. User-required 128-part
+scrolling extends beyond the smaller panel count shown in the references.
+
+Historical independent screenshot corroboration
+https://www.dtmstation.com/archives/57621.html
+Original article: 2022-08-19; page updated 2025-08-22. Its original 2388x1668 iPad
+screens show the four-panel rack, two-column patch sheet, polyphony popover and
+2x8 player; its 360x780 phone image shows 16 stacked miniature keyboards.
+These are directly inspected website screenshots, not video frames or proof of
+the current 26 edition. Local research copies are outside runtime app assets.
+
+Measured style-frame targets, in normalized CSS pixels
+From docs/superpowers/specs/2026-10-29-fidelity-reconstruction.txt:
+Phone 390x847: menu x61.8 y57 w266.4 h34; rack x7 y109.7 w376 h244.2;
+gap 7.3; dial 36.4; labels 11; fields/menu 13; keyboard controls 626.7..661.2,
+ruler661.5..682.7; whitekeys683.3..816.7; black-key height75.8.
+Tablet 768x1024: menu x272.3 y25.1 w224.7 h28.8; rack x49.5 y144 w669.4
+h125.3; gap 5.6; dial 40.5; labels 9; controls 752.6..781.9; ruler 782.6..809.3;
+whitekeys 810.4..1005.4. Landscape 1024x768: menu x361.5 y22 w301.5 h39;
+rack x62 y69 w900 h168; gap 8; dial 56; labels 12; controls 429.5..468,
+ruler468..496.5; keys496.5..768. OS clock/notch/home indicators are not app UI.
+These measurements are reconstruction inputs, not results from the running app.
+Actual generated measurements/comparisons belong in output/fidelity-verification.json.
+That report had not been generated when this ledger was written; no passing
+geometry, pixel parity, native build or device result is asserted here.
+
+Typography inference and reproducibility
+Regular proportional sans text and native-looking Apple sheets support choosing
+the native Apple system face first on iOS. Raster references do not establish
+the original font family, exact metrics or Dynamic Type settings. Linux/browser
+previews use licensed Inter under the Fidelity Sans alias; this is an explicit
+fallback. No Apple font binary is bundled. See web/src/typography.css and
+licenses/code/FidelitySans-OFL.txt for font source, checksum and license.
+The Kira Q Tech website's Titillium CSS is not evidence of the app's font.
+
+Video discovery and date coverage
+https://www.youtube.com/watch?v=tngK2LhVtTU — Jupiter developer-promoted demo,
+known to exist by the developer's 2022-06-06 launch post:
+https://www.reddit.com/r/ipadmusic/comments/v6b0ue/
+https://www.youtube.com/watch?v=wRb4bidsaq8 — Sound Test Room walkthrough,
+indexed publication date 2022-06-07. Metadata/title only were verified.
+YouTube/video-image requests returned 403; no video frames or transcripts were
+inspected and no timestamps are claimed. Searches across 2022–2026 found later
+reposts but no independently verified new 2024–2026 footage. Do not describe this
+research as watching four years of videos or treat repost dates as capture dates.
+
+Other-player precedents, only for undocumented gaps
+https://www.bismark.jp/bs-16i and https://www.bismark.jp/bs-16i/support give an overview;
+no public official manual was located. Use developer-authored release notes:
+https://apps.apple.com/us/app/bismark-bs-16i/id388149926
+Version 5.1.0, 2026-06-17, describes scene export/import with bank/song paths
+relative to Documents. This is a portability precedent, not Sampei behavior.
+Relative-path session portability is NOT implemented here: Project128 currently
+uses hash-based bank identities with a reimport manifest. No .bs16iScene or
+.kqspreset compatibility follows from this precedent.
+https://apps.apple.com/us/app/bismark-m16/id1293998203
+The companion player's v4.5 notes (2022-02-27) fix instrument reset on rewind.
+This supports a deliberate override-persistence policy where Sampei's seeking
+details are incomplete; it does not establish Sampei's policy or test our engine.
+Sampei already documents pinch/glide, solo-hold and patch-close behavior, so those
+do not need borrowed gestures. All borrowed precedents remain explicitly separate.
+
+Build verification completed:126 core,14 Chromium interface and2 resource-sync
+checks passed. See docs/VERIFICATION.json and the included FIDELITY_VERIFICATION.json
+for measured phone/tablet templates. These geometry checks do not prove complete
+pixel equivalence, original font identity, proprietary DSP equivalence or native
+physical-device behavior. The source comparison is supplied separately as an
+output artifact; public reference screenshots are not bundled runtime assets.

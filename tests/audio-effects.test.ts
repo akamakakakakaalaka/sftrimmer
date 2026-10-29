@@ -16,6 +16,17 @@ test('app effects bypass preserves dry stereo samples at sixteen bits',()=>{
   assert.deepEqual(right,wantRight);
 });
 
+test('master balance attenuates only the opposite side and includes the effect return',()=>{
+  for(const balance of [-1,1]){
+    const effects=new AppEffects(1000);effects.configure(settings({balance,delayMix:1}));
+    const left=new Float32Array(24),right=new Float32Array(24);left[0]=.4;right[0]=.6;
+    effects.process(left,right);
+    const muted=balance===1?left:right,kept=balance===1?right:left;
+    assert.ok(muted.every(value=>value===0));
+    assert.ok(kept[0]>0&&kept[10]>0);
+  }
+});
+
 test('delay returns the impulse at its requested sample time with independent stereo feedback',()=>{
   const effects=new AppEffects(1000);
   effects.configure(settings({delayMix:1,delayFeedback:0.5}));

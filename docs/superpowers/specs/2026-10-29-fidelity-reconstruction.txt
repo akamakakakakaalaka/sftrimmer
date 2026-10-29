@@ -1,0 +1,66 @@
+Project128 fidelity reconstruction, revision 2
+
+User intent: the previous approximation is not close enough. Reconstruct KQ
+Sampei's actual proportions, typography, control density and positioning as
+closely as available evidence allows, using historical/current screenshots and
+public videos. Other MIDI players may fill undocumented interaction gaps.
+Earlier continuous-build authorization remains active; no approval checkpoint.
+
+Diagnosis: the previous surface omitted about twenty documented controls and
+replaced them with extras, made tablet panels as tall as phone panels, and added
+headers, branding, status and navigation blocks outside the reference layout.
+Passing functional tests did not demonstrate visual fidelity. This revision
+must compare reference and implementation geometry, not merely count controls.
+
+Approach: keep the tested SpessaSynth/independent-bank architecture; rebuild the
+surface from measured phone and tablet templates. Implement missing controls
+with real per-part MIDI/DSP behavior. Move absolute ADSR/delay/locks and new app
+features behind secondary controls. Keep all128 scrollable parts per the user's
+original requirement, although the original screenshots display fewer panels.
+
+Rejected: another recolor of the sparse five-dial rack; fake inert replicas of
+missing controls; an unverified full rewrite of synthesis or proprietary code.
+No copyrighted Apple font file is bundled. Use the Apple system font on iOS and
+a clearly documented licensed Inter fallback on Linux. Exact KQ font identity
+cannot be established from raster screenshots alone.
+
+Reference measurements:
+Phone390x847: menu x61.8/y57/w266.4/h34; rack x7/y109.7/w376/h244.2,
+gap7.3; dial36.4; labels11, fields/menu13. Keyboard controls626.7..661.2,
+ruler661.5..682.7, whitekeys683.3..816.7; blackheight75.8.
+Tablet768x1024: menu x272.3/y25.1/w224.7/h28.8; rack x49.5/y144/w669.4/
+h125.3/gap5.6; dial40.5, label9. Controls752.6..781.9; ruler782.6..809.3;
+whitekeys810.4..1005.4. Four two-row panels fit the reference viewport.
+Landscape1024x768: menu x361.5/y22/w301.5/h39; rack x62/y69/w900/h168/
+gap8; dial56,label12; controls429.5..468,ruler468..496.5,keys496.5..768.
+Do not draw a fake OS clock, notch or home indicator to meet these coordinates.
+
+Full panel: Part/Channel/Patch/Low/High; Volume/Express/Pan/Reverb/Chorus/
+Por/P.Time/Mno; P.Bend/Rng/K.Shft/F.Tune/Mod/V.Rate/V.Depth/V.Delay;
+Attack/Decay/Release/Cutoff/Q/Soft/Sost/Hold. Phone wraps into four rows;
+tablet combines the same controls into two rows. M tap/hold controls mute/solo.
+Channel remains an accurate fixed routing label; Omni/None routing is not faked.
+Relative ADR is centered at64; absolute ADSR remains an advanced override.
+
+Controller implementation must preserve exact bank identity, immutable preset
+samples, exact note lifetimes and per-part MIDI-preset intent. Optional normalized
+performance state keeps old v1 presets importable; nested fields clone and merge
+independently. True sostenuto and audible vibrato need compatibility adapters for
+the pinned core. Live key ranges must never suppress a matching existing NoteOff.
+Native extra NavigationStack chrome is removed while Files/MIDI/share remain.
+
+Param popover: native grouped rows, MasterVolume/Balance/KeyShift/Tune in order,
+value at top right, blue sliders and minus/plus steppers, PartTuning navigation.
+Other menus use the same native-looking header/table grammar; no descriptive
+marketing blocks in the playing surface. Preserve working imports and extras.
+
+Evidence rules: distinguish directly viewed screenshots, video metadata and
+inference. Direct video requests returned403; no watched timestamps or complete
+four-year footage coverage may be claimed without frames actually inspected.
+All reference assets remain research material, separate from runtime assets.
+
+Verification: real PCM and controller lifecycle tests; current app regressions;
+responsive bounds and full-grid browser interactions; actual native-CSP playback
+and font loading; measured layout report plus new phone/tablet previews and
+reference comparisons; resource sync; source ZIP lossless verified under20 MB.
+Native compile/sign/device validation remains unavailable in this Linux host.

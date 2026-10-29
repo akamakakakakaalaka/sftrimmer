@@ -12,6 +12,7 @@ interface PendingCall {
 /** Browser control surface. Sound generation and sequencing stay in the worklet. */
 export class PlayerEngine {
   onPosition?: (position: PlayerPosition) => void;
+  onActivity?: (levels: number[], notes?:number[][]) => void;
   onError?: (error: Error) => void;
   private state: AppState = createState();
   private context?: AudioContext;
@@ -69,6 +70,7 @@ export class PlayerEngine {
         } else if (message?.type === 'position') {
           this.latestPosition = message.position;
           this.onPosition?.(this.position());
+          if(Array.isArray(message.levels))this.onActivity?.(message.levels,Array.isArray(message.notes)?message.notes:undefined);
         } else if (message?.type === 'response') {
           const call = this.pending.get(message.id);
           if (!call) return;

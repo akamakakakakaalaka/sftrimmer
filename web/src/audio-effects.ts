@@ -22,10 +22,12 @@ export class AppEffects {
   private targetFeedback = 0.3;
   private targetDelayMix = 0;
   private targetFlangerMix = 0;
+  private targetBalance = 0;
   private delayTime = 0.25;
   private feedback = 0.3;
   private delayMix = 0;
   private flangerMix = 0;
+  private balance = 0;
   private bits = 16;
   private configured = false;
 
@@ -46,12 +48,14 @@ export class AppEffects {
     this.targetFeedback = bounded(master.delayFeedback, 0, 0.9, 0.3);
     this.targetDelayMix = bounded(master.delayMix, 0, 1, 0);
     this.targetFlangerMix = bounded(master.flangerMix, 0, 1, 0);
+    this.targetBalance = bounded(master.balance ?? 0, -1, 1, 0);
     this.bits = Math.round(bounded(master.crusherBits, 1, 16, 16));
     if (!this.configured) {
       this.delayTime = this.targetTime;
       this.feedback = this.targetFeedback;
       this.delayMix = this.targetDelayMix;
       this.flangerMix = this.targetFlangerMix;
+      this.balance = this.targetBalance;
       this.configured = true;
     }
   }
@@ -78,6 +82,7 @@ export class AppEffects {
       this.feedback += (this.targetFeedback - this.feedback) * this.smoothing;
       this.delayMix += (this.targetDelayMix - this.delayMix) * this.smoothing;
       this.flangerMix += (this.targetFlangerMix - this.flangerMix) * this.smoothing;
+      this.balance += (this.targetBalance - this.balance) * this.smoothing;
       const dryL = audio(left[i]);
       const dryR = audio(right[i]);
       const delayedL = this.read(this.delayLeft, this.delayWrite, this.delayTime * this.sampleRate);
@@ -104,8 +109,8 @@ export class AppEffects {
         outL = Math.round(outL / step) * step;
         outR = Math.round(outR / step) * step;
       }
-      left[i] = audio(outL);
-      right[i] = audio(outR);
+      left[i] = audio(outL * (this.balance > 0 ? 1-this.balance : 1));
+      right[i] = audio(outR * (this.balance < 0 ? 1+this.balance : 1));
     }
   }
 
@@ -121,5 +126,6 @@ export class AppEffects {
     this.feedback = this.targetFeedback;
     this.delayMix = this.targetDelayMix;
     this.flangerMix = this.targetFlangerMix;
+    this.balance = this.targetBalance;
   }
 }

@@ -1,6 +1,10 @@
+import './typography.css';
 import './style.css';
 import { PlayerEngine } from './engine';
 import { PartRack } from './part-rack';
+import { parameterSheetMarkup } from './parameter-sheet';
+import { PlayerParts } from './player-parts';
+import { getPerformanceControls, getProgramPortamento } from './performance';
 import { matchesPatchQuery, patchIdentity, sortPatchEntries } from './patch-search';
 import { loadState, saveState, restoreState, createPreset, applyPreset, parsePreset } from './state';
 import { SCALES, requiresMicrotonalTuning } from './harmony';
@@ -40,9 +44,21 @@ let audioReady = false;
 let audioStarting = false;
 let busy = 0;
 let currentTab = 'perform';
+let baseView: 'perform'|'player' = 'perform';
+let repeatPlayback=false;
 let midiName = '';
 let position: PlayerPosition = { current: 0, duration: 0, playing: false };
 let baseNote = 48;
+let keyboardZoom=1;
+let keyboardUserMoved=false;
+let keyboardScroll=0;
+let keyboardWhiteWidth=26;
+let keyboardDrag:'fixed'|'glide'|'scroll'='fixed';
+let touchVelocity=false;
+let pinching=false;
+let pinchDistance=0;
+let pinchZoom=1;
+const pointerPositions=new Map<number,{x:number;y:number;lastX:number}>();
 let velocity = 100;
 let sustain = false;
 let banks: BankInfo[] = [];
@@ -76,27 +92,21 @@ $('#app').innerHTML = `
       <details class="navigator"><summary>Part navigator · <span id="assigned-count">000</span> assigned</summary><section class="panel overview" aria-label="128-part overview"><div class="panel-header"><div class="panel-title">${icon('grid')}Part overview</div><span class="chip">8 PORTS × 16 CH</span></div><div class="overview-caption">Select a part to shape its sound. Numbers are MIDI channels.</div><div class="parts-grid" id="parts-grid"></div><div class="grid-legend"><span><i class="legend-box"></i>Selected</span><span><i class="legend-dot"></i>Bank assigned</span><span>All 128 parts are independent</span></div></section></details>
       <div class="part-rack" id="part-rack" aria-label="128 part panels"></div>
     </section>
-    <section class="view menu-popover" id="view-parameters" role="tabpanel" aria-labelledby="tab-parameters" hidden><button class="popover-close" data-close-view aria-label="Close menu">${icon('close')}</button>
-      <div class="page-heading"><h1>Parameters</h1><button class="text-button" id="back-to-panel">Back to panel</button></div>
-      <div class="parameter-master-grid"><section class="panel settings-panel"><h2>Master parameters</h2><div class="range-field" style="margin-top:20px"><label class="field-label" for="master-gain">Master Volume<output id="master-gain-value"></output></label><input id="master-gain" type="range" min="0" max="2" step="0.01"></div><p class="master-tuning-caption">Pitch overrides apply to melodic parts. Percussion keeps its original tuning.</p><div class="tuning-fields"><label class="field">Master Key Shift · semitones<input id="key-shift" type="number" min="-48" max="48" step="1"></label><label class="field">Master Tune · cents<input id="fine-tune" type="number" min="-100" max="100" step="1"></label></div><div class="tuning-fields"><label class="field">Scale root<select id="root">${['C','C♯ / D♭','D','D♯ / E♭','E','F','F♯ / G♭','G','G♯ / A♭','A','A♯ / B♭','B'].map((name,i) => `<option value="${i}">${name}</option>`).join('')}</select></label><label class="field">Scale / mode<select id="mode">${Object.keys(SCALES).map(name => `<option value="${name}"${requiresMicrotonalTuning(name)?' disabled':''}>${modeNames[name] || name}${requiresMicrotonalTuning(name)?' · unavailable':''}</option>`).join('')}</select></label></div><div class="settings-note" id="harmony-note">Scale mapping changes live and MIDI notes. Chromatic leaves note classes unchanged.</div></section>
-      <section class="panel settings-panel"><h2>Shared effect buses</h2><p>Shape the room around your parts. Each part controls its own send amount.</p>${[['delay-time','Delay time','0.05','2','0.01'],['delay-feedback','Delay feedback','0','0.9','0.01'],['delay-mix','Delay mix','0','1','0.01'],['flanger-mix','Flanger mix','0','1','0.01'],['crusher-bits','Bitcrusher depth','2','16','1']].map(([id,label,min,max,step]) => `<div class="range-field"><label class="field-label" for="${id}">${label}<output id="${id}-value"></output></label><input id="${id}" type="range" min="${min}" max="${max}" step="${step}"></div>`).join('')}</section>
-      </div>
-      <h2 class="part-parameters-heading">Selected part parameters</h2><aside class="panel part-inspector" aria-label="Selected part controls">
+    <section class="view menu-popover parameter-popover" id="view-parameters" role="tabpanel" aria-labelledby="tab-parameters" hidden><button class="popover-close" data-close-view aria-label="Close menu">${icon('close')}</button><div class="popover-title"><h1 id="parameter-title">Parameters</h1></div>${parameterSheetMarkup()}<div id="legacy-advanced" hidden><aside class="panel part-inspector" aria-label="Selected part controls">
           <div class="panel-header"><div class="panel-title">${icon('sliders')}Selected part</div><label class="switch-label"><input type="checkbox" id="part-locked">Lock</label></div>
           <div class="part-identity"><div class="part-number"><span id="part-number">01</span><small id="part-port">PORT 1 · CH 1</small></div><div class="toggle-group"><button class="small-toggle" id="part-mute" aria-pressed="false">Mute</button><button class="small-toggle" id="part-solo" aria-pressed="false">Solo</button></div></div>
           <div class="inspector-section patch-section"><div class="select-stack"><label class="field">Soundbank<select id="part-bank"><option value="">No bank assigned</option></select></label><label class="field">Instrument<select id="part-patch"><option value="">Choose a soundbank first</option></select></label></div><div class="field-grid"><label class="field">BANK MSB<input id="part-msb" type="number" min="0" max="127" value="0"></label><label class="field">BANK LSB<input id="part-lsb" type="number" min="0" max="127" value="0"></label><label class="field">PROGRAM<input id="part-program" type="number" min="0" max="127" value="0"></label></div><div class="envelope-note">Panel values are saved controls; MIDI can recall another preset. Apply displayed settings to restore them.</div><button class="text-button" id="apply-part-settings" style="margin-top:7px">Apply displayed settings ${icon('arrow')}</button><div class="section-heading" style="margin:13px 0 0"><label class="switch-label"><input id="part-drums" type="checkbox">Percussion part</label><span class="subtle" style="font-size:9px">MIDI values 0–127</span></div></div>
           <div class="inspector-section mixer-section"><div class="range-field"><label class="field-label" for="part-volume">Volume<output id="part-volume-value">100</output></label><input id="part-volume" type="range" min="0" max="127" step="1" value="100"></div><div class="range-field"><label class="field-label" for="part-pan">Pan<output id="part-pan-value">Center</output></label><input id="part-pan" type="range" min="0" max="127" step="1" value="64"></div><div class="send-grid">${['reverb','chorus','delay'].map(name => `<div><label class="field-label" for="part-${name}">${name[0].toUpperCase()+name.slice(1)}<output id="part-${name}-value">0</output></label><input id="part-${name}" type="range" min="0" max="127" step="1" value="0"></div>`).join('')}</div></div>
           <div class="inspector-section envelope-section"><div class="section-heading"><span>Amplitude envelope</span><label class="switch-label"><input id="envelope-enabled" type="checkbox">Override</label></div><svg class="envelope-graph" viewBox="0 0 300 70" preserveAspectRatio="none" aria-label="Amplitude ADSR curve" role="img"><path class="graph-grid" d="M0 65H300M0 35H300M0 5H300M60 0V70M120 0V70M180 0V70M240 0V70"/><path id="envelope-fill" class="curve-fill"/><path id="envelope-curve" class="curve-line"/></svg><div class="envelope-fields"><label>Attack · s<input id="env-attack" type="number" min="0" max="20" step="0.01"></label><label>Decay · s<input id="env-decay" type="number" min="0" max="20" step="0.01"></label><label>Sustain · %<input id="env-sustain" type="number" min="0" max="100" step="1"></label><label>Release · s<input id="env-release" type="number" min="0" max="20" step="0.01"></label></div><div class="envelope-note" id="envelope-note">Original bank envelope. Enable override to use absolute values.</div></div>
           <div class="inspector-footer"><button class="text-button" id="open-drum-map">Drum key map ${icon('arrow')}</button><button class="text-button" id="save-part-preset">Save as preset ${icon('arrow')}</button></div>
-        </aside>
-    </section>
+        </aside><section class="panel settings-panel"><h2>Scale mapping</h2><div class="tuning-fields"><label class="field">Scale root<select id="root">${['C','C♯ / D♭','D','D♯ / E♭','E','F','F♯ / G♭','G','G♯ / A♭','A','A♯ / B♭','B'].map((name,i) => `<option value="${i}">${name}</option>`).join('')}</select></label><label class="field">Scale / mode<select id="mode">${Object.keys(SCALES).map(name => `<option value="${name}"${requiresMicrotonalTuning(name)?' disabled':''}>${modeNames[name] || name}${requiresMicrotonalTuning(name)?' · unavailable':''}</option>`).join('')}</select></label></div><div class="settings-note" id="harmony-note">Scale mapping changes live and MIDI notes. Chromatic leaves note classes unchanged.</div></section><section class="panel settings-panel"><h2>Shared effect buses</h2><p>Shape the room around your parts. Each part controls its own send amount.</p>${[['delay-time','Delay time','0.05','2','0.01'],['delay-feedback','Delay feedback','0','0.9','0.01'],['delay-mix','Delay mix','0','1','0.01'],['flanger-mix','Flanger mix','0','1','0.01'],['crusher-bits','Bitcrusher depth','2','16','1']].map(([id,label,min,max,step]) => `<div class="range-field"><label class="field-label" for="${id}">${label}<output id="${id}-value"></output></label><input id="${id}" type="range" min="${min}" max="${max}" step="${step}"></div>`).join('')}</section></div></section>
     <section class="view" id="view-player" role="tabpanel" aria-labelledby="tab-player" hidden>
-      <div class="page-heading"><h1>MIDI file player</h1></div><section class="panel transport" aria-label="MIDI transport">
+      <section class="panel transport" aria-label="MIDI transport">
             <div class="transport-top"><div class="track-info"><div class="track-art">${icon('music')}</div><div><div class="track-name" id="track-name">No MIDI file selected</div><div class="track-detail" id="track-detail">Open an SMF or RIFF MIDI file.</div></div></div><button class="icon-button" id="open-midi" aria-label="Open MIDI file" title="Open MIDI file">${icon('folder')}</button></div>
             <div class="transport-timeline"><div class="time-labels mono"><span id="current-time">0:00</span><span id="duration">0:00</span></div><input type="range" id="seek" min="0" max="1" step="0.01" value="0" disabled aria-label="Song position"></div>
             <div class="transport-bottom"><div class="playback-buttons"><button class="icon-button" id="rewind" aria-label="Return to beginning" title="Return to beginning" disabled>${icon('rewind')}</button><button class="icon-button" id="play" aria-label="Play MIDI" title="Play" disabled>${icon('play')}</button><button class="icon-button" id="pause" aria-label="Pause MIDI" title="Pause" disabled>${icon('pause')}</button><button class="icon-button" id="stop" aria-label="Stop MIDI" title="Stop" disabled>${icon('stop')}</button></div><label class="tempo-inline" for="tempo">TEMPO <input type="range" id="tempo" min="0.25" max="4" step="0.01" value="1"><output id="tempo-value">1.00×</output></label></div><label class="field" id="sequence-control" style="margin-top:15px" hidden>Independent sequence<select id="sequence"></select></label>
           </section>
-      <div class="panel player-summary"><strong>128 independent parts</strong><p>Use Panels for the mixer or Param for the selected part. Master tuning stays in place when files change.</p><button class="button" id="player-panels">Show panels</button></div>
+      <div class="smf-options"><button class="small-control" id="player-panels" aria-label="Show panels">${icon('sliders')}</button><label>Port <select id="player-port">${Array.from({length:8},(_,i)=>`<option value="${i}">${i+1}</option>`).join('')}</select></label></div><div id="player-parts"></div>
     </section>
     <section class="view menu-popover" id="view-reset" role="tabpanel" aria-labelledby="tab-reset" hidden><button class="popover-close" data-close-view aria-label="Close menu">${icon('close')}</button><div class="page-heading"><h1>Reset</h1></div><section class="panel reset-actions"><button data-reset-cc="120">All Sound Off<small>CC120 · stop sounding voices</small></button><button data-reset-cc="123">All Notes Off<small>CC123 · release notes; pedals still apply</small></button><button data-reset-cc="121">Reset Controllers<small>CC121 · reset incoming MIDI controllers</small></button></section><p class="subtle">These actions cover all eight ports. Saved banks, presets and master tuning stay in place.</p></section>
     <section class="view menu-popover" id="view-midi" role="tabpanel" aria-labelledby="tab-midi" hidden><button class="popover-close" data-close-view aria-label="Close menu">${icon('close')}</button>
@@ -110,13 +120,13 @@ $('#app').innerHTML = `
     </section>
     <section class="view menu-popover" id="view-settings" role="tabpanel" aria-labelledby="tab-settings" hidden><button class="popover-close" data-close-view aria-label="Close menu">${icon('close')}</button>
       <div class="page-heading"><div><div class="eyebrow">Preferences</div><h1>Master preferences</h1><p>Master settings stay with you when songs change.</p></div></div>
-      <section class="panel settings-panel"><h2>Sound Set Manager</h2><p>Import, select, compress or export independent sound sets.</p><button class="button" id="settings-sound-manager">Open Sound Set Manager</button></section><div class="settings-grid"><section class="panel settings-panel"><h2>Panel colors</h2><p>Select a palette. Existing saved colors are preserved.</p><div class="theme-options">${[['rose','#f9e6e1','#a50025'],['dark','#101a2c','#e9bc78'],['slate','#20252d','#b3c5df'],['forest','#182a24','#d9c88e'],['paper','#f8f5ed','#8c5e2f']].map(([id,bg,accent]) => `<button class="theme-option" data-theme-choice="${id}" aria-pressed="false"><span class="theme-swatch" style="--swatch-bg:${bg};--swatch-accent:${accent}"></span>${themeNames[id]}</button>`).join('')}</div><label class="sr-only" for="theme">Theme</label><select id="theme" class="sr-only">${Object.entries(themeNames).map(([id,name])=>`<option value="${id}">${name}</option>`).join('')}</select></section>
+      <section class="panel settings-panel native-actions"><button class="native-menu-row" id="native-file-import">Import Files ${icon('folder')}</button><button class="native-menu-row" id="native-midi-status">MIDI Devices ${icon('keys')}</button></section><section class="panel settings-panel" id="layout-extras"><h2>Project128 Extras</h2><p>128 parts, independent banks and conversion settings.</p></section><section class="panel settings-panel"><h2>Sound Set Manager</h2><p>Import, select, compress or export independent sound sets.</p><button class="button" id="settings-sound-manager">Open Sound Set Manager</button></section><div class="settings-grid"><section class="panel settings-panel"><h2>Panel colors</h2><p>Select a palette. Existing saved colors are preserved.</p><div class="theme-options">${[['rose','#f9e6e1','#a50025'],['dark','#101a2c','#e9bc78'],['slate','#20252d','#b3c5df'],['forest','#182a24','#d9c88e'],['paper','#f8f5ed','#8c5e2f']].map(([id,bg,accent]) => `<button class="theme-option" data-theme-choice="${id}" aria-pressed="false"><span class="theme-swatch" style="--swatch-bg:${bg};--swatch-accent:${accent}"></span>${themeNames[id]}</button>`).join('')}</div><label class="sr-only" for="theme">Theme</label><select id="theme" class="sr-only">${Object.entries(themeNames).map(([id,name])=>`<option value="${id}">${name}</option>`).join('')}</select></section>
       <section class="panel settings-panel"><h2>Session backup</h2><p>Settings save on this device automatically. Make a backup to take your setup somewhere else.</p><div class="settings-actions"><button class="button" id="export-session">${icon('download')}Back up session</button><button class="button" id="open-session">${icon('upload')}Restore backup</button></div><div class="settings-note">Backups include all 128 parts, master settings, and individual presets. Soundbank and MIDI audio data are separate; import the matching banks after restoring.</div></section></div>
       <a class="catalog-link" href="docs/features.html" target="_blank" rel="noopener"><span><strong>250-feature roadmap</strong><small>Explore the feature catalog with honest implementation status.</small></span>${icon('arrow')}</a>
       <p class="library-note"><a href="licenses/banks/README.txt" target="_blank" rel="noopener">Soundbank credits, licenses and editable-source details</a></p>
     </section>
   </main>
-  <section class="panel keyboard-panel" aria-label="Touch keyboard"><div class="keyboard-toolbar"><div class="keyboard-controls"><label class="velocity-control" for="velocity">Vel: <input id="velocity" type="range" min="1" max="127" value="100"><output id="velocity-value">100</output></label><button class="small-toggle" id="sustain" aria-pressed="false">Hold</button><label class="keyboard-channel-label" for="keyboard-channel">C: <select id="keyboard-channel" aria-label="Keyboard destination part">${Array.from({length:128},(_,i)=>`<option value="${i}">${i+1}</option>`).join('')}</select></label></div><button class="small-toggle" id="toggle-keys" aria-expanded="true" aria-controls="keyboard">KBD</button><button class="icon-button" id="panic" aria-label="All sound off" title="All sound off">${icon('shield')}</button></div><div class="keyboard-register"><button id="octave-down" aria-label="Keyboard octave down">−</button><input id="keyboard-scroll" type="range" min="12" max="96" step="12" value="48" aria-label="Keyboard scroll ruler"><span class="sr-only" id="octave-label">C3 – C5</span><button id="octave-up" aria-label="Keyboard octave up">+</button></div><div class="keyboard" id="keyboard"></div><div class="keyboard-bottom"><span id="keyboard-part">Playing part 01 · channel 1</span><span>128 parts · 8 ports</span></div></section>
+  <section class="keyboard-panel" aria-label="Touch keyboard"><div class="keyboard-toolbar"><div class="keyboard-controls"><label for="velocity">Vel: <input id="velocity" type="range" min="1" max="127" value="100" aria-label="Keyboard velocity"><output id="velocity-value" class="sr-only">100</output></label><label for="keyboard-mod">Mod: <input id="keyboard-mod" type="range" min="0" max="127" value="0" aria-label="Keyboard modulation"></label><label for="keyboard-pitch">Pit: <input id="keyboard-pitch" type="range" min="0" max="16383" value="8192" aria-label="Keyboard pitch bend"></label><label for="keyboard-channel">C: <select id="keyboard-channel" aria-label="Keyboard destination part">${Array.from({length:128},(_,i)=>`<option value="${i}">${i+1}</option>`).join('')}</select></label></div><button id="toggle-keys" aria-expanded="true" aria-controls="keyboard">KBD</button></div><div class="keyboard-register"><input id="keyboard-scroll" type="range" min="0" max="127" step="1" value="48" aria-label="Keyboard scroll ruler"><span class="sr-only" id="octave-label">C3 – C5</span></div><div class="keyboard" id="keyboard"></div><div class="keyboard-bottom sr-only"><span id="keyboard-part">Playing part 01 · channel 1</span></div></section>
   <footer class="footer-status"><span id="status" role="status" aria-live="polite">Start audio to load Project128 GS.</span><span class="footer-mark">SPESSASYNTH</span></footer>
 </div>
 <input class="file-input" id="import-bank" type="file" accept=".sf2,.sf3,.dls" multiple aria-label="Import soundbank">
@@ -128,13 +138,25 @@ $('#app').innerHTML = `
 <dialog id="drum-dialog" aria-labelledby="drum-title"><div class="dialog-header"><h2 id="drum-title">Drum key map</h2><button class="icon-button" id="close-drum-map" aria-label="Close drum map">${icon('close')}</button></div><p>Remap an incoming drum note to another key for the selected part. Unmapped notes pass through unchanged.</p><div class="drum-map-fields"><label class="field">Incoming note<input id="drum-source" type="number" min="0" max="127" value="36"></label><label class="field">Play this note<input id="drum-target" type="number" min="0" max="127" value="36"></label></div><button class="button accent" id="add-drum-map">Add mapping</button><div class="drum-list" id="drum-map-list"></div><div class="dialog-buttons"><button class="button" id="clear-drum-map">Clear map</button><button class="button" id="done-drum-map">Done</button></div></dialog>
 <dialog id="preset-map-dialog" aria-labelledby="preset-map-title"><div class="dialog-header"><h2 id="preset-map-title">MIDI program mapping</h2><button class="icon-button" id="close-preset-map" aria-label="Close preset mapping">${icon('close')}</button></div><p>Choose the incoming MIDI bank and program address that recalls a saved app preset on this part. All incoming MIDI values below are zero-based, from 0 to 127.</p><div class="mapping-dialog-fields"><label class="field">Selected part · 1–128<input id="mapping-part" type="number" min="1" max="128" readonly></label><label class="field">Saved app preset<select id="mapping-preset"></select></label></div><div class="field-grid mapping-address-fields"><label class="field">BANK MSB<input id="mapping-msb" type="number" min="0" max="127" step="1"></label><label class="field">BANK LSB<input id="mapping-lsb" type="number" min="0" max="127" step="1"></label><label class="field">PROGRAM<input id="mapping-program" type="number" min="0" max="127" step="1"></label></div><p>The saved preset takes priority at this exact address. Saving an existing address replaces its snapshot.</p><div class="dialog-buttons"><button class="button" id="cancel-preset-map">Cancel</button><button class="button accent" id="save-preset-mapping">Save mapping</button></div></dialog>`;
 
+document.querySelectorAll<HTMLElement>('.menu-popover').forEach(view=>$('.app-shell').append(view));
+const popoverPointer=document.createElement('i');popoverPointer.id='popover-pointer';popoverPointer.setAttribute('aria-hidden','true');$('.app-shell').append(popoverPointer);
+if((window as any).webkit?.messageHandlers?.project128)document.body.dataset.native='true';
+$('#parameter-extras').append($('#legacy-advanced'));
+$('#legacy-advanced').hidden=false;
+$('#layout-extras').append($('.rack-toolbar'),$('.navigator'));
+const additionalActions=document.createElement('div');additionalActions.className='extra-keyboard-actions';additionalActions.innerHTML=`<button id="octave-down">Octave −</button><button id="octave-up">Octave +</button><button id="sustain" aria-pressed="false">Hold</button><button id="panic">All Sound Off</button>`;$('#layout-extras').append(additionalActions);
+const keyboardSettings=document.createElement('div');keyboardSettings.className='keyboard-extra-settings';keyboardSettings.innerHTML=`<label class="field">Keyboard Drag<select id="keyboard-drag"><option value="fixed">Fixed</option><option value="glide">Glide</option><option value="scroll">Scroll</option></select></label><label class="switch-label"><input id="keyboard-velocity-sens" type="checkbox">Velocity by touch position</label><button class="button" id="keyboard-reset-zoom">Reset keyboard zoom</button>`;$('#layout-extras').append(keyboardSettings);
+
 let patchPartId = state.selectedPart;
 let patchBankId = '';
 const rack = new PartRack($('#part-rack'), {
   select: id => selectPart(id),
   edit: (id, patch, fields) => commitPartFor(id, patch, fields),
   choosePatch: id => openPatchBrowser(id),
-  parameters: id => { selectPart(id); showTab('parameters'); },
+  parameters: id => { selectPart(id); showTab('parameters'); showParameterPage('extras'); },
+});
+const playerParts = new PlayerParts($('#player-parts'), {
+  select: id=>selectPart(id), edit:(id,patch,fields)=>commitPartFor(id,patch,fields), choosePatch:id=>openPatchBrowser(id),
 });
 
 function setStatus(message: string, working = false) {
@@ -172,12 +194,27 @@ function commitMaster(patch: Partial<AppState['master']>) {
 function commitPart(patch: Partial<PartState>, changedFields: string[] = Object.keys(patch)) {
   commitPartFor(state.selectedPart, patch, changedFields);
 }
-function commitPartFor(id: number, patch: Partial<PartState>, changedFields: string[] = Object.keys(patch)) {
+function commitPartFor(id: number, patch: Partial<PartState>, changedFields: string[] = Object.keys(patch), selectEdited = true) {
   if (!Number.isInteger(id) || id < 0 || id >= state.parts.length) return;
-  state.selectedPart = id;
+  if(selectEdited)state.selectedPart = id;
+  const binding=changedFields.some(field=>['bankId','msb','lsb','program','drums'].includes(field));
+  if(binding){
+    const target={...state.parts[id],...patch};
+    const exact=banks.find(bank=>bank.id===target.bankId)?.presets.some(preset=>preset.msb===target.msb&&preset.lsb===target.lsb&&preset.program===target.program&&preset.drums===target.drums);
+    if(exact)patch={...patch,performance:{...getPerformanceControls(target),...getProgramPortamento(state,target)}};
+    // A font selection is a program-default recall, not an explicit pedal edit.
+    // The audio adapter resolves absent numeric addresses inside the real bank.
+  }
   Object.assign(state.parts[id], patch);
+  const savesGlide=!binding&&changedFields.some(field=>field==='performance.portamento'||field==='performance.portamentoTime');
+  const part=state.parts[id];
+  if(savesGlide&&part.bankId){
+    const performance=getPerformanceControls(part);
+    const setting={bankId:part.bankId,msb:part.msb,lsb:part.lsb,program:part.program,drums:part.drums,portamento:performance.portamento,portamentoTime:performance.portamentoTime};
+    state.programPortamento=[...(state.programPortamento||[]).filter(existing=>!(existing.bankId===part.bankId&&existing.msb===part.msb&&existing.lsb===part.lsb&&existing.program===part.program&&existing.drums===part.drums)),setting].slice(-8192);
+  }
   persist();
-  if (audioReady) engine.applyPart(selectedPart(), changedFields);
+  if (audioReady) {if(savesGlide)engine.applyState(state);engine.applyPart(part, changedFields);}
   renderPart(); renderGrid();
 }
 function selectPart(id: number) {
@@ -186,24 +223,42 @@ function selectPart(id: number) {
 }
 function showTab(tab: string) {
   if (!document.getElementById(`view-${tab}`)) return;
+  const previousTab=currentTab;
   const changed = currentTab !== tab;
   currentTab = tab;
+  if(tab==='perform'||tab==='player')baseView=tab;
   document.querySelectorAll<HTMLElement>('[data-tab]').forEach((button,index) => {
     button.setAttribute('aria-selected', String(button.dataset.tab === tab));
     button.tabIndex = button.dataset.tab === tab || (tab === 'perform' && index === 0) ? 0 : -1;
   });
   const popover = ['library','reset','parameters','midi','settings'].includes(tab);
-  document.querySelectorAll<HTMLElement>('.view').forEach(view => view.hidden = view.id !== `view-${tab}` && !(popover && view.id === 'view-perform'));
+  document.querySelectorAll<HTMLElement>('.view').forEach(view => view.hidden = view.id !== `view-${tab}` && !(popover && view.id === `view-${baseView}`));
   $('#view-perform').inert = popover;
+  $('#view-player').inert = popover;
   $('.keyboard-panel').inert = popover;
   $('#view-backdrop').hidden = !popover;
   document.body.classList.toggle('has-popover',popover);
   if (changed) {
-    $('main').scrollTop = 0;
+    if(tab==='player'||previousTab==='player')$('main').scrollTop = 0;
     $(`#view-${tab}`).scrollTop = 0;
     if(popover)$(`#view-${tab}`).querySelector<HTMLButtonElement>('[data-close-view]')?.focus({preventScroll:true});
-    else if(tab==='perform')$('#panels-home').focus({preventScroll:true});
+    else if(tab==='perform')$('#tab-library').focus({preventScroll:true});
   }
+  if(tab==='parameters'&&changed)showParameterPage('home');
+  document.body.classList.toggle('file-player',baseView==='player');
+  $('#tab-player').innerHTML=icon(baseView==='player'?'grid':'music');
+}
+function showParameterPage(page:'home'|'tuning'|'extras') {
+  for(const name of ['home','tuning','extras'])$(`#parameter-${name}`).hidden=name!==page;
+  $('#parameter-back').hidden=page==='home';
+  $('#parameter-title').textContent=page==='home'?'Parameters':page==='tuning'?'Part Tuning':'Miscellaneous Parameters';
+  $('#view-parameters').scrollTop=0;
+  if(page==='tuning')renderPartTunings();
+}
+function renderPartTunings(){
+  const list=$('#parameter-tuning');
+  if(!list.childElementCount)list.innerHTML=`<div class="native-parameter-group">${state.parts.map(part=>`<label class="part-tune-row">Part ${part.id+1}<input data-part-tune="${part.id}" type="number" min="-100" max="100" step="1" value="0" aria-label="Fine tune part ${part.id+1}"><span>cent</span></label>`).join('')}</div>`;
+  for(const part of state.parts)$<HTMLInputElement>(`[data-part-tune="${part.id}"]`).value=String(getPerformanceControls(part).fineTune);
 }
 function patchSettings(): PatchBrowserSettings {
   return state.patchBrowser ||= {favorites:[],sort:'none',closeOnSelect:true,favoritesOnly:false};
@@ -257,6 +312,7 @@ function renderGrid() {
   });
   $('#assigned-count').textContent = String(state.parts.filter(part => part.bankId).length).padStart(3,'0');
   rack.update(state, banks);
+  playerParts.update(state,banks,Number($<HTMLSelectElement>('#player-port').value));
 }
 function renderPart() {
   const part = selectedPart();
@@ -266,6 +322,9 @@ function renderPart() {
   $('#part-port').textContent = `PORT ${Math.floor(part.id/16)+1} · CH ${part.id%16+1}`;
   $('#keyboard-part').textContent = `Playing part ${String(part.id+1).padStart(2,'0')} · channel ${part.id%16+1}`;
   $<HTMLSelectElement>('#keyboard-channel').value=String(part.id);
+  const performance=getPerformanceControls(part);
+  $<HTMLInputElement>('#keyboard-mod').value=String(performance.modulation);
+  $<HTMLInputElement>('#keyboard-pitch').value=String(performance.pitchBend);
   const bankSelect = $<HTMLSelectElement>('#part-bank');
   bankSelect.innerHTML = '<option value="">No bank assigned</option>' + banks.map(bank => `<option value="${escapeHTML(bank.id)}">${escapeHTML(bank.name)}</option>`).join('') + (part.bankId && !bank ? `<option value="${escapeHTML(part.bankId)}">Missing bank · import to relink</option>`:'');
   bankSelect.value = part.bankId || '';
@@ -290,6 +349,7 @@ function renderPart() {
   renderEnvelope();
   if ($<HTMLDialogElement>('#drum-dialog').open) renderDrumMap();
   renderPresetMappings();
+  renderKeyboardBars();
 }
 function renderEnvelope() {
   const env = selectedPart().envelope;
@@ -306,7 +366,13 @@ function renderMaster() {
   document.documentElement.dataset.theme = state.master.theme;
   const masterFields: Record<string,number|string> = {'key-shift':state.master.keyShift,'fine-tune':state.master.fineTune,root:state.master.root,mode:state.master.mode,theme:state.master.theme,'master-gain':state.master.gain,'delay-time':state.master.delayTime,'delay-feedback':state.master.delayFeedback,'delay-mix':state.master.delayMix,'flanger-mix':state.master.flangerMix,'crusher-bits':state.master.crusherBits,tempo:state.master.tempo};
   Object.entries(masterFields).forEach(([id,value]) => { $<HTMLInputElement>(`#${id}`).value=String(value); });
-  $('#master-gain-value').textContent = `${Math.round(state.master.gain*100)}%`;
+  $('#master-gain-value').textContent = (state.master.gain*100).toFixed(2);
+  $<HTMLInputElement>('#master-balance').value=String(state.master.balance??0);
+  $('#master-balance-value').textContent=((state.master.balance??0)*100).toFixed(2);
+  for(const [id,value] of [['reverb-gain',state.master.reverbGain??1],['chorus-gain',state.master.chorusGain??1]] as const){$<HTMLInputElement>(`#${id}`).value=String(value);$(`#${id}-value`).textContent=`${(value*100).toFixed(2)} %`;}
+  $<HTMLInputElement>('#key-shift-range').value=String(state.master.keyShift);
+  $<HTMLInputElement>('#fine-tune-range').value=String(state.master.fineTune);
+  document.querySelectorAll<HTMLInputElement>('.native-parameter-range').forEach(input=>input.style.setProperty('--native-range-progress',`${(input.valueAsNumber-Number(input.min))/(Number(input.max)-Number(input.min))*100}%`));
   $('#delay-time-value').textContent = `${state.master.delayTime.toFixed(2)} s`;
   for (const [id,value] of [['delay-feedback',state.master.delayFeedback],['delay-mix',state.master.delayMix],['flanger-mix',state.master.flangerMix]] as const) $(`#${id}-value`).textContent = `${Math.round(value*100)}%`;
   $('#crusher-bits-value').textContent = state.master.crusherBits === 16 ? '16 bit · bypass' : `${state.master.crusherBits} bit`;
@@ -360,35 +426,70 @@ function savePresetMapping() {
   setStatus(`“${preset.name}” mapped to part ${mapping.partId+1}, incoming ${mapping.msb}:${mapping.lsb}:${mapping.program}.`);
 }
 function renderKeyboard() {
-  const keyboard = $('#keyboard'); keyboard.replaceChildren();
-  const span = innerWidth >= 760 ? Math.min(48,127-baseNote) : 24;
-  const whites = Array.from({length:span+1},(_,i)=>baseNote+i).filter(note => ![1,3,6,8,10].includes(note%12));
-  let whiteIndex = 0;
-  for (let note=baseNote;note<=baseNote+span;note++) {
-    const black = [1,3,6,8,10].includes(note%12);
-    const key = document.createElement('button'); key.className=`key ${black?'black':'white'}`; key.dataset.note=String(note); key.setAttribute('aria-label',`Play ${noteName(note)}`); key.setAttribute('aria-pressed','false');
-    if (black) {key.style.left=`calc(${(whiteIndex-.33)/whites.length*100}% + 2px)`;key.style.width=`${.66/whites.length*100}%`;}
-    else { whiteIndex++; if(note%12===0) key.textContent=noteName(note); }
-    key.addEventListener('pointerdown', event => {
-      event.preventDefault(); if (!audioReady) {setStatus('Start audio first, then play a note.');return;}
-      key.setPointerCapture(event.pointerId); const part=state.selectedPart; heldPointers.set(event.pointerId,{part,note}); pressNote(part,note); updateKeyVisual(note);
-    });
-    const release = (event:PointerEvent) => { const active=heldPointers.get(event.pointerId); if(!active)return; heldPointers.delete(event.pointerId); releaseNote(active.part,active.note); updateKeyVisual(active.note); };
-    key.addEventListener('pointerup',release); key.addEventListener('pointercancel',release); key.addEventListener('lostpointercapture',release);
-    keyboard.append(key);
+  const keyboard=$('#keyboard');
+  if(!keyboard.childElementCount){
+    const bed=document.createElement('div');bed.className='keyboard-keybed';
+    let white=0;
+    for(let note=0;note<128;note++){
+      const black=[1,3,6,8,10].includes(note%12);
+      const key=document.createElement('button');key.className=`key ${black?'black':'white'}`;key.dataset.note=String(note);key.tabIndex=-1;
+      key.setAttribute('aria-label',`Play ${noteName(note)}`);key.setAttribute('aria-pressed','false');
+      if(black)key.style.left=`calc(var(--white-key-width) * ${white-.435})`;
+      else{white++;if(note%12===0)key.textContent=noteName(note);}
+      key.addEventListener('pointerdown',event=>{
+        event.preventDefault();if(!audioReady){setStatus('Start audio first.');return;}
+        key.setPointerCapture(event.pointerId);pointerPositions.set(event.pointerId,{x:event.clientX,y:event.clientY,lastX:event.clientX});
+        if(pointerPositions.size===2){const points=[...pointerPositions.values()];pinchDistance=Math.hypot(points[0].x-points[1].x,points[0].y-points[1].y);pinchZoom=keyboardZoom;}
+        const part=state.selectedPart;heldPointers.set(event.pointerId,{part,note});pressNote(part,note,touchVelocity?Math.round(Math.max(1,Math.min(127,(event.clientY-keyboard.getBoundingClientRect().top)/keyboard.clientHeight*127))):velocity);updateKeyVisual(note);
+      });
+      key.addEventListener('pointermove',event=>{
+        const point=pointerPositions.get(event.pointerId);if(!point)return;const dx=event.clientX-point.lastX;point.x=event.clientX;point.y=event.clientY;point.lastX=event.clientX;
+        if(pointerPositions.size>=2&&pinchDistance>8){const points=[...pointerPositions.values()];const distance=Math.hypot(points[0].x-points[1].x,points[0].y-points[1].y);if(pinching||Math.abs(distance/pinchDistance-1)>.08){if(!pinching){pinching=true;releaseLiveNotes();}keyboardUserMoved=true;keyboardZoom=Math.max(.45,Math.min(2.5,pinchZoom*distance/pinchDistance));layoutKeyboard();return;}}
+        if(pinching)return;
+        if(keyboardDrag==='scroll'){keyboardUserMoved=true;keyboardScroll-=dx;positionKeyboard();return;}
+        if(keyboardDrag==='glide'){
+          const hit=document.elementFromPoint(event.clientX,event.clientY)?.closest<HTMLButtonElement>('#keyboard [data-note]');const active=heldPointers.get(event.pointerId);
+          if(hit&&active&&Number(hit.dataset.note)!==active.note){const next=Number(hit.dataset.note);releaseNote(active.part,active.note);updateKeyVisual(active.note);heldPointers.set(event.pointerId,{part:active.part,note:next});pressNote(active.part,next);updateKeyVisual(next);}
+        }
+      });
+      const release=(event:PointerEvent)=>{const active=heldPointers.get(event.pointerId);if(active){heldPointers.delete(event.pointerId);releaseNote(active.part,active.note);updateKeyVisual(active.note);}pointerPositions.delete(event.pointerId);if(pointerPositions.size<2){pinching=false;pinchDistance=0;}};
+      key.addEventListener('pointerup',release);key.addEventListener('pointercancel',release);key.addEventListener('lostpointercapture',release);
+      bed.append(key);
+    }
+    keyboard.append(bed);
   }
-  $('#octave-label').textContent=`${noteName(baseNote)} – ${noteName(baseNote+span)}`;
+  layoutKeyboard();
+}
+function whiteBefore(note:number){let whites=0;for(let n=0;n<note;n++)if(![1,3,6,8,10].includes(n%12))whites++;return whites;}
+function layoutKeyboard(){
+  const oldWidth=keyboardWhiteWidth;
+  const oldScroll=keyboardScroll;
+  keyboardWhiteWidth=innerWidth*(innerWidth<600?.069:innerWidth>innerHeight?.0376:.0439)*keyboardZoom;
+  $('#keyboard').style.setProperty('--white-key-width',`${keyboardWhiteWidth}px`);
+  if(pinching&&oldWidth>0){const points=[...pointerPositions.values()];const center=points.reduce((sum,point)=>sum+point.x,0)/points.length;keyboardScroll=(oldScroll+center)*keyboardWhiteWidth/oldWidth-center;}
+  else if(!keyboardUserMoved){const phone=innerWidth<600,landscape=innerWidth>innerHeight;const anchor=phone?60:48;const x=innerWidth*(phone?101/390:landscape?107.5/1024:32.25/768);baseNote=phone?53:landscape?45:48;keyboardScroll=(whiteBefore(anchor)+.5)*keyboardWhiteWidth-x;}
+  else keyboardScroll=(whiteBefore(baseNote)+([1,3,6,8,10].includes(baseNote%12)?.5:0))*keyboardWhiteWidth;
+  positionKeyboard();
+}
+function positionKeyboard(){
+  keyboardScroll=Math.max(0,Math.min(75*keyboardWhiteWidth-innerWidth,keyboardScroll));
+  $('.keyboard-keybed').style.transform=`translateX(${-keyboardScroll}px)`;
   $<HTMLInputElement>('#keyboard-scroll').value=String(baseNote);
-  $<HTMLButtonElement>('#octave-down').disabled=baseNote<=12; $<HTMLButtonElement>('#octave-up').disabled=baseNote>=96;
+  $('#octave-label').textContent=`${noteName(baseNote)} · pinch to zoom`;
+  $<HTMLButtonElement>('#octave-down').disabled=baseNote<=0;$<HTMLButtonElement>('#octave-up').disabled=baseNote>=115;
+  document.querySelectorAll<HTMLButtonElement>('#keyboard [data-note]').forEach(key=>key.tabIndex=Number(key.dataset.note)===baseNote?0:-1);
+}
+function renderKeyboardBars(){
+  for(const id of ['velocity','keyboard-mod','keyboard-pitch']){const input=$<HTMLInputElement>(`#${id}`);input.style.setProperty('--bar-fill',`${(input.valueAsNumber-Number(input.min))/(Number(input.max)-Number(input.min))*100}%`);}
 }
 function updateKeyVisual(note:number) {
   const key=$(`[data-note="${note}"]`);if(!key)return;const down=Array.from(heldPointers.values()).some(active=>active.note===note)||Array.from(heldKeys.values()).some(active=>active.note===note);key.classList.toggle('is-down',down);key.setAttribute('aria-pressed',String(down));
 }
-function pressNote(part:number,note:number) {
+function pressNote(part:number,note:number,noteVelocity=velocity) {
   const token=`${part}:${note}`;
   if(sustained.has(token)){engine.noteOff(part,note);sustained.delete(token);}
   const existing=sounding.get(token);
-  if(existing) existing.count++; else {sounding.set(token,{part,note,count:1});engine.noteOn(part,note,velocity);}
+  if(existing) existing.count++; else {sounding.set(token,{part,note,count:1});engine.noteOn(part,note,noteVelocity);}
   $(`[data-part="${part}"]`).classList.add('is-playing');
   rack.setPlaying(part,true);
 }
@@ -399,10 +500,12 @@ function releaseNote(part:number,note:number) {
   if(!Array.from(sounding.values()).some(item=>item.part===part)){$(`[data-part="${part}"]`).classList.remove('is-playing');rack.setPlaying(part,false);}
 }
 function releaseAll() {
+  pinching=false;pointerPositions.clear();
   if(audioReady) engine.panic();
   clearKeyboardVisuals();
 }
 function clearKeyboardVisuals() {
+  if(!pinching)pointerPositions.clear();
   heldPointers.clear();heldKeys.clear();sounding.clear();sustained.clear();
   document.querySelectorAll('.is-down,.is-playing').forEach(key=>{key.classList.remove('is-down','is-playing');if(key.hasAttribute('data-note'))key.setAttribute('aria-pressed','false');});
 }
@@ -414,14 +517,16 @@ function setSustain(enabled:boolean) {
   sustain=enabled;$('#sustain').setAttribute('aria-pressed',String(enabled));
   if(!enabled){sustained.forEach(({part,note})=>engine.noteOff(part,note));sustained.clear();}
 }
-function assignBank(bank:BankInfo) {
+function assignBank(bank:BankInfo,applyProgramDefaults=true) {
   const part=selectedPart(); const patch=bank.presets.find(p=>p.drums===part.drums)||bank.presets[0];
-  commitPart({bankId:bank.id,...(patch?{msb:patch.msb,lsb:patch.lsb,program:patch.program,drums:patch.drums}:{})});
+  const tuple={bankId:bank.id,...(patch?{msb:patch.msb,lsb:patch.lsb,program:patch.program,drums:patch.drums}:{})};
+  if(applyProgramDefaults)commitPart(tuple);
+  else{Object.assign(part,tuple);persist();if(audioReady)engine.applyPart(part);renderPart();renderGrid();}
 }
 async function loadBank(data:ArrayBuffer,name:string) {
   const bank=await engine.loadBank(data,name);const existing=banks.findIndex(item=>item.id===bank.id);if(existing>=0)banks[existing]=bank;else banks.push(bank);
   bankSources.set(bank.id,{data:data.slice(0),name});
-  if(!selectedPart().bankId)assignBank(bank);else if(audioReady)engine.applyState(state);
+  if(!selectedPart().bankId)assignBank(bank,false);else if(audioReady)engine.applyState(state);
   renderLibrary();renderPart();renderGrid();return bank;
 }
 async function startAudio() {
@@ -429,7 +534,7 @@ async function startAudio() {
   if(audioReady){setStatus('Audio is ready. Play a note or open a MIDI file.');return;}
   audioStarting=true;const button=$<HTMLButtonElement>('#start-audio');button.disabled=true;button.querySelector('span')!.textContent='Starting…';
   await run('Starting audio and loading GeneralUser GS…',async()=>{
-    await engine.init();audioReady=true;
+    await engine.init();audioReady=true;document.body.dataset.audioReady="true";
     $('#engine-status').classList.add('ready');$('#engine-label').textContent='AUDIO READY';button.classList.add('is-ready');button.querySelector('span')!.textContent='Audio ready';
     try {
       const [response,metadata]=await Promise.all([fetch(new URL('banks/starter.sf3',document.baseURI)),fetch(new URL('banks/starter.json',document.baseURI)).then(response=>response.ok?response.json():null).catch(()=>null)]);if(!response.ok)throw new Error(`Bundled bank could not be loaded (${response.status}). Import a soundbank from Library to continue.`);
@@ -502,12 +607,29 @@ function validNumber(id:string,min:number,max:number,integer=false) {
 }
 
 on('#start-audio','click',()=>void startAudio());
+document.addEventListener('pointerdown',()=>{if(!audioReady&&!audioStarting)void startAudio();},{once:true,capture:true});
+on('#parameter-extras-open','click',()=>showParameterPage('extras'));
+on('#parameter-tuning-open','click',()=>showParameterPage('tuning'));
+on('#parameter-back','click',()=>showParameterPage('home'));
+on('#parameter-tuning','input',event=>{const input=(event.target as HTMLElement).closest<HTMLInputElement>('[data-part-tune]');if(!input||!input.value||!input.validity.valid)return;const id=Number(input.dataset.partTune),part=state.parts[id];if(part)commitPartFor(id,{performance:{...getPerformanceControls(part),fineTune:Math.max(-100,Math.min(100,input.valueAsNumber))}},['performance.fineTune']);});
+on('#view-parameters','click',event=>{const button=(event.target as HTMLElement).closest<HTMLButtonElement>('[data-step-target]');if(!button)return;const input=$<HTMLInputElement>(`#${button.dataset.stepTarget}`);input.value=String(Math.max(Number(input.min),Math.min(Number(input.max),input.valueAsNumber+Number(button.dataset.stepDelta))));input.dispatchEvent(new Event('input',{bubbles:true}));});
+on('#key-shift-range','input',()=>commitMaster({keyShift:validNumber('key-shift-range',-48,48,true)}));
+on('#fine-tune-range','input',()=>commitMaster({fineTune:validNumber('fine-tune-range',-100,100)}));
+on('#master-balance','input',()=>commitMaster({balance:validNumber('master-balance',-1,1)}));
+on('#reverb-gain','input',()=>commitMaster({reverbGain:validNumber('reverb-gain',0,2)}));
+on('#chorus-gain','input',()=>commitMaster({chorusGain:validNumber('chorus-gain',0,2)}));
+on('#native-file-import','click',()=>{const bridge=(window as any).webkit?.messageHandlers?.project128;if(bridge)bridge.postMessage({command:'import'});else $('#import-bank').click();});
+on('#native-midi-status','click',()=>{const bridge=(window as any).webkit?.messageHandlers?.project128;if(bridge)bridge.postMessage({command:'midiStatus'});else{showTab('midi');setStatus('Native MIDI connection details are available in the iOS build.');}});
+on('#player-port','change',()=>playerParts.update(state,banks,Number($<HTMLSelectElement>('#player-port').value)));
+on('#track-name','click',()=>$('#import-midi').click());
+$('#track-name').tabIndex=0;$('#track-name').setAttribute('role','button');$('#track-name').setAttribute('aria-label','Open MIDI file');
+on('#track-name','keydown',event=>{if(['Enter',' '].includes((event as KeyboardEvent).key)){event.preventDefault();$('#import-midi').click();}});
 on('#panels-home','click',()=>showTab('perform'));
-on('#view-backdrop','click',()=>showTab('perform'));
-document.querySelectorAll('[data-close-view]').forEach(button=>button.addEventListener('click',()=>showTab('perform')));
+on('#view-backdrop','click',()=>showTab(baseView));
+document.querySelectorAll('[data-close-view]').forEach(button=>button.addEventListener('click',()=>showTab(baseView)));
 on('#settings-sound-manager','click',()=>showTab('library'));
-document.addEventListener('keydown',event=>{if(event.key==='Escape'&&document.body.classList.contains('has-popover')&&!document.querySelector('dialog[open]')){event.preventDefault();showTab('perform');}});
-document.querySelectorAll<HTMLElement>('[data-tab]').forEach(button=>button.addEventListener('click',()=>showTab(button.dataset.tab!)));
+document.addEventListener('keydown',event=>{if(event.key==='Escape'&&document.body.classList.contains('has-popover')&&!document.querySelector('dialog[open]')){event.preventDefault();showTab(baseView);}});
+document.querySelectorAll<HTMLElement>('[data-tab]').forEach(button=>button.addEventListener('click',()=>showTab(button.dataset.tab==='player'&&currentTab==='player'?'perform':button.dataset.tab!)));
 $('.tabs').addEventListener('keydown',event=>{
   const key=(event as KeyboardEvent).key;
   if(!['ArrowLeft','ArrowRight','Home','End'].includes(key))return;
@@ -517,7 +639,7 @@ $('.tabs').addEventListener('keydown',event=>{
   showTab(tabs[next].dataset.tab!);tabs[next].focus();
 });
 function goToSelectedPanel(){showTab('perform');$(`[data-panel-part="${state.selectedPart}"]`).scrollIntoView({block:'nearest'});}
-on('#back-to-panel','click',goToSelectedPanel);on('#player-panels','click',goToSelectedPanel);
+on('#player-panels','click',goToSelectedPanel);
 on('#jump-to-part','click',()=>{selectPart(validNumber('jump-part',1,128,true)-1);goToSelectedPanel();});
 on('#jump-part','keydown',event=>{if((event as KeyboardEvent).key==='Enter'){selectPart(validNumber('jump-part',1,128,true)-1);goToSelectedPanel();}});
 on('#toggle-keys','click',()=>{const keyboard=$('#keyboard');keyboard.hidden=!keyboard.hidden;$('#toggle-keys').setAttribute('aria-expanded',String(!keyboard.hidden));$('.keyboard-panel').classList.toggle('is-collapsed',keyboard.hidden);if(keyboard.hidden)releaseLiveNotes();});
@@ -553,6 +675,7 @@ function bindFileInput(id:string,handler:(data:ArrayBuffer,name:string)=>unknown
 bindFileInput('#import-bank',importBank);bindFileInput('#import-midi',importMidi);bindFileInput('#import-preset',data=>importPreset(new TextDecoder().decode(data)));bindFileInput('#restore-session',data=>importSession(new TextDecoder().decode(data)));
 on('#play','click',()=>void run('Starting playback…',async()=>{await engine.play();renderTransport(engine.position());setStatus(`Playing ${midiName}.`);}));
 on('#pause','click',()=>void run('Pausing…',async()=>{await engine.pause();renderTransport(engine.position());setStatus('Playback paused.');}));
+const repeatButton=document.createElement('button');repeatButton.id='repeat';repeatButton.className='icon-button';repeatButton.setAttribute('aria-label','Repeat MIDI');repeatButton.setAttribute('aria-pressed','false');repeatButton.textContent='↻';$('#stop').after(repeatButton);repeatButton.addEventListener('click',()=>{repeatPlayback=!repeatPlayback;repeatButton.setAttribute('aria-pressed',String(repeatPlayback));});
 on('#stop','click',()=>void run('Stopping…',async()=>{await engine.stop();renderTransport(engine.position());setStatus('Playback stopped. Master settings preserved.');}));
 on('#rewind','click',()=>void run('Returning to beginning…',async()=>{await engine.seek(0);renderTransport(engine.position());setStatus('At the beginning.');}));
 on('#seek','input',event=>{const seconds=Number((event.target as HTMLInputElement).value);void run('Seeking…',async()=>{await engine.seek(seconds);renderTransport(engine.position());setStatus(`Position ${formatTime(seconds)}.`);});});
@@ -566,19 +689,26 @@ for(const property of ['locked','drums'] as const)on(`#part-${property}`,'change
 for(const property of ['mute','solo'] as const)on(`#part-${property}`,'click',()=>commitPart({[property]:!selectedPart()[property]}));
 on('#envelope-enabled','change',()=>commitPart({envelope:{...selectedPart().envelope,enabled:$<HTMLInputElement>('#envelope-enabled').checked}},['envelope.enabled']));
 for(const property of ['attack','decay','sustain','release'] as const)on(`#env-${property}`,'change',()=>commitPart({envelope:{...selectedPart().envelope,[property]:validNumber(`env-${property}`,0,property==='sustain'?100:20)/(property==='sustain'?100:1)}},[`envelope.${property}`]));
-on('#key-shift','input',()=>commitMaster({keyShift:validNumber('key-shift',-48,48,true)}));on('#fine-tune','input',()=>commitMaster({fineTune:validNumber('fine-tune',-100,100)}));
+on('#key-shift','input',()=>{const input=$<HTMLInputElement>('#key-shift');if(input.value&&input.validity.valid)commitMaster({keyShift:validNumber('key-shift',-48,48,true)});});on('#fine-tune','input',()=>{const input=$<HTMLInputElement>('#fine-tune');if(input.value&&input.validity.valid)commitMaster({fineTune:validNumber('fine-tune',-100,100)});});
 on('#root','change',()=>commitMaster({root:Number($<HTMLSelectElement>('#root').value)}));on('#mode','change',()=>commitMaster({mode:$<HTMLSelectElement>('#mode').value}));
 on('#master-gain','input',()=>commitMaster({gain:validNumber('master-gain',0,2)}));
 for(const [id,property,min,max] of [['delay-time','delayTime',.05,2],['delay-feedback','delayFeedback',0,.9],['delay-mix','delayMix',0,1],['flanger-mix','flangerMix',0,1],['crusher-bits','crusherBits',2,16]] as const)on(`#${id}`,'input',()=>commitMaster({[property]:validNumber(id,min,max)}));
 on('#theme','change',()=>commitMaster({theme:$<HTMLSelectElement>('#theme').value}));document.querySelectorAll<HTMLElement>('[data-theme-choice]').forEach(button=>button.addEventListener('click',()=>commitMaster({theme:button.dataset.themeChoice!})));
-on('#velocity','input',()=>{velocity=validNumber('velocity',1,127,true);$('#velocity-value').textContent=String(velocity);});
-on('#octave-down','click',()=>{releaseLiveNotes();baseNote=Math.max(12,baseNote-12);renderKeyboard();});on('#octave-up','click',()=>{releaseLiveNotes();baseNote=Math.min(96,baseNote+12);renderKeyboard();});
-on('#keyboard-scroll','input',()=>{releaseLiveNotes();baseNote=validNumber('keyboard-scroll',12,96,true);renderKeyboard();});
+on('#velocity','input',()=>{velocity=validNumber('velocity',1,127,true);$('#velocity-value').textContent=String(velocity);renderKeyboardBars();});
+on('#keyboard-mod','input',()=>commitPart({performance:{...getPerformanceControls(selectedPart()),modulation:validNumber('keyboard-mod',0,127,true)}},['performance.modulation']));
+let pitchPart:number|null=null;
+on('#keyboard-pitch','pointerdown',()=>{pitchPart=state.selectedPart;});
+on('#keyboard-pitch','input',()=>{const id=pitchPart??state.selectedPart;commitPartFor(id,{performance:{...getPerformanceControls(state.parts[id]),pitchBend:validNumber('keyboard-pitch',0,16383,true)}},['performance.pitchBend'],false);});
+for(const type of ['pointerup','pointercancel'])on('#keyboard-pitch',type,()=>{if(pitchPart!==null){const id=pitchPart;pitchPart=null;commitPartFor(id,{performance:{...getPerformanceControls(state.parts[id]),pitchBend:8192}},['performance.pitchBend'],false);}});
+on('#octave-down','click',()=>{releaseLiveNotes();keyboardUserMoved=true;baseNote=Math.max(0,baseNote-12);renderKeyboard();});on('#octave-up','click',()=>{releaseLiveNotes();keyboardUserMoved=true;baseNote=Math.min(115,baseNote+12);renderKeyboard();});
+on('#keyboard-scroll','input',()=>{releaseLiveNotes();keyboardUserMoved=true;baseNote=validNumber('keyboard-scroll',0,127,true);renderKeyboard();});
+on('#keyboard-drag','change',()=>{keyboardDrag=$<HTMLSelectElement>('#keyboard-drag').value as typeof keyboardDrag;});
+on('#keyboard-velocity-sens','change',()=>{touchVelocity=$<HTMLInputElement>('#keyboard-velocity-sens').checked;});
+on('#keyboard-reset-zoom','click',()=>{keyboardZoom=1;keyboardUserMoved=false;layoutKeyboard();});
 on('#keyboard-channel','change',()=>selectPart(validNumber('keyboard-channel',0,127,true)));
-let keyboardWide=innerWidth>=760;
-window.addEventListener('resize',()=>{if(keyboardWide!==(innerWidth>=760)){keyboardWide=innerWidth>=760;releaseLiveNotes();renderKeyboard();}});
+window.addEventListener('resize',()=>{releaseLiveNotes();layoutKeyboard();});
 on('#sustain','click',()=>setSustain(!sustain));on('#panic','click',()=>{releaseAll();setSustain(false);setStatus('All notes released.');});
-document.addEventListener('keydown',event=>{if(event.repeat||event.metaKey||event.ctrlKey||event.altKey||document.body.classList.contains('has-popover')||!audioReady||event.target instanceof HTMLInputElement||event.target instanceof HTMLSelectElement||document.querySelector('dialog[open]'))return;const offset=physicalKeys[event.key.toLowerCase()];if(offset===undefined)return;event.preventDefault();const note=baseNote+offset;heldKeys.set(event.code,{part:state.selectedPart,note});pressNote(state.selectedPart,note);updateKeyVisual(note);});
+document.addEventListener('keydown',event=>{if(event.repeat||event.metaKey||event.ctrlKey||event.altKey||document.body.classList.contains('has-popover')||!audioReady||event.target instanceof HTMLInputElement||event.target instanceof HTMLSelectElement||document.querySelector('dialog[open]'))return;const offset=physicalKeys[event.key.toLowerCase()];if(offset===undefined)return;event.preventDefault();const note=baseNote+offset;if(note>127)return;heldKeys.set(event.code,{part:state.selectedPart,note});pressNote(state.selectedPart,note);updateKeyVisual(note);});
 document.addEventListener('keyup',event=>{const active=heldKeys.get(event.code);if(!active)return;heldKeys.delete(event.code);releaseNote(active.part,active.note);updateKeyVisual(active.note);});
 window.addEventListener('blur',()=>{releaseAll();setSustain(false);});document.addEventListener('visibilitychange',()=>{if(document.hidden){releaseAll();setSustain(false);}});
 on('#save-part-preset','click',()=>{showTab('library');$<HTMLInputElement>('#preset-name').focus();setStatus('Name your selected part to save an individual preset.');});on('#create-preset','click',()=>void run('Saving preset…',saveCurrentPreset));
@@ -617,7 +747,8 @@ on('#open-drum-map','click',()=>{renderDrumMap();$<HTMLDialogElement>('#drum-dia
 on('#add-drum-map','click',()=>{const source=validNumber('drum-source',0,127,true),target=validNumber('drum-target',0,127,true);commitPart({drumMap:{...selectedPart().drumMap,[source]:target}});renderDrumMap();setStatus(`Drum note ${source} now plays ${target}.`);});
 on('#clear-drum-map','click',()=>{commitPart({drumMap:{}});renderDrumMap();setStatus('Drum map cleared.');});on('#drum-map-list','click',event=>{const button=(event.target as HTMLElement).closest<HTMLButtonElement>('[data-drum-remove]');if(!button)return;const map={...selectedPart().drumMap};delete map[Number(button.dataset.drumRemove)];commitPart({drumMap:map});renderDrumMap();});
 
-engine.onPosition=next=>renderTransport(next);
+engine.onPosition=next=>{const ended=position.playing&&!next.playing&&next.duration>0&&next.current>=next.duration;renderTransport(next);if(ended&&repeatPlayback)void run('Repeating MIDI…',async()=>{await engine.seek(0);await engine.play();});};
+engine.onActivity=(levels,notes)=>{rack.setLevels(levels);playerParts.setActivity(levels,notes);const active=new Set(notes?.[state.selectedPart]||[]);document.querySelectorAll<HTMLElement>('#keyboard [data-note]').forEach(key=>key.classList.toggle('is-midi',active.has(Number(key.dataset.note))));};
 engine.onError=reportError;
 on('#sequence','change',()=>void run('Selecting independent sequence…',async()=>{engine.selectSequence(Number($<HTMLSelectElement>('#sequence').value));setStatus(`Sequence ${Number($<HTMLSelectElement>('#sequence').value)+1} selected.`);}));
 interface MIDIDecoder {running:number;status:number;needed:number;data:number[];sysex:number[]|null}

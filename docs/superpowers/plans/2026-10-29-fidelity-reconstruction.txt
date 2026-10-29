@@ -1,0 +1,35 @@
+Fidelity reconstruction implementation plan
+
+Goal: replace the sparse approximation with a measured, functional Sampei-style
+surface, preserving existing synthesis, bank isolation and persistent overrides.
+Spec: ../specs/2026-10-29-fidelity-reconstruction.txt
+Architecture: shared optional performance state + tested controller adapter;
+coordinate-template PartRack; root keyboard/menu layouts; native fullscreen shell.
+
+[x] Task1 — Evidence: inspect historical/current screenshots and public video
+metadata/frames, record observation confidence, derive phone/tablet geometry.
+Files: docs/UI_REFERENCE_EVIDENCE.txt, output/fidelity-verification.json.
+
+[x] Task2 — Real controls: normalize/clone performance state; per-leaf edits;
+controllers/RPN/tuning; relativeADR, keyrange/sostenuto/vibrato compatibility;
+master balance. RED/GREEN state and PCM/lifecycle tests; retain old fixtures.
+Files: contracts.ts,state.ts,performance.ts,offline.ts,audio-effects.ts, tests.
+
+[x] Task3 — Full panel and typography: all documented slots, separate phone/
+tablet templates, stable native inputs, accurate fonts and licensed fallback;
+remove extra native chrome without losing Files/MIDI/share bridges.
+Files: part-rack.ts/.css,typography.css,font assets/licenses,native Swift shell.
+
+[x] Task4 — Main layout and native-style menus: measured toolbar/rack/keyboard
+positions, hide added interface clutter behind Extras, real keyboard performance
+controllers and grouped master rows/steppers; preserve existing import/preset flows.
+Files: main.ts,style.css and focused UI modules/tests as needed.
+
+[x] Task5 — Independent functional/visual review; fix important findings; verify
+core/browser/native-sync and built native-CSP audio/font/conversion; compare actual
+DOM geometry to references; update previews/evidence and verify ZIP size/CRC/bytes.
+
+Review focus: new nested fields overwrite mapped instruments; held voices lost on
+range/pedal changes; visual native controls resize the reference grid; iOS safe
+areas counted twice; desktop fallback font mistaken for verified Apple typography;
+unsupported video or1:1 native installation claims. Deliver no fake controls.

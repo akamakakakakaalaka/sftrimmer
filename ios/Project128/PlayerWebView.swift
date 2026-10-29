@@ -55,6 +55,8 @@ struct PlayerWebView: UIViewRepresentable {
                   let body = message.body as? [String: Any], let command = body["command"] as? String else { return }
             switch command {
             case "import": model.importRequested = true
+            case "midiStatus":
+                model.notice = "\(model.midiStatus)\n\nUp to eight CoreMIDI sources use separate ports, stable while connected. WebKit delivery is batched and is not a hard real-time transport. Physical-device latency and background synthesis still need validation."
             case "share":
                 guard let name = body["name"] as? String, let data = body["data"] as? String else { return }
                 model.share(name: name, base64: data)

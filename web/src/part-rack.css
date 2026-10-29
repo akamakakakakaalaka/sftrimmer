@@ -1,344 +1,445 @@
+/* Coordinates follow the native 376 × 244.2 phone and 900 × 168 tablet panels.
+   The rack is the query container, so portrait tablets retain the two-row layout. */
 .part-rack {
+  container-type: inline-size;
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: 10px;
   align-items: start;
-}
-
-.part-rack .sampei-part {
-  --dial-track: var(--key, #fffaf7);
-  --dial-fill: var(--accent, #ae102b);
-  --dial-face: var(--active, #ce6556);
-  display: grid;
-  grid-template-columns: 36px minmax(0, 1fr);
-  gap: 9px;
+  gap: 0;
   min-width: 0;
-  padding: 10px;
-  border: 1px solid transparent;
-  background: var(--surface, #f6bdb4);
-  color: var(--text, #2b1518);
-  scroll-margin: 110px 0 240px;
+  font-family: var(--font-ui, -apple-system, BlinkMacSystemFont, 'Fidelity Sans', Arial, sans-serif);
+  font-weight: 400;
+  letter-spacing: normal;
 }
 
-.part-rack .sampei-part.is-selected {
-  border-color: var(--accent, #ae102b);
-}
-
-.part-rack .sampei-part.is-playing .sampei-part-select {
-  background: var(--accent, #ae102b);
-  color: var(--key, #fffaf7);
-}
-
-.part-rack .sampei-strip {
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  gap: 3px;
-  min-width: 0;
-}
-
-.part-rack .sampei-saved-volume {
+.part-rack .sampei-panel {
+  --sampei-unit: calc(100cqw / 376);
+  --sampei-diameter: 36.36;
+  --sampei-face-top: 15.6;
+  --sampei-ring: 2.6;
+  --sampei-label-size: 11;
+  --sampei-label-height: 13;
+  --sampei-field-size: 13;
+  --sampei-field-top: 19.4;
+  --sampei-field-height: 25.5;
+  --sampei-panel-color: var(--surface, #fac1b9);
+  --sampei-face-color: var(--dial-color, #d96857);
+  --sampei-active-color: var(--accent, #99001a);
+  --sampei-white: var(--surface-soft, #fff);
+  --sampei-ink: var(--text, #000);
   position: relative;
-  width: 14px;
-  min-height: 74px;
-  flex: 1;
-  align-self: center;
-  overflow: hidden;
-  background: var(--key, #fffaf7);
-}
-
-.part-rack .sampei-saved-volume-fill {
-  position: absolute;
-  inset: auto 2px 2px;
-  height: calc(var(--saved-volume, 0%) - 2px);
-  min-height: 0;
-  background: var(--accent, #ae102b);
-}
-
-.part-rack .is-muted .sampei-saved-volume-fill { opacity: .35; }
-
-.part-rack button,
-.part-rack input {
-  font: inherit;
-}
-
-.part-rack button {
-  cursor: pointer;
+  width: 100%;
+  height: calc(var(--sampei-unit) * 244.2);
+  min-width: 0;
+  margin: 0 0 calc(var(--sampei-unit) * 7.3);
+  padding: 0;
   border: 0;
   border-radius: 0;
-  color: inherit;
-  background: var(--key, #fffaf7);
+  background: var(--sampei-panel-color);
+  color: var(--sampei-ink);
+  scroll-margin: 8px 0;
 }
 
-.part-rack button:hover { background: var(--surface-raised, #fff3ed); }
-.part-rack button:focus-visible,
-.part-rack input:focus-visible {
-  outline: 2px solid var(--accent, #ae102b);
+.part-rack .sampei-panel.is-selected {
+  outline: calc(var(--sampei-unit) * .8) solid var(--sampei-active-color);
+  outline-offset: calc(var(--sampei-unit) * -.8);
+}
+
+.part-rack .sampei-panel button,
+.part-rack .sampei-panel input {
+  box-sizing: border-box;
+  min-width: 0;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  color: var(--sampei-ink);
+  font: inherit;
+  font-weight: 400;
+  letter-spacing: normal;
+  box-shadow: none;
+}
+
+.part-rack .sampei-panel button { cursor: pointer; }
+.part-rack .sampei-panel button:hover { filter: brightness(.98); }
+.part-rack .sampei-panel button:focus-visible,
+.part-rack .sampei-panel input:focus-visible {
+  outline: 2px solid var(--sampei-active-color);
   outline-offset: 2px;
 }
 
-.part-rack .sampei-toggle {
-  min-width: 44px;
-  min-height: 44px;
-  margin: 0 -4px;
+.part-rack .sampei-item {
+  position: absolute;
+  left: calc(var(--sampei-unit) * var(--x));
+  top: calc(var(--sampei-unit) * var(--y));
+  display: block;
+  width: calc(var(--sampei-unit) * var(--w));
+  height: calc(var(--sampei-unit) * var(--h, 54));
+  margin: 0;
   padding: 0;
-  touch-action: pan-y;
-  user-select: none;
-  -webkit-touch-callout: none;
-  font-size: 14px;
-  line-height: 1;
-}
-
-.part-rack .sampei-toggle[aria-pressed="true"] {
-  background: var(--accent, #ae102b);
-  color: var(--key, #fffaf7);
-}
-
-.part-rack .sampei-lock {
-  display: flex;
-  min-height: 44px;
-  min-width: 44px;
-  margin: 0;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 2px;
-  cursor: pointer;
-  font-size: 10px;
-  line-height: 1;
-}
-
-.part-rack .sampei-checkbox {
-  width: 19px;
-  height: 19px;
-  margin: 0;
-  accent-color: var(--accent, #ae102b);
-  cursor: pointer;
-}
-
-.part-rack .sampei-part-body { min-width: 0; }
-
-.part-rack .sampei-part-head {
-  display: grid;
-  grid-template-columns: 44px 55px minmax(0, 1fr) 44px;
-  align-items: end;
-  gap: 6px;
-  margin-bottom: 9px;
-}
-
-.part-rack .sampei-head-field {
-  display: flex;
-  min-width: 0;
-  flex-direction: column;
-  gap: 4px;
+  color: var(--sampei-ink);
   text-align: center;
 }
 
-.part-rack .sampei-field-caption,
-.part-rack .sampei-dial-caption {
-  color: var(--text, #2b1518);
-  font-size: 12px;
+.part-rack .sampei-caption {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  display: block;
+  width: max-content;
+  max-width: none;
+  height: calc(var(--sampei-unit) * var(--sampei-label-height));
+  margin: 0;
+  transform: translateX(-50%);
+  color: var(--sampei-ink);
+  font-size: calc(var(--sampei-unit) * var(--sampei-label-size));
   font-weight: 400;
-  line-height: 16px;
+  line-height: calc(var(--sampei-unit) * var(--sampei-label-height));
+  letter-spacing: normal;
   white-space: nowrap;
 }
 
-.part-rack .sampei-part-select,
-.part-rack .sampei-address,
-.part-rack .sampei-patch,
-.part-rack .sampei-parameters {
+.part-rack .sampei-responsive-caption { font-size: 0; }
+.part-rack .sampei-responsive-caption::after {
+  content: attr(data-phone-caption);
+  font-size: calc(var(--sampei-unit) * var(--sampei-label-size));
+}
+
+.part-rack .sampei-panel .sampei-white-field {
+  position: absolute;
+  top: calc(var(--sampei-unit) * var(--sampei-field-top));
+  left: 0;
   display: flex;
-  min-height: 44px;
   align-items: center;
   justify-content: center;
-  padding: 4px;
-  background: var(--key, #fffaf7);
-  font-size: 14px;
-  line-height: 18px;
-}
-
-.part-rack .sampei-address {
-  font-size: 12px;
-  white-space: nowrap;
-}
-
-.part-rack .sampei-patch {
-  display: block;
   width: 100%;
+  height: calc(var(--sampei-unit) * var(--sampei-field-height));
+  min-height: 0;
+  padding: 0 calc(var(--sampei-unit) * 1.5);
   overflow: hidden;
+  border: 0;
+  border-radius: 0;
+  background: var(--sampei-white);
+  color: var(--sampei-ink);
+  font-size: calc(var(--sampei-unit) * var(--sampei-field-size));
+  line-height: calc(var(--sampei-unit) * var(--sampei-field-height));
+  text-align: center;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.part-rack .sampei-parameters {
-  align-self: end;
-  font-size: 10px;
+.part-rack .sampei-panel .sampei-patch-button { display: block; }
+.part-rack .sampei-note-input { appearance: none; }
+.part-rack .sampei-panel.is-playing .sampei-select {
+  background: var(--sampei-active-color);
+  color: var(--key, #fff);
 }
 
-.part-rack .sampei-dial-row {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  align-items: start;
-  gap: 5px;
-}
-
-.part-rack .sampei-envelope { margin-top: 7px; }
-
-.part-rack .sampei-dial {
-  position: relative;
-  display: flex;
-  min-width: 0;
-  flex-direction: column;
-  align-items: center;
-  cursor: ew-resize;
-  touch-action: pan-y;
-}
-
-.part-rack .sampei-knob {
-  position: relative;
-  display: block;
-  width: var(--dial-size, 44px);
-  height: var(--dial-size, 44px);
-  margin-top: 3px;
-  flex: none;
-  border-radius: 50%;
-  background: conic-gradient(from 225deg, var(--dial-fill) 0deg var(--dial-progress, 0deg), var(--dial-track) var(--dial-progress, 0deg) 270deg, transparent 270deg 360deg);
-}
-
-.part-rack .sampei-knob::before {
+.part-rack .sampei-rotary { cursor: ew-resize; }
+.part-rack .sampei-rotary-face {
   position: absolute;
-  inset: 3px;
+  top: calc(var(--sampei-unit) * var(--sampei-face-top));
+  left: 50%;
+  display: block;
+  width: calc(var(--sampei-unit) * var(--sampei-diameter));
+  height: calc(var(--sampei-unit) * var(--sampei-diameter));
+  transform: translateX(-50%);
   border-radius: 50%;
-  background: var(--dial-face);
-  content: '';
+  background: conic-gradient(from 225deg, var(--sampei-white) 0deg var(--sampei-dial-start, 0deg), var(--sampei-active-color) var(--sampei-dial-start, 0deg) var(--sampei-dial-progress, 0deg), var(--sampei-white) var(--sampei-dial-progress, 0deg) 270deg, transparent 270deg 360deg);
 }
 
-.part-rack .sampei-knob-needle {
+.part-rack .sampei-rotary-face::before {
+  position: absolute;
+  inset: calc(var(--sampei-unit) * var(--sampei-ring));
+  content: '';
+  border-radius: 50%;
+  background: var(--sampei-face-color);
+}
+
+.part-rack .sampei-rotary-pointer {
+  position: absolute;
+  inset: 0;
+  transform: rotate(var(--sampei-dial-angle, 0deg));
+}
+
+.part-rack .sampei-rotary-pointer::after {
+  position: absolute;
+  top: calc(var(--sampei-unit) * 4.6);
+  left: 50%;
+  display: block;
+  width: calc(var(--sampei-unit) * 3.2);
+  height: calc(var(--sampei-unit) * 3.2);
+  content: '';
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: var(--sampei-ink);
+}
+
+.part-rack .sampei-panel .sampei-rotary-input {
   position: absolute;
   z-index: 1;
-  inset: 0;
-  transform: rotate(var(--dial-angle, -135deg));
-}
-
-.part-rack .sampei-knob-needle::after {
-  position: absolute;
-  top: 5px;
-  left: calc(50% - 2px);
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  background: var(--text, #2b1518);
-  content: '';
-}
-
-.part-rack .sampei-dial-input {
-  position: absolute;
-  z-index: 2;
-  top: 19px;
+  top: calc(var(--sampei-unit) * var(--sampei-face-top));
   left: 50%;
-  width: var(--dial-size, 44px);
-  height: var(--dial-size, 44px);
+  width: calc(var(--sampei-unit) * var(--sampei-diameter));
+  height: calc(var(--sampei-unit) * var(--sampei-diameter));
+  min-height: 0;
   margin: 0;
-  padding: 0;
   transform: translateX(-50%);
   opacity: 0;
   cursor: ew-resize;
   touch-action: pan-y;
 }
 
-.part-rack .sampei-dial:has(.sampei-dial-input:focus-visible) .sampei-knob {
-  outline: 2px solid var(--accent, #ae102b);
-  outline-offset: 3px;
+.part-rack .sampei-rotary:has(input:focus-visible) .sampei-rotary-face {
+  outline: 2px solid var(--sampei-active-color);
+  outline-offset: 2px;
 }
+.part-rack .sampei-rotary.is-overridden .sampei-rotary-face { opacity: .48; }
+.part-rack .sampei-rotary.is-overridden,
+.part-rack .sampei-panel .sampei-rotary-input:disabled { cursor: default; }
 
-.part-rack .sampei-dial-value,
-.part-rack .sampei-envelope-caption {
-  display: block;
-  min-height: 15px;
-  margin-top: 2px;
-  color: var(--muted, #6e4146);
-  font-size: 10px;
-  line-height: 13px;
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-}
-
-.part-rack .sampei-dial.is-disabled { opacity: .48; }
-.part-rack .sampei-dial.is-disabled,
-.part-rack .sampei-dial-input:disabled { cursor: default; }
-
-.part-rack .sampei-env-override {
-  display: flex;
-  min-width: 0;
-  flex-direction: column;
-  align-items: center;
-  cursor: pointer;
-}
-
-.part-rack .sampei-override-control {
-  display: flex;
-  width: 44px;
-  height: 44px;
-  margin-top: 3px;
-  align-items: center;
-  justify-content: center;
-}
-
-.part-rack .sampei-secondary-controls {
-  display: flex;
-  min-width: 0;
-  align-items: end;
-  gap: 12px;
-  margin-top: 7px;
-}
-
-.part-rack .sampei-key-shift {
-  display: flex;
-  width: 60px;
-  flex-direction: column;
-  align-items: stretch;
-  gap: 4px;
-  text-align: center;
-}
-
-.part-rack .sampei-transpose {
+.part-rack .sampei-panel .sampei-switch-input {
+  position: absolute;
+  top: calc(var(--sampei-unit) * var(--switch-top, 17.15));
+  left: 0;
   width: 100%;
-  min-height: 44px;
+  height: calc(var(--sampei-unit) * 23.03);
+  appearance: none;
   border: 0;
   border-radius: 0;
+  background: var(--sampei-white);
+  opacity: 1;
+  cursor: pointer;
+}
+.part-rack .sampei-panel .sampei-switch-input:checked { background: var(--sampei-active-color); }
+
+.part-rack .sampei-number-control { --sampei-field-top: 18.6; }
+.part-rack .sampei-panel .sampei-number-input { appearance: textfield; }
+.part-rack .sampei-number-input::-webkit-inner-spin-button,
+.part-rack .sampei-number-input::-webkit-outer-spin-button { appearance: none; margin: 0; }
+.part-rack .sampei-number-display {
+  position: absolute;
+  top: calc(var(--sampei-unit) * var(--sampei-field-top));
+  left: 0;
+  width: 100%;
+  height: calc(var(--sampei-unit) * var(--sampei-field-height));
+  background: var(--sampei-white);
+  color: var(--sampei-ink);
+  font-size: calc(var(--sampei-unit) * var(--sampei-field-size));
+  line-height: calc(var(--sampei-unit) * var(--sampei-field-height));
+  pointer-events: none;
+}
+.part-rack .sampei-number-control:focus-within .sampei-number-display { display: none; }
+
+.part-rack .sampei-fader-track {
+  position: absolute;
+  top: calc(var(--sampei-unit) * 17);
+  left: 50%;
+  width: calc(var(--sampei-unit) * 3.6);
+  height: calc(var(--sampei-unit) * 31.5);
+  transform: translateX(-50%);
+  border-radius: calc(var(--sampei-unit) * 2);
+  background: var(--sampei-white);
+}
+.part-rack .sampei-fader-thumb {
+  position: absolute;
+  top: var(--sampei-fader-position, 50%);
+  left: 50%;
+  width: calc(var(--sampei-unit) * 19.1);
+  height: calc(var(--sampei-unit) * 7.2);
+  transform: translate(-50%, -50%);
+  background: var(--sampei-ink);
+}
+.part-rack .sampei-panel .sampei-fader-input {
+  position: absolute;
+  z-index: 1;
+  top: calc(var(--sampei-unit) * 13.4);
+  left: 50%;
+  width: calc(var(--sampei-unit) * 24);
+  height: calc(var(--sampei-unit) * 38.7);
+  min-height: 0;
+  margin: 0;
+  transform: translateX(-50%);
+  opacity: 0;
+  writing-mode: vertical-lr;
+  direction: rtl;
+  cursor: ns-resize;
+  touch-action: none;
+}
+.part-rack .sampei-fader:has(input:focus-visible) .sampei-fader-track {
+  outline: 2px solid var(--sampei-active-color);
+  outline-offset: calc(var(--sampei-unit) * 8);
+}
+
+.part-rack .sampei-volume-strip {
+  position: absolute;
+  left: calc(var(--sampei-unit) * 10);
+  top: calc(var(--sampei-unit) * 7.3);
+  width: calc(var(--sampei-unit) * 12.1);
+  height: calc(var(--sampei-unit) * 205.5);
+  overflow: hidden;
+  background: var(--sampei-white);
+}
+.part-rack .sampei-volume-fill {
+  position: absolute;
+  right: calc(var(--sampei-unit) * 1.5);
+  bottom: calc(var(--sampei-unit) * 1.5);
+  left: calc(var(--sampei-unit) * 1.5);
+  height: max(calc(var(--sampei-unit) * .8), calc(var(--sampei-audio-level, 0%) - var(--sampei-unit) * 3));
+  background: var(--sampei-active-color);
+}
+.part-rack .sampei-panel .sampei-mute {
+  position: absolute;
+  left: calc(var(--sampei-unit) * 7);
+  top: calc(var(--sampei-unit) * 219.7);
+  width: calc(var(--sampei-unit) * 18.2);
+  height: calc(var(--sampei-unit) * 18.2);
+  background: var(--sampei-white);
+  color: var(--sampei-ink);
+  font-size: calc(var(--sampei-unit) * 13);
+  line-height: 1;
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+.part-rack .sampei-panel .sampei-mute[aria-pressed=true] {
+  background: var(--sampei-active-color);
+  color: var(--key, #fff);
+}
+
+.part-rack .sampei-divider {
+  position: absolute;
+  left: calc(var(--sampei-unit) * var(--x));
+  top: calc(var(--sampei-unit) * var(--y));
+  width: calc(var(--sampei-unit) * .8);
+  height: calc(var(--sampei-unit) * 38);
+  background: var(--line, #b08781);
+}
+.part-rack .sampei-advanced-access {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.part-rack .sampei-panel .sampei-advanced-access:focus-visible {
+  z-index: 3;
+  top: 0;
+  right: 0;
+  width: auto;
+  height: auto;
   padding: 4px;
-  background: var(--key, #fffaf7);
-  color: var(--text, #2b1518);
-  text-align: center;
-  font-size: 14px;
+  clip-path: none;
+  background: var(--sampei-white);
+  font-size: 12px;
 }
 
-@media (min-width: 900px) {
-  .part-rack .sampei-part { --dial-size: 64px; gap: 14px; padding: 12px; }
-  .part-rack .sampei-part-body {
-    display: grid;
-    grid-template-columns: minmax(260px, .8fr) minmax(340px, 1.2fr);
-    grid-template-areas: 'head mixer' 'secondary envelope';
-    gap: 12px 20px;
-    align-items: start;
-  }
-  .part-rack .sampei-part-head {
-    grid-area: head;
-    grid-template-columns: 44px 60px minmax(0, 1fr) 48px;
-    margin: 0;
-  }
-  .part-rack .sampei-mixer { grid-area: mixer; }
-  .part-rack .sampei-envelope { grid-area: envelope; margin: 0; }
-  .part-rack .sampei-secondary-controls { grid-area: secondary; margin: 0; }
-  .part-rack .sampei-override-control { width: 64px; height: 64px; }
-  .part-rack .sampei-saved-volume { width: 18px; }
-}
+.part-rack .sampei-header-field { --y: 8.5; }
+.part-rack .sampei-control-part { --x: 32.1; --w: 26.4; }
+.part-rack .sampei-control-channel { --x: 65.8; --w: 35.2; }
+.part-rack .sampei-control-patch { --x: 108.5; --w: 106.1; }
+.part-rack .sampei-control-lowKey { --x: 221.8; --w: 26.4; }
+.part-rack .sampei-control-highKey { --x: 255.5; --w: 26.4; }
+.part-rack .sampei-rotary { --w: 36.36; }
+.part-rack .sampei-control-volume { --x: 32.73; --y: 68; }
+.part-rack .sampei-control-expression { --x: 77.88; --y: 68; }
+.part-rack .sampei-control-pan { --x: 123.03; --y: 68; }
+.part-rack .sampei-control-reverb { --x: 176.37; --y: 68; }
+.part-rack .sampei-control-chorus { --x: 221.52; --y: 68; }
+.part-rack .sampei-control-portamento { --x: 274.24; --y: 68; --w: 15.45; }
+.part-rack .sampei-control-portamentoTime { --x: 297.58; --y: 68; }
+.part-rack .sampei-control-mono { --x: 350.3; --y: 68; --w: 15.45; }
+.part-rack .sampei-control-pitchBend { --x: 31.3; --y: 127.5; --w: 24; }
+.part-rack .sampei-control-bendRange { --x: 62.1; --y: 127.5; --w: 26.1; }
+.part-rack .sampei-control-transpose { --x: 95.8; --y: 127.5; --w: 26.4; }
+.part-rack .sampei-control-fineTune { --x: 130.02; --y: 127.5; }
+.part-rack .sampei-control-modulation { --x: 181.9; --y: 127.5; --w: 24; }
+.part-rack .sampei-control-vibratoRate { --x: 213.02; --y: 127.5; }
+.part-rack .sampei-control-vibratoDepth { --x: 258.22; --y: 127.5; }
+.part-rack .sampei-control-vibratoDelay { --x: 303.62; --y: 127.5; }
+.part-rack .sampei-control-attack { --x: 32.73; --y: 187; }
+.part-rack .sampei-control-decay { --x: 78.03; --y: 187; }
+.part-rack .sampei-control-release { --x: 123.18; --y: 187; }
+.part-rack .sampei-control-cutoff { --x: 176.21; --y: 187; }
+.part-rack .sampei-control-resonance { --x: 221.52; --y: 187; }
+.part-rack .sampei-control-soft { --x: 274.24; --y: 187; --w: 15.45; --switch-top: 20.6; }
+.part-rack .sampei-control-sostenuto { --x: 297.27; --y: 187; --w: 15.45; --switch-top: 20.6; }
+.part-rack .sampei-control-hold { --x: 320.3; --y: 187; --w: 15.45; --switch-top: 20.6; }
+.part-rack .sampei-divider-header { --x: 289.7; --y: 21; }
+.part-rack .sampei-divider-pan { --x: 167.7; --y: 80.6; }
+.part-rack .sampei-divider-chorus { --x: 265.8; --y: 80.6; }
+.part-rack .sampei-divider-portamentoTime { --x: 342.1; --y: 80.6; }
+.part-rack .sampei-divider-mono { display: none; }
+.part-rack .sampei-divider-fineTune { --x: 174.1; --y: 140; }
+.part-rack .sampei-divider-vibratoDelay { --x: 348.4; --y: 140; }
+.part-rack .sampei-divider-release { --x: 167.7; --y: 199.5; }
+.part-rack .sampei-divider-resonance { --x: 265.8; --y: 199.5; }
 
-@media (max-width: 380px) {
-  .part-rack .sampei-part { gap: 6px; padding: 8px; grid-template-columns: 36px minmax(0, 1fr); }
-  .part-rack .sampei-part-head { grid-template-columns: 44px 45px minmax(0, 1fr) 44px; gap: 4px; }
-  .part-rack .sampei-dial-row { gap: 1px; }
-  .part-rack .sampei-field-caption,
-  .part-rack .sampei-dial-caption { font-size: 10px; }
-  .part-rack .sampei-patch { font-size: 12px; }
+@container (min-width: 600px) {
+  .part-rack .sampei-panel {
+    --sampei-unit: calc(100cqw / 900);
+    --sampei-diameter: 56;
+    --sampei-face-top: 17;
+    --sampei-ring: 4;
+    --sampei-label-size: 12;
+    --sampei-label-height: 15;
+    --sampei-field-size: 14;
+    --sampei-field-top: 28;
+    --sampei-field-height: 29;
+    height: calc(var(--sampei-unit) * 168);
+    margin-bottom: calc(var(--sampei-unit) * 8);
+  }
+  .part-rack .sampei-responsive-caption::after { content: attr(data-tablet-caption); }
+  .part-rack .sampei-header-field { --y: 9.5; }
+  .part-rack .sampei-control-part { --x: 36; --w: 30; }
+  .part-rack .sampei-control-channel { --x: 74; --w: 40; }
+  .part-rack .sampei-control-patch { --x: 122; --w: 120; }
+  .part-rack .sampei-control-lowKey { --x: 250; --w: 30; }
+  .part-rack .sampei-control-highKey { --x: 288; --w: 30; }
+  .part-rack .sampei-rotary { --w: 56; }
+  .part-rack .sampei-control-volume { --x: 335; --y: 9.5; }
+  .part-rack .sampei-control-expression { --x: 398.75; --y: 9.5; }
+  .part-rack .sampei-control-pan { --x: 462.75; --y: 9.5; }
+  .part-rack .sampei-control-reverb { --x: 536; --y: 9.5; }
+  .part-rack .sampei-control-chorus { --x: 599.75; --y: 9.5; }
+  .part-rack .sampei-control-portamento { --x: 673; --y: 9.5; --w: 22.5; }
+  .part-rack .sampei-control-portamentoTime { --x: 703.25; --y: 9.5; }
+  .part-rack .sampei-control-mono { --x: 776.5; --y: 9.5; --w: 22.5; }
+  .part-rack .sampei-control-pitchBend { --x: 35.5; --y: 89.5; --w: 34; }
+  .part-rack .sampei-control-bendRange { --x: 77.5; --y: 89.5; --w: 30; }
+  .part-rack .sampei-control-transpose { --x: 115.5; --y: 89.5; --w: 30; }
+  .part-rack .sampei-control-fineTune { --x: 153.25; --y: 89.5; }
+  .part-rack .sampei-control-modulation { --x: 226; --y: 89.5; --w: 34; }
+  .part-rack .sampei-control-vibratoRate { --x: 267.75; --y: 89.5; }
+  .part-rack .sampei-control-vibratoDepth { --x: 331.75; --y: 89.5; }
+  .part-rack .sampei-control-vibratoDelay { --x: 395.75; --y: 89.5; }
+  .part-rack .sampei-control-attack { --x: 468.75; --y: 89.5; }
+  .part-rack .sampei-control-decay { --x: 532.75; --y: 89.5; }
+  .part-rack .sampei-control-release { --x: 596.75; --y: 89.5; }
+  .part-rack .sampei-control-cutoff { --x: 669.75; --y: 89.5; }
+  .part-rack .sampei-control-resonance { --x: 733.75; --y: 89.5; }
+  .part-rack .sampei-control-soft { --x: 807; --y: 89.5; --w: 22.5; }
+  .part-rack .sampei-control-sostenuto { --x: 837.5; --y: 89.5; --w: 22.5; }
+  .part-rack .sampei-control-hold { --x: 868; --y: 89.5; --w: 22.5; }
+  .part-rack .sampei-switch { --switch-top: 25.5; }
+  .part-rack .sampei-panel .sampei-switch-input { height: calc(var(--sampei-unit) * 34); }
+  .part-rack .sampei-number-control { --sampei-field-top: 28; }
+  .part-rack .sampei-fader-track { top: calc(var(--sampei-unit) * 18.5); width: calc(var(--sampei-unit) * 4); height: calc(var(--sampei-unit) * 48); }
+  .part-rack .sampei-fader-thumb { width: calc(var(--sampei-unit) * 30); height: calc(var(--sampei-unit) * 8); }
+  .part-rack .sampei-panel .sampei-fader-input { top: calc(var(--sampei-unit) * 14.5); width: calc(var(--sampei-unit) * 34); height: calc(var(--sampei-unit) * 56); }
+  .part-rack .sampei-rotary-pointer::after { top: calc(var(--sampei-unit) * 7); width: calc(var(--sampei-unit) * 4.8); height: calc(var(--sampei-unit) * 4.8); }
+  .part-rack .sampei-volume-strip { left: calc(var(--sampei-unit) * 11); top: calc(var(--sampei-unit) * 8); width: calc(var(--sampei-unit) * 14); height: calc(var(--sampei-unit) * 124); }
+  .part-rack .sampei-panel .sampei-mute { left: calc(var(--sampei-unit) * 7.5); top: calc(var(--sampei-unit) * 140); width: calc(var(--sampei-unit) * 20); height: calc(var(--sampei-unit) * 20); font-size: calc(var(--sampei-unit) * 14); }
+  .part-rack .sampei-divider { height: calc(var(--sampei-unit) * 56); }
+  .part-rack .sampei-divider-header { --x: 327; --y: 24; }
+  .part-rack .sampei-divider-pan { --x: 527; --y: 24; }
+  .part-rack .sampei-divider-chorus { --x: 664; --y: 24; }
+  .part-rack .sampei-divider-portamentoTime { --x: 768; --y: 24; }
+  .part-rack .sampei-divider-mono { display: block; --x: 807; --y: 24; }
+  .part-rack .sampei-divider-fineTune { --x: 218; --y: 104; }
+  .part-rack .sampei-divider-vibratoDelay { --x: 460; --y: 104; }
+  .part-rack .sampei-divider-release { --x: 661; --y: 104; }
+  .part-rack .sampei-divider-resonance { --x: 798; --y: 104; }
 }
