@@ -1,0 +1,120 @@
+PROJECT 128: BUILDING IOS WHILE WORKING FROM LINUX
+
+The project includes .github/workflows/build-ios.yml. Linux can prepare the
+source, run the web/audio tests, and dispatch/download a macOS build. Xcode
+then runs on GitHub's real Mac infrastructure. This is remote macOS CI,
+not macOS emulation inside this Linux workspace.
+
+CURRENT HOST EVIDENCE
+The inspected host is x86_64, with 17.59 GiB RAM and 20.97 GiB free in
+/workspace. It exposes neither /dev/kvm nor Intel vmx/AMD svm CPU flags;
+QEMU is not installed. No macOS installer, Xcode distribution, VM, Apple
+account session, or paid cloud service was provisioned during this work.
+
+OSX-KVM documents modern Linux, QEMU >= 8.2.2, VT-x/AMD SVM, SSE4.1, and
+AVX2 for macOS Ventura or newer. Its current OpenCore boot script uses
+-enable-kvm; its example macOS disk is 256 GB (virtual capacity, not an
+assertion that all 256 GB is immediately allocated). This host does not
+meet its hardware-virtualization prerequisites. Installing QEMU alone
+would not expose the missing host acceleration.
+
+QEMU also has the TCG software CPU emulator. That is a real emulator, but
+its existence is not evidence that this host can practically install and
+run modern macOS, Xcode, and iOS Simulator. The upstream OSX-KVM recipe
+requires hardware virtualization and also describes missing graphical
+acceleration and an unreliable sound subsystem. No local TCG/macOS build
+or audio result is claimed. Darling describes only basic experimental
+support for simple GUI programs; it is not a verified Xcode/iOS SDK path.
+
+Apple's macOS Sequoia/Tahoe license, section 2B(iii), permits up to two
+additional virtual instances on each Apple-branded computer already
+running macOS, for specified purposes including development/testing.
+It does not grant that permission for an ordinary non-Apple Linux host.
+Apple's supported Apple-silicon virtualization API also runs on a Mac.
+These restrictions and this host's missing KVM support are separate facts.
+
+HOW TO RUN THE INCLUDED CI
+1. Put this source in a GitHub repository you control, preserving the
+   .github/workflows folder. That repository/account operation was not
+   performed here, and an existing remote or credentials are not assumed.
+2. Enable GitHub Actions for the repository. Open Actions > Build iOS >
+   Run workflow. Leave sign_ipa false for the default unsigned simulator
+   build. An authorized Linux client can alternatively dispatch it with:
+     gh workflow run build-ios.yml --ref YOUR_BRANCH -f sign_ipa=false
+3. The workflow uses macos-15, checks full Xcode and both iOS SDKs, runs
+   npm ci, npm test, and npm run build (including the iOS web-asset sync),
+   then builds the shared Project128 scheme for generic iOS Simulator
+   with CODE_SIGNING_ALLOWED=NO. Download Project128-simulator from the
+   successful run. It contains the simulator .app ZIP and build log.
+4. This simulator build requires no Apple signing certificate or paid
+   Apple Developer membership. GitHub Actions availability, included
+   minutes, billing, and any approval rules depend on your repository
+   and account. No promise that a remote run is free is made.
+
+The preflight is tools/macos-preflight.sh. It is read-only and deliberately
+fails on Linux with a useful message. It checks toolchain availability,
+SDKs, and the shared scheme; passing it is not a compile or runtime test.
+Apple lists Xcode 16.2 on macOS Sonoma 14.5+ with the iOS 18.2 SDK, and
+Xcode 16.4 on macOS Sequoia 15.3+ with iOS 18.5. Newer compatible Xcode
+versions can target iOS 18. The workflow checks the actual installed
+toolchain instead of claiming a particular SDK is present without a run.
+
+OPTIONAL SIGNED DEVICE IPA
+The optional signed-ipa job runs only when sign_ipa is true and the
+simulator job succeeds. Add these GitHub repository Actions secrets:
+  APPLETEAMID             Ten-character Apple Developer team identifier.
+  CERTIFICATEP12BASE64    Base64 PKCS#12 signing certificate AND private key.
+  CERTPASSWORD           Password protecting that PKCS#12 export.
+  PROFILEBASE64          Base64 iOS provisioning profile authorizing
+                         org.project128.player and that certificate/team.
+
+These materials must come from an authorized Apple account/team. Merely
+running macOS in a VM cannot create signing authorization. The workflow
+does not log in to an Apple account, create certificates, register devices,
+or request automatic provisioning. Keep certificate/private-key material
+in secrets, never in source or chat. Supply a password-protected P12.
+
+The job validates the profile's team, bundle identifier, platform, expiry,
+and certificate match. It imports the P12 into a temporary keychain and
+exports an IPA using the profile's development, ad hoc, enterprise, or
+App Store method. It does not upload to App Store Connect or TestFlight.
+The always-run cleanup removes the keychain, profile copies, and temporary
+private-key files. The hosted runner is ephemeral as well.
+
+The downloaded IPA's installation rights come from its signing profile:
+development/ad hoc profiles require authorized registered devices; an
+App Store export is for Apple's distribution flow and is not a universal
+sideloadable IPA. A simulator .app cannot be installed on a real iPhone.
+No signed IPA is claimed until a successful signing run produces one.
+
+WHAT THIS CAN AND CANNOT VERIFY
+A successful macOS CI compile establishes that Xcode accepts the native
+project, resources, and selected target. The default workflow does not
+boot Simulator, execute XCTest, or exercise live audio/native MIDI. The
+web/core test results and native compile log are separate evidence.
+Simulator runtime tests can be added and run on the Mac runner, but are
+still separate from physical-device tests. Actual iPhone/iPad audio,
+WKWebView worklet behavior, route changes, interruptions, screen locking,
+background behavior, native MIDI latency, and installation require a real
+device and appropriate signing. No emulator or CI compile proves them.
+
+PRIMARY REFERENCES (consulted 28 OCTOBER 2026)
+OSX-KVM requirements and documented limitations:
+  https://github.com/kholia/OSX-KVM#requirements
+  https://github.com/kholia/OSX-KVM#setting-expectations-right
+  https://github.com/kholia/OSX-KVM/blob/master/OpenCore-Boot.sh
+QEMU system emulation and available accelerators:
+  https://www.qemu.org/docs/master/system/introduction.html
+Apple macOS licenses, section 2B(iii):
+  https://www.apple.com/legal/sla/docs/macOSSequoia.pdf
+  https://www.apple.com/legal/sla/docs/macOSTahoe.pdf
+Apple's Mac virtualization API:
+  https://developer.apple.com/documentation/virtualization/running-macos-in-a-virtual-machine-on-apple-silicon
+Apple Xcode/SDK/macOS compatibility table:
+  https://developer.apple.com/support/xcode/
+Darling's stated GUI and platform scope:
+  https://www.darlinghq.org/
+GitHub macOS runner details and limits:
+  https://docs.github.com/en/actions/reference/runners/github-hosted-runners
+GitHub's temporary certificate/keychain signing pattern:
+  https://docs.github.com/en/actions/use-cases-and-examples/deploying/deploying-xcode-applications/installing-an-apple-certificate-on-macos-runners-for-xcode-development

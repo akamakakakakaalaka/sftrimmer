@@ -1,0 +1,2002 @@
+[
+  {
+    "id": 1,
+    "category": "Performance workspace",
+    "title": "128-panel performance overview",
+    "description": "Display 128 mini panels together, mapped explicitly as eight MIDI ports with sixteen channels each, plus activity indicators.",
+    "status": "Proposed",
+    "phase": "Core"
+  },
+  {
+    "id": 2,
+    "category": "Performance workspace",
+    "title": "Readable expanded part view",
+    "description": "Expand any mini panel into large labeled controls while retaining its position within the complete performance overview.",
+    "status": "Proposed",
+    "phase": "Core"
+  },
+  {
+    "id": 3,
+    "category": "Performance workspace",
+    "title": "Part focus strip",
+    "description": "Keep selected part identity, sound source, MIDI channel, and essential controls visible while switching editing screens.",
+    "status": "Proposed",
+    "phase": "Core"
+  },
+  {
+    "id": 4,
+    "category": "Performance workspace",
+    "title": "Multi-part selection",
+    "description": "Select several parts and apply compatible volume, pan, mute, or routing changes with clear affected-part previews.",
+    "status": "Proposed",
+    "phase": "Core"
+  },
+  {
+    "id": 5,
+    "category": "Performance workspace",
+    "title": "Part groups",
+    "description": "Create named part groups for strings, rhythm, accompaniment, or live layers, with independent group controls.",
+    "status": "Proposed",
+    "phase": "Core"
+  },
+  {
+    "id": 6,
+    "category": "Performance workspace",
+    "title": "Solo audition modes",
+    "description": "Offer exclusive solo, additive solo, and momentary audition behavior suitable for rehearsing dense multitimbral arrangements.",
+    "status": "Proposed",
+    "phase": "Core"
+  },
+  {
+    "id": 7,
+    "category": "Performance workspace",
+    "title": "Part activity meters",
+    "description": "Show note activity, audio level, sustain state, and voice usage for each visible performance part.",
+    "status": "Proposed",
+    "phase": "Core"
+  },
+  {
+    "id": 8,
+    "category": "Performance workspace",
+    "title": "Performance lock mode",
+    "description": "Lock editing controls during performance while preserving transport, expressive playing, panic, and explicitly permitted live adjustments.",
+    "status": "Proposed",
+    "phase": "Core"
+  },
+  {
+    "id": 9,
+    "category": "Performance workspace",
+    "title": "Workspace bookmarks",
+    "description": "Save named combinations of visible editors, selected parts, zoom levels, and panel ordering for recurring workflows.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 10,
+    "category": "Performance workspace",
+    "title": "Part comparison view",
+    "description": "Place two expanded part editors side by side to compare instrument choices, controller values, and routing settings.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 11,
+    "category": "Sound sources and part assignments",
+    "title": "Independent part bank and program maps",
+    "description": "Assign independent SF2 or SF3 bank and program values per part; expose DLS sources only after validated compatibility.",
+    "status": "Proposed",
+    "phase": "Core"
+  },
+  {
+    "id": 12,
+    "category": "Sound sources and part assignments",
+    "title": "Independent app preset assignments",
+    "description": "Assign an individual app preset to every part without replacing presets or instruments assigned elsewhere.",
+    "status": "Proposed",
+    "phase": "Core"
+  },
+  {
+    "id": 13,
+    "category": "Sound sources and part assignments",
+    "title": "Explicit bank address controls",
+    "description": "Expose bank MSB, bank LSB, and program numbers with selectable zero-based or one-based display conventions.",
+    "status": "Proposed",
+    "phase": "Core"
+  },
+  {
+    "id": 14,
+    "category": "Sound sources and part assignments",
+    "title": "Per-part source priority",
+    "description": "Define an ordered source list for each part so overlapping bank addresses resolve according to deliberate choices.",
+    "status": "Proposed",
+    "phase": "Core"
+  },
+  {
+    "id": 15,
+    "category": "Sound sources and part assignments",
+    "title": "Missing instrument resolution",
+    "description": "Present unavailable instruments with matching candidates and let users accept replacements individually before playback begins.",
+    "status": "Proposed",
+    "phase": "Core"
+  },
+  {
+    "id": 16,
+    "category": "Sound sources and part assignments",
+    "title": "Instrument substitution rules",
+    "description": "Create reusable substitution rules based on source identity, bank address, program, channel role, and song metadata.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 17,
+    "category": "Sound sources and part assignments",
+    "title": "Source provenance inspector",
+    "description": "Display source filename, content fingerprint, credited creator, license notes, and imported instrument identifiers beside each assignment.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 18,
+    "category": "Sound sources and part assignments",
+    "title": "Bank map comparison",
+    "description": "Compare two libraries by bank and program coverage to identify missing instruments before changing a performance setup.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 19,
+    "category": "Sound sources and part assignments",
+    "title": "Sound source isolation",
+    "description": "Temporarily audition one loaded source and identify every part currently depending on that library.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 20,
+    "category": "Sound sources and part assignments",
+    "title": "DLS articulation translation report",
+    "description": "Explain which validated DLS articulations translate accurately, which require approximation, and which prevent trustworthy playback.",
+    "status": "Proposed",
+    "phase": "Research"
+  },
+  {
+    "id": 21,
+    "category": "App presets and sound design",
+    "title": "Named app preset library",
+    "description": "Serialize original app presets independently, preserving names, categories, comments, stable preset identifiers, and immutable source-bank fingerprints.",
+    "status": "Proposed",
+    "phase": "Core"
+  },
+  {
+    "id": 22,
+    "category": "App presets and sound design",
+    "title": "Preset source dependencies",
+    "description": "Show every library and sample dependency a preset requires before loading, sharing, or removing related files.",
+    "status": "Proposed",
+    "phase": "Core"
+  },
+  {
+    "id": 23,
+    "category": "App presets and sound design",
+    "title": "Per-preset effect snapshots",
+    "description": "Save independent reverb, chorus, and delay settings inside each app preset, including per-preset sends and routing preferences.",
+    "status": "Proposed",
+    "phase": "Core"
+  },
+  {
+    "id": 24,
+    "category": "App presets and sound design",
+    "title": "Preset save comparison",
+    "description": "Compare the edited preset against its saved version and choose exactly which changed sections to keep.",
+    "status": "Proposed",
+    "phase": "Core"
+  },
+  {
+    "id": 25,
+    "category": "App presets and sound design",
+    "title": "Preset favorites and ratings",
+    "description": "Mark favorite presets and add personal ratings to build useful shortlists across large imported sound collections.",
+    "status": "Proposed",
+    "phase": "Core"
+  },
+  {
+    "id": 26,
+    "category": "App presets and sound design",
+    "title": "Layered app presets",
+    "description": "Combine several instrument layers with independent gain, pan, key ranges, velocity ranges, and tuning offsets.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 27,
+    "category": "App presets and sound design",
+    "title": "Velocity crossfade layers",
+    "description": "Blend between layered instruments across configurable velocity windows to reduce abrupt timbral transitions during expressive playing.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 28,
+    "category": "App presets and sound design",
+    "title": "Preset macro controls",
+    "description": "Map named macro knobs to several compatible sound parameters with individual ranges, curves, and inversion options.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 29,
+    "category": "App presets and sound design",
+    "title": "Preset variation families",
+    "description": "Organize related sound variations under one parent preset while preserving clear differences and individual recall targets.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 30,
+    "category": "App presets and sound design",
+    "title": "Portable preset bundles",
+    "description": "Export app presets with dependency manifests and include audio resources only when their redistribution rights permit sharing.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 31,
+    "category": "Envelopes and modulation",
+    "title": "Per-preset ADSR controls",
+    "description": "Store attack, decay, sustain, and release separately for every preset, with numeric entry and musical audition controls.",
+    "status": "Proposed",
+    "phase": "Core"
+  },
+  {
+    "id": 32,
+    "category": "Envelopes and modulation",
+    "title": "Original AHDSR envelope editor",
+    "description": "Offer draggable attack, hold, decay, sustain, and release handles inspired by familiar sampler workflows, with original interaction design.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 33,
+    "category": "Envelopes and modulation",
+    "title": "Envelope curve shaping",
+    "description": "Adjust stage curvature and inspect the resulting amplitude trajectory while preserving precise time and level values.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 34,
+    "category": "Envelopes and modulation",
+    "title": "Envelope time scaling",
+    "description": "Scale an entire envelope proportionally to create shorter or longer variations without manually changing every stage.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 35,
+    "category": "Envelopes and modulation",
+    "title": "Velocity envelope response",
+    "description": "Map playing velocity to envelope times or sustain level, with bounded ranges and an immediate response preview.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 36,
+    "category": "Envelopes and modulation",
+    "title": "Keytracked envelope timing",
+    "description": "Change selected envelope stages across the keyboard using configurable center notes, slopes, and minimum or maximum limits.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 37,
+    "category": "Envelopes and modulation",
+    "title": "Modulation assignment matrix",
+    "description": "Route supported modulation sources to synthesis destinations after verifying the engine exposes stable, compatible parameter controls.",
+    "status": "Proposed",
+    "phase": "Research"
+  },
+  {
+    "id": 38,
+    "category": "Envelopes and modulation",
+    "title": "Tempo-synchronized LFO controls",
+    "description": "Set rhythmic modulation rates, waveform, phase, and depth with clear free-running and retriggered behavior choices.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 39,
+    "category": "Envelopes and modulation",
+    "title": "Release-trigger layer design",
+    "description": "Explore release-triggered sound layers with explicit engine capability checks and predictable sustain-pedal interaction before enabling them.",
+    "status": "Proposed",
+    "phase": "Research"
+  },
+  {
+    "id": 40,
+    "category": "Envelopes and modulation",
+    "title": "Envelope audition loop",
+    "description": "Repeat a chosen note with adjustable gate length and velocity while editing envelope shapes and release tails.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 41,
+    "category": "Keyboard and expressive playing",
+    "title": "Resizable performance keyboard",
+    "description": "Adjust visible key count, keyboard height, octave position, and label density for comfortable playing on different iOS screens.",
+    "status": "Proposed",
+    "phase": "Core"
+  },
+  {
+    "id": 42,
+    "category": "Keyboard and expressive playing",
+    "title": "Split keyboard zones",
+    "description": "Define multiple playable keyboard regions with separate destinations, octave offsets, velocity responses, and visible zone boundaries.",
+    "status": "Proposed",
+    "phase": "Core"
+  },
+  {
+    "id": 43,
+    "category": "Keyboard and expressive playing",
+    "title": "Layer destination keyboard",
+    "description": "Send one keyboard gesture to several chosen parts while retaining each destination's independent sound and controller settings.",
+    "status": "Proposed",
+    "phase": "Core"
+  },
+  {
+    "id": 44,
+    "category": "Keyboard and expressive playing",
+    "title": "Velocity response curves",
+    "description": "Choose or draw touch velocity curves and set minimum, maximum, and fixed-velocity options for predictable expression.",
+    "status": "Proposed",
+    "phase": "Core"
+  },
+  {
+    "id": 45,
+    "category": "Keyboard and expressive playing",
+    "title": "Pitch and modulation surfaces",
+    "description": "Provide configurable pitch bend and modulation controls with adjustable ranges, return behavior, and reachable performance placement.",
+    "status": "Proposed",
+    "phase": "Core"
+  },
+  {
+    "id": 46,
+    "category": "Keyboard and expressive playing",
+    "title": "Sustain and sostenuto pedals",
+    "description": "Offer on-screen sustain, sostenuto, and soft-pedal controls with latch modes and clear held-note feedback.",
+    "status": "Proposed",
+    "phase": "Core"
+  },
+  {
+    "id": 47,
+    "category": "Keyboard and expressive playing",
+    "title": "Scale-constrained keyboard",
+    "description": "Constrain playable keys to a selected scale while showing the original pitch layout and explicit remapping behavior.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 48,
+    "category": "Keyboard and expressive playing",
+    "title": "Isomorphic pad layouts",
+    "description": "Offer configurable interval-based pad grids with scale highlighting, octave navigation, and independent velocity or pressure mappings.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 49,
+    "category": "Keyboard and expressive playing",
+    "title": "Gesture expression lanes",
+    "description": "Map vertical or horizontal gestures to supported expressive controllers with editable ranges and visual feedback during performance.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 50,
+    "category": "Keyboard and expressive playing",
+    "title": "One-touch chord pads",
+    "description": "Trigger user-defined voicings from labeled pads with per-pad velocity, gate, strum direction, and destination controls.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 51,
+    "category": "Harmony and scale vocabulary",
+    "title": "Major and minor scale families",
+    "description": "Provide major, natural minor, harmonic minor, and melodic minor scales with visible interval formulas and selectable tonic.",
+    "status": "Proposed",
+    "phase": "Core"
+  },
+  {
+    "id": 52,
+    "category": "Harmony and scale vocabulary",
+    "title": "Church mode collection",
+    "description": "Offer Ionian, Dorian, Phrygian, Lydian, Mixolydian, Aeolian, and Locrian as individually named, editable interval patterns.",
+    "status": "Proposed",
+    "phase": "Core"
+  },
+  {
+    "id": 53,
+    "category": "Harmony and scale vocabulary",
+    "title": "Hijaz scale workspace",
+    "description": "Provide a named Hijaz starting pattern with editable intervals and tuning context, acknowledging differences between performance traditions.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 54,
+    "category": "Harmony and scale vocabulary",
+    "title": "Rast scale workspace",
+    "description": "Provide named Rast interval and tuning templates with editable degrees instead of presenting one universal regional scale.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 55,
+    "category": "Harmony and scale vocabulary",
+    "title": "Bayati scale workspace",
+    "description": "Provide named Bayati starting templates with adjustable microtonal degrees, tonic selection, and contextual tuning notes.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 56,
+    "category": "Harmony and scale vocabulary",
+    "title": "Hirajoshi scale workspace",
+    "description": "Offer Hirajoshi as a distinct named scale pattern with degree highlighting, transposition, and user-editable interval definitions.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 57,
+    "category": "Harmony and scale vocabulary",
+    "title": "Insen scale workspace",
+    "description": "Offer Insen as a distinct named scale pattern with degree highlighting, transposition, and user-editable interval definitions.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 58,
+    "category": "Harmony and scale vocabulary",
+    "title": "Chord vocabulary browser",
+    "description": "Browse named chord qualities, extensions, inversions, and omissions independently from the selected melodic scale or tuning system.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 59,
+    "category": "Harmony and scale vocabulary",
+    "title": "Voicing transformation tools",
+    "description": "Generate open, close, drop-two, and inversion variants while keeping selected voice ranges and bass notes under control.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 60,
+    "category": "Harmony and scale vocabulary",
+    "title": "Custom scale sharing",
+    "description": "Save and exchange user-defined scales with interval values, tuning references, authorship notes, and descriptive cultural context.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 61,
+    "category": "Tuning and intonation",
+    "title": "Per-part tuning offsets",
+    "description": "Set independent coarse and fine tuning for selected parts with numeric readouts and quick reference-pitch audition controls.",
+    "status": "Proposed",
+    "phase": "Core"
+  },
+  {
+    "id": 62,
+    "category": "Tuning and intonation",
+    "title": "Tuning table editor",
+    "description": "Edit pitch offsets for individual scale degrees or MIDI notes using cents, ratios, and audible reference comparisons.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 63,
+    "category": "Tuning and intonation",
+    "title": "Scala tuning import",
+    "description": "Import validated Scala scale files and display parsed intervals, unsupported content, and the resulting playable note mapping.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 64,
+    "category": "Tuning and intonation",
+    "title": "Keyboard mapping import",
+    "description": "Import compatible keyboard mapping files with explicit reference note, frequency, octave mapping, and unmapped-note behavior previews.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 65,
+    "category": "Tuning and intonation",
+    "title": "Historical temperament library",
+    "description": "Provide documented equal, meantone, Pythagorean, and selected well-tempered tuning templates with editable reference pitch settings.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 66,
+    "category": "Tuning and intonation",
+    "title": "Tuning comparison audition",
+    "description": "Alternate between two tuning tables during a held chord or repeated phrase while retaining identical instrument and velocity settings.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 67,
+    "category": "Tuning and intonation",
+    "title": "MIDI tuning message support",
+    "description": "Evaluate supported MIDI Tuning Standard messages and expose only behaviors confirmed through device and engine compatibility testing.",
+    "status": "Proposed",
+    "phase": "Research"
+  },
+  {
+    "id": 68,
+    "category": "Tuning and intonation",
+    "title": "Adaptive just intonation",
+    "description": "Explore context-sensitive tuning with transparent chord assumptions, bounded pitch movement, and an immediate return to fixed tuning.",
+    "status": "Proposed",
+    "phase": "Research"
+  },
+  {
+    "id": 69,
+    "category": "Tuning and intonation",
+    "title": "Reference tone generator",
+    "description": "Play selectable reference pitches and intervals through a chosen part for tuning rehearsal and ensemble preparation.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 70,
+    "category": "Tuning and intonation",
+    "title": "Tuning annotations",
+    "description": "Attach explanations, sources, and performance notes to tuning presets so interval choices remain understandable when revisiting projects.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 71,
+    "category": "Drumkits and rhythm",
+    "title": "Drumkit program key editor",
+    "description": "Edit individual keys within a selected drumkit program, including sound assignment, level, pan, tuning, and key labels.",
+    "status": "Proposed",
+    "phase": "Core"
+  },
+  {
+    "id": 72,
+    "category": "Drumkits and rhythm",
+    "title": "Drum key audition keyboard",
+    "description": "Show labeled percussion keys with isolated preview, velocity testing, and visible highlighting of incoming drum notes.",
+    "status": "Proposed",
+    "phase": "Core"
+  },
+  {
+    "id": 73,
+    "category": "Drumkits and rhythm",
+    "title": "Drum articulation alternatives",
+    "description": "Assign alternate articulations to drum pads or keys while preserving explicit source program and note relationships.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 74,
+    "category": "Drumkits and rhythm",
+    "title": "Drum choke group controls",
+    "description": "Configure mutually exclusive percussion groups only after confirming reliable note termination and engine support for the selected sources.",
+    "status": "Proposed",
+    "phase": "Research"
+  },
+  {
+    "id": 75,
+    "category": "Drumkits and rhythm",
+    "title": "Drum map translation",
+    "description": "Translate between named drum maps with a preview of changed note numbers and unresolved percussion articulations.",
+    "status": "Proposed",
+    "phase": "Core"
+  },
+  {
+    "id": 76,
+    "category": "Drumkits and rhythm",
+    "title": "Step rhythm sequencer",
+    "description": "Create looping drum patterns with per-step velocity, probability, gate length, and independently selectable destination parts.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 77,
+    "category": "Drumkits and rhythm",
+    "title": "Rhythm swing templates",
+    "description": "Apply adjustable swing or groove timing to sequenced rhythms while preserving an accessible straight-timing reference.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 78,
+    "category": "Drumkits and rhythm",
+    "title": "Polyrhythm lane lengths",
+    "description": "Give sequencer lanes independent cycle lengths and display when their combined rhythm returns to its starting alignment.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 79,
+    "category": "Drumkits and rhythm",
+    "title": "Humanization controls",
+    "description": "Introduce bounded timing and velocity variation with reproducible seeds and separate controls for each rhythm lane.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 80,
+    "category": "Drumkits and rhythm",
+    "title": "Percussion note extraction",
+    "description": "Collect percussion events from an imported song into an editable rhythm pattern without altering the source file.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 81,
+    "category": "Song playback and transport",
+    "title": "Tempo control and tap tempo",
+    "description": "Adjust playback tempo numerically or by tapping, with clear indication of original tempo and active tempo changes.",
+    "status": "Proposed",
+    "phase": "Core"
+  },
+  {
+    "id": 82,
+    "category": "Song playback and transport",
+    "title": "Musical position navigation",
+    "description": "Jump by measure, beat, marker, or elapsed time with a transport display that reflects changing meter.",
+    "status": "Proposed",
+    "phase": "Core"
+  },
+  {
+    "id": 83,
+    "category": "Song playback and transport",
+    "title": "A/B practice loop",
+    "description": "Set adjustable loop boundaries, count-in length, and repeat count while showing the selected musical region clearly.",
+    "status": "Proposed",
+    "phase": "Core"
+  },
+  {
+    "id": 84,
+    "category": "Song playback and transport",
+    "title": "Playback speed presets",
+    "description": "Recall several tempo multipliers for rehearsal and performance without repeatedly entering the same speed values manually.",
+    "status": "Proposed",
+    "phase": "Core"
+  },
+  {
+    "id": 85,
+    "category": "Song playback and transport",
+    "title": "Marker navigation list",
+    "description": "Browse named song markers with surrounding measures and jump directly to the selected location during playback.",
+    "status": "Proposed",
+    "phase": "Core"
+  },
+  {
+    "id": 86,
+    "category": "Song playback and transport",
+    "title": "Count-in metronome",
+    "description": "Provide configurable count-in bars, beat accents, sound choice, and metronome output independent of the musical parts.",
+    "status": "Proposed",
+    "phase": "Core"
+  },
+  {
+    "id": 87,
+    "category": "Song playback and transport",
+    "title": "Gapless set playback",
+    "description": "Prepare the next song in advance and offer configurable transitions, silence intervals, and transport handoff behavior.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 88,
+    "category": "Song playback and transport",
+    "title": "Loop transition rules",
+    "description": "Choose whether a loop repeats immediately, completes a final pass, or continues into the following arrangement section.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 89,
+    "category": "Song playback and transport",
+    "title": "Playback follow modes",
+    "description": "Follow the current position in piano roll, score, or track views with configurable scrolling and manual inspection overrides.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 90,
+    "category": "Song playback and transport",
+    "title": "Song ending controls",
+    "description": "Choose natural release, fixed tail duration, or explicit stop behavior and preview the expected ending length.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 91,
+    "category": "MIDI file inspection",
+    "title": "MIDI event inspector",
+    "description": "Inspect note, controller, program, tempo, meter, and system events with human-readable descriptions and original numeric values.",
+    "status": "Proposed",
+    "phase": "Core"
+  },
+  {
+    "id": 92,
+    "category": "MIDI file inspection",
+    "title": "Track and channel matrix",
+    "description": "Visualize which tracks address each MIDI channel and identify shared-channel relationships before assigning sounds or routing.",
+    "status": "Proposed",
+    "phase": "Core"
+  },
+  {
+    "id": 93,
+    "category": "MIDI file inspection",
+    "title": "Import validation report",
+    "description": "Report malformed events, unusual timing divisions, unsupported messages, and recoverable import decisions before accepting a file.",
+    "status": "Proposed",
+    "phase": "Core"
+  },
+  {
+    "id": 94,
+    "category": "MIDI file inspection",
+    "title": "Tempo and meter map",
+    "description": "Display every tempo and meter change in a navigable timeline with both musical and absolute time positions.",
+    "status": "Proposed",
+    "phase": "Core"
+  },
+  {
+    "id": 95,
+    "category": "MIDI file inspection",
+    "title": "Program history viewer",
+    "description": "Show chronological bank and program changes for each channel so instrument transitions can be understood before playback.",
+    "status": "Proposed",
+    "phase": "Core"
+  },
+  {
+    "id": 96,
+    "category": "MIDI file inspection",
+    "title": "Controller history graphs",
+    "description": "Plot selected controller values over time and distinguish explicit events from inherited or synthesized playback state.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 97,
+    "category": "MIDI file inspection",
+    "title": "SysEx message inspection",
+    "description": "Display system-exclusive manufacturer identifiers, decoded supported fields, raw bytes, and explicit warnings for unrecognized structures.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 98,
+    "category": "MIDI file inspection",
+    "title": "Note range analysis",
+    "description": "Summarize pitch ranges, velocity distributions, polyphony peaks, and note durations for selected tracks or musical sections.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 99,
+    "category": "MIDI file inspection",
+    "title": "Embedded text browser",
+    "description": "Collect lyrics, copyright text, sequence names, and other text events in a searchable view with event timing.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 100,
+    "category": "MIDI file inspection",
+    "title": "Format-two sequence workspace",
+    "description": "Select and organize independent MIDI format two sequences without silently treating unrelated patterns as simultaneous tracks.",
+    "status": "Proposed",
+    "phase": "Research"
+  },
+  {
+    "id": 101,
+    "category": "Arrangement and note editing",
+    "title": "Piano roll editor",
+    "description": "Edit notes in a zoomable piano roll with snapping, velocity controls, and visible measure or beat boundaries.",
+    "status": "Proposed",
+    "phase": "Core"
+  },
+  {
+    "id": 102,
+    "category": "Arrangement and note editing",
+    "title": "Track mute arrangements",
+    "description": "Save alternative track mute combinations as named arrangements that can be recalled without rewriting the imported song.",
+    "status": "Proposed",
+    "phase": "Core"
+  },
+  {
+    "id": 103,
+    "category": "Arrangement and note editing",
+    "title": "Section arrangement playlist",
+    "description": "Build a playback order from song regions, allowing repeated introductions, extended solos, and alternate endings with clear transitions.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 104,
+    "category": "Arrangement and note editing",
+    "title": "Non-destructive note transforms",
+    "description": "Apply reversible note transposition, length scaling, velocity scaling, and range filtering to selected musical regions.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 105,
+    "category": "Arrangement and note editing",
+    "title": "Quantization with strength",
+    "description": "Quantize selected note starts or ends using adjustable strength, swing, and exclusions for intentional grace notes.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 106,
+    "category": "Arrangement and note editing",
+    "title": "Velocity shaping tools",
+    "description": "Draw velocity ramps, compress dynamics, and adjust selected notes while showing original and resulting values together.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 107,
+    "category": "Arrangement and note editing",
+    "title": "Controller lane editing",
+    "description": "Create and edit controller curves beside notes using stepped or interpolated segments and editable point values.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 108,
+    "category": "Arrangement and note editing",
+    "title": "Track split and merge",
+    "description": "Split selected events by channel, pitch range, or controller type, then combine chosen tracks with conflict previews.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 109,
+    "category": "Arrangement and note editing",
+    "title": "Section duplication",
+    "description": "Duplicate selected musical regions with associated tempo, controller, and marker handling shown before the arrangement changes.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 110,
+    "category": "Arrangement and note editing",
+    "title": "Event edit history",
+    "description": "Inspect and selectively undo named editing operations with clear descriptions of affected tracks, regions, and event counts.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 111,
+    "category": "Recording and export",
+    "title": "Offline stereo rendering",
+    "description": "Render selected songs or regions to stereo audio with selectable sample rate, bit depth, and release-tail duration.",
+    "status": "Proposed",
+    "phase": "Core"
+  },
+  {
+    "id": 112,
+    "category": "Recording and export",
+    "title": "Live performance recording",
+    "description": "Capture keyboard playing and song playback into audio with visible recording state, elapsed time, and input or output meters.",
+    "status": "Proposed",
+    "phase": "Core"
+  },
+  {
+    "id": 113,
+    "category": "Recording and export",
+    "title": "Per-part audio stems",
+    "description": "Export isolated part stems with consistent start times, optional shared-effect returns, and a machine-readable arrangement manifest.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 114,
+    "category": "Recording and export",
+    "title": "Loop region audio export",
+    "description": "Export a chosen loop with configurable tail handling, optional count-in, and filename fields for tempo and key.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 115,
+    "category": "Recording and export",
+    "title": "Export loudness options",
+    "description": "Offer measured peak and loudness reports with optional target normalization and an explicit clipping prevention preview.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 116,
+    "category": "Recording and export",
+    "title": "Audio format profiles",
+    "description": "Save export profiles for rehearsal sharing, archival masters, and mobile delivery using supported, clearly identified audio formats.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 117,
+    "category": "Recording and export",
+    "title": "Batch song rendering",
+    "description": "Queue several songs or preset variations for rendering with individual progress, error reporting, and resumable queue management.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 118,
+    "category": "Recording and export",
+    "title": "Performance take browser",
+    "description": "Review recorded takes with dates, lengths, associated songs, and quick trimming or sharing of selected audio regions.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 119,
+    "category": "Recording and export",
+    "title": "Audio and MIDI alignment",
+    "description": "Measure and compensate recording alignment between rendered audio, external audio inputs, and captured MIDI events across tested devices.",
+    "status": "Proposed",
+    "phase": "Research"
+  },
+  {
+    "id": 120,
+    "category": "Recording and export",
+    "title": "Standard MIDI file export",
+    "description": "Export selected notes, controllers, tempo maps, and markers as standard MIDI format zero or one with explicit channel mapping.",
+    "status": "Proposed",
+    "phase": "Core"
+  },
+  {
+    "id": 121,
+    "category": "MIDI connections and routing",
+    "title": "Connection dashboard",
+    "description": "List available wired, Bluetooth, virtual, and network MIDI endpoints with connection state and clearly named input or output roles.",
+    "status": "Proposed",
+    "phase": "Core"
+  },
+  {
+    "id": 122,
+    "category": "MIDI connections and routing",
+    "title": "Input routing matrix",
+    "description": "Route chosen input ports and channels to selected parts with visible filters and immediate activity feedback.",
+    "status": "Proposed",
+    "phase": "Core"
+  },
+  {
+    "id": 123,
+    "category": "MIDI connections and routing",
+    "title": "Output routing matrix",
+    "description": "Send tracks or live input to selected MIDI destinations with channel remapping and explicit local-engine monitoring choices.",
+    "status": "Proposed",
+    "phase": "Core"
+  },
+  {
+    "id": 124,
+    "category": "MIDI connections and routing",
+    "title": "MIDI learn bindings",
+    "description": "Bind external notes, controllers, and program changes to supported app actions with clear conflict detection and removal controls.",
+    "status": "Proposed",
+    "phase": "Core"
+  },
+  {
+    "id": 125,
+    "category": "MIDI connections and routing",
+    "title": "Controller filtering",
+    "description": "Filter selected controller, aftertouch, program, or system message classes independently for each routing connection in a performance setup.",
+    "status": "Proposed",
+    "phase": "Core"
+  },
+  {
+    "id": 126,
+    "category": "MIDI connections and routing",
+    "title": "MIDI clock synchronization",
+    "description": "Follow or send MIDI clock with visible synchronization status, transport options, and configurable clock output destinations.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 127,
+    "category": "MIDI connections and routing",
+    "title": "Bluetooth reconnect profiles",
+    "description": "Remember trusted Bluetooth MIDI devices and restore their selected routing profile when a compatible connection becomes available.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 128,
+    "category": "MIDI connections and routing",
+    "title": "MPE input interpretation",
+    "description": "Validate lower and upper MPE zones, per-note expression mapping, and voice allocation before advertising compatible instrument performance.",
+    "status": "Proposed",
+    "phase": "Research"
+  },
+  {
+    "id": 129,
+    "category": "MIDI connections and routing",
+    "title": "MIDI two capability discovery",
+    "description": "Explore supported MIDI two endpoint discovery and translation while showing exact protocol capabilities confirmed for each device.",
+    "status": "Proposed",
+    "phase": "Research"
+  },
+  {
+    "id": 130,
+    "category": "MIDI connections and routing",
+    "title": "Routing loop detection",
+    "description": "Detect likely MIDI feedback loops from configured virtual routes and explain which connections could repeatedly echo events.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 131,
+    "category": "Controllers and automation",
+    "title": "Controller control surface",
+    "description": "Build a labeled set of continuous-controller sliders and buttons for the currently selected part or performance group.",
+    "status": "Proposed",
+    "phase": "Core"
+  },
+  {
+    "id": 132,
+    "category": "Controllers and automation",
+    "title": "Program change audition queue",
+    "description": "Step through selected programs with a repeated test phrase and visible bank addresses before committing an assignment.",
+    "status": "Proposed",
+    "phase": "Core"
+  },
+  {
+    "id": 133,
+    "category": "Controllers and automation",
+    "title": "Automation recording modes",
+    "description": "Record controller movement using replace, touch, or latch behavior with explicit start, stop, and affected-lane indicators.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 134,
+    "category": "Controllers and automation",
+    "title": "Controller curve mapping",
+    "description": "Map incoming controller values through custom curves, dead zones, limits, or stepped ranges before they reach chosen destinations.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 135,
+    "category": "Controllers and automation",
+    "title": "Pedal polarity profiles",
+    "description": "Store supported pedal inversion, threshold, half-pedal range, and calibration settings for individual connected controllers or performance setups.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 136,
+    "category": "Controllers and automation",
+    "title": "Automation snapshot recall",
+    "description": "Capture selected controller states and recall them together with optional ramp times and visible excluded parameters.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 137,
+    "category": "Controllers and automation",
+    "title": "External control feedback",
+    "description": "Send supported control values back to configured hardware displays or motorized controls with protection against feedback loops.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 138,
+    "category": "Controllers and automation",
+    "title": "Aftertouch mapping tools",
+    "description": "Map channel or polyphonic pressure to verified destinations with response curves, limits, and an audition display.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 139,
+    "category": "Controllers and automation",
+    "title": "Controller pickup behavior",
+    "description": "Offer pickup, relative, and immediate modes so external knobs can join existing parameter positions predictably during performance.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 140,
+    "category": "Controllers and automation",
+    "title": "RPN and NRPN editor",
+    "description": "Expose verified parameter definitions with explicit data-entry sequencing and device profiles rather than assuming universal controller meanings.",
+    "status": "Proposed",
+    "phase": "Research"
+  },
+  {
+    "id": 141,
+    "category": "Reverb and chorus design",
+    "title": "Reverb algorithm selector",
+    "description": "Offer verified room, hall, and plate-style reverb choices with clear parameter availability and consistent level controls.",
+    "status": "Proposed",
+    "phase": "Core"
+  },
+  {
+    "id": 142,
+    "category": "Reverb and chorus design",
+    "title": "Chorus depth controls",
+    "description": "Adjust chorus rate, depth, feedback, and mix where supported, with sensible ranges and immediate bypass comparison.",
+    "status": "Proposed",
+    "phase": "Core"
+  },
+  {
+    "id": 143,
+    "category": "Reverb and chorus design",
+    "title": "Per-part effect sends",
+    "description": "Set independent reverb and chorus send amounts for each part while displaying the relationship to shared effect returns.",
+    "status": "Proposed",
+    "phase": "Core"
+  },
+  {
+    "id": 144,
+    "category": "Reverb and chorus design",
+    "title": "Reverb pre-delay control",
+    "description": "Set reverb pre-delay in milliseconds or synchronized note values with a visible indication of tempo-linked behavior.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 145,
+    "category": "Reverb and chorus design",
+    "title": "Reverb decay shaping",
+    "description": "Adjust supported decay, damping, and frequency-dependent response controls while showing meaningful units and an audible comparison option.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 146,
+    "category": "Reverb and chorus design",
+    "title": "Chorus stereo controls",
+    "description": "Shape supported chorus stereo width, phase relationships, and channel spread with clear mono compatibility audition controls.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 147,
+    "category": "Reverb and chorus design",
+    "title": "Effect return equalization",
+    "description": "Apply editable high-pass, low-pass, and tonal shaping to shared reverb or chorus returns without changing dry instruments.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 148,
+    "category": "Reverb and chorus design",
+    "title": "Effect tail hold",
+    "description": "Freeze or extend an effect tail when the selected processor supports it, with clear release and panic behavior.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 149,
+    "category": "Reverb and chorus design",
+    "title": "Effect audition references",
+    "description": "Compare effect settings using identical notes or phrases with level matching and clear identification of the active variation.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 150,
+    "category": "Reverb and chorus design",
+    "title": "Legacy effect mapping profiles",
+    "description": "Document and verify how supported GM, GS, or XG effect messages map to available processors and unsupported parameters.",
+    "status": "Proposed",
+    "phase": "Research"
+  },
+  {
+    "id": 151,
+    "category": "Delay and XG research",
+    "title": "Per-preset delay controller",
+    "description": "Give each preset independent delay time, feedback, mix, and routing settings with clearly labeled units and bypass controls.",
+    "status": "Proposed",
+    "phase": "Core"
+  },
+  {
+    "id": 152,
+    "category": "Delay and XG research",
+    "title": "Synchronized delay divisions",
+    "description": "Choose straight, dotted, and triplet delay divisions with tempo following, manual time override, and visible effective milliseconds.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 153,
+    "category": "Delay and XG research",
+    "title": "Stereo and ping-pong delay",
+    "description": "Choose independent left or right timing and ping-pong routing with explicit feedback paths and stereo width controls.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 154,
+    "category": "Delay and XG research",
+    "title": "Delay feedback filtering",
+    "description": "Shape repeated echoes with adjustable low-cut, high-cut, and tonal controls inside the feedback path where supported.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 155,
+    "category": "Delay and XG research",
+    "title": "Delay ducking controls",
+    "description": "Reduce delay output during dry-note activity using threshold, amount, attack, and release controls with visible gain reduction.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 156,
+    "category": "Delay and XG research",
+    "title": "Delay tap pattern editor",
+    "description": "Design multiple delay taps with independent timing, level, pan, and enable state within a clearly displayed pattern.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 157,
+    "category": "Delay and XG research",
+    "title": "Delay tempo transition modes",
+    "description": "Choose smooth time changes or discrete rhythmic switching and audition the resulting pitch or timing behavior beforehand.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 158,
+    "category": "Delay and XG research",
+    "title": "Full XG delay parameter catalog",
+    "description": "Catalog every delay-related XG effect type, parameter, address, unit, range, default, and routing rule before claiming conformance.",
+    "status": "Proposed",
+    "phase": "Research"
+  },
+  {
+    "id": 159,
+    "category": "Delay and XG research",
+    "title": "XG delay conformance bench",
+    "description": "Compare supported XG delay messages against documented references and captured results, recording coverage and every known mismatch.",
+    "status": "Proposed",
+    "phase": "Research"
+  },
+  {
+    "id": 160,
+    "category": "Delay and XG research",
+    "title": "XG delay compatibility profiles",
+    "description": "Enable only verified type and parameter combinations per engine version, with unsupported messages visibly reported to users.",
+    "status": "Proposed",
+    "phase": "Research"
+  },
+  {
+    "id": 161,
+    "category": "Creative effects rack",
+    "title": "License-audited flanger processor",
+    "description": "Evaluate open-source flanger candidates for license compatibility and audio quality before offering rate, depth, feedback, and mix controls.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 162,
+    "category": "Creative effects rack",
+    "title": "License-audited bitcrusher processor",
+    "description": "Evaluate open-source bitcrusher candidates for license compatibility before exposing bit depth, sample reduction, filtering, and wet mix.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 163,
+    "category": "Creative effects rack",
+    "title": "Parametric equalizer",
+    "description": "Shape selected parts or buses with editable frequency, gain, bandwidth, high-pass, and low-pass controls plus spectral feedback.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 164,
+    "category": "Creative effects rack",
+    "title": "Dynamics compressor",
+    "description": "Control threshold, ratio, knee, attack, release, and makeup gain with visible gain reduction and matched bypass audition.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 165,
+    "category": "Creative effects rack",
+    "title": "Output limiter",
+    "description": "Offer an optional final limiter with ceiling, release, and gain reduction metering for controlled performance output levels.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 166,
+    "category": "Creative effects rack",
+    "title": "Distortion and saturation",
+    "description": "Choose clearly described saturation or distortion models with drive, tone, mix, and level-matched comparison controls.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 167,
+    "category": "Creative effects rack",
+    "title": "Phaser processor",
+    "description": "Shape phase modulation using supported stage count, rate, depth, feedback, and stereo controls in an editable effect slot.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 168,
+    "category": "Creative effects rack",
+    "title": "Tremolo and autopan",
+    "description": "Apply tempo-synchronized amplitude or stereo movement with waveform, depth, phase, and manual rate options for performance use.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 169,
+    "category": "Creative effects rack",
+    "title": "Flexible effect ordering",
+    "description": "Reorder compatible insert effects per part or bus while showing signal flow and warning about changed gain structure.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 170,
+    "category": "Creative effects rack",
+    "title": "Effect performance qualification",
+    "description": "Measure candidate effects for latency, CPU, memory, denormal behavior, and bypass consistency before approving them for live use.",
+    "status": "Proposed",
+    "phase": "Research"
+  },
+  {
+    "id": 171,
+    "category": "Sound library discovery",
+    "title": "Unified library search",
+    "description": "Search imported banks and app presets by name, category, source, bank address, tags, and personal notes.",
+    "status": "Proposed",
+    "phase": "Core"
+  },
+  {
+    "id": 172,
+    "category": "Sound library discovery",
+    "title": "Instrument category browser",
+    "description": "Browse melodic families, percussion kits, and user-defined categories with visible source and program information for every result.",
+    "status": "Proposed",
+    "phase": "Core"
+  },
+  {
+    "id": 173,
+    "category": "Sound library discovery",
+    "title": "Instant library audition",
+    "description": "Preview instruments using a selectable phrase or played notes without replacing the active performance part until confirmed.",
+    "status": "Proposed",
+    "phase": "Core"
+  },
+  {
+    "id": 174,
+    "category": "Sound library discovery",
+    "title": "Library collection folders",
+    "description": "Organize libraries and presets into named collections while preserving their original file locations and stable source references.",
+    "status": "Proposed",
+    "phase": "Core"
+  },
+  {
+    "id": 175,
+    "category": "Sound library discovery",
+    "title": "User tagging system",
+    "description": "Apply multiple descriptive tags to sounds and filter combinations for specific genres, roles, articulations, or ensemble tasks.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 176,
+    "category": "Sound library discovery",
+    "title": "Recent sound history",
+    "description": "Revisit recently auditioned or assigned sounds with their source identities and the parts where they were used.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 177,
+    "category": "Sound library discovery",
+    "title": "Library content statistics",
+    "description": "Display instrument counts, bank coverage, sample memory, format details, and unused resource estimates for each imported library.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 178,
+    "category": "Sound library discovery",
+    "title": "Attribution and rights records",
+    "description": "Store creator credits, source links, license files, and redistribution notes alongside libraries and exported preset dependency manifests.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 179,
+    "category": "Sound library discovery",
+    "title": "Duplicate library detection",
+    "description": "Identify byte-identical library files by content fingerprint and offer storage cleanup while preserving affected project references.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 180,
+    "category": "Sound library discovery",
+    "title": "Missing library locator",
+    "description": "Reconnect moved libraries through user-selected files and verify content fingerprints before repairing saved dependency paths.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 181,
+    "category": "Soundfont conversion workflow",
+    "title": "Automatic SF2 preview with opt-in conversion",
+    "description": "Automatically prepare an SF2 audition preview on import; require explicit opt-in before generating tiered SF3 comparison candidates.",
+    "status": "Proposed",
+    "phase": "Research"
+  },
+  {
+    "id": 182,
+    "category": "Soundfont conversion workflow",
+    "title": "SF3 quality tier choices",
+    "description": "Present several validated compression quality tiers with estimated size, conversion time, and clearly described audible tradeoffs.",
+    "status": "Proposed",
+    "phase": "Research"
+  },
+  {
+    "id": 183,
+    "category": "Soundfont conversion workflow",
+    "title": "Matched SF2 and SF3 comparison",
+    "description": "Compare original SF2 and candidate SF3 renders with identical MIDI, gain matching, instant switching, and optional blind labels.",
+    "status": "Proposed",
+    "phase": "Research"
+  },
+  {
+    "id": 184,
+    "category": "Soundfont conversion workflow",
+    "title": "Conversion integrity report",
+    "description": "Verify instrument counts, bank addresses, sample loops, stereo relationships, and playable ranges before approving a converted library.",
+    "status": "Proposed",
+    "phase": "Research"
+  },
+  {
+    "id": 185,
+    "category": "Soundfont conversion workflow",
+    "title": "Conversion compatibility checks",
+    "description": "Check candidate SF3 files against the actual playback engine and report unsupported content or decoder requirements before use.",
+    "status": "Proposed",
+    "phase": "Research"
+  },
+  {
+    "id": 186,
+    "category": "Soundfont conversion workflow",
+    "title": "Selective sample compression",
+    "description": "Explore preserving sensitive samples at higher quality while compressing suitable material, with transparent per-sample decisions and compatibility results.",
+    "status": "Proposed",
+    "phase": "Research"
+  },
+  {
+    "id": 187,
+    "category": "Soundfont conversion workflow",
+    "title": "Original library preservation",
+    "description": "Keep the original SF2 and record conversion provenance, settings, source fingerprint, and the relationship to each generated copy.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 188,
+    "category": "Soundfont conversion workflow",
+    "title": "Conversion job queue",
+    "description": "Queue opt-in conversions with individual progress, cancellation, resumable status, and clear reporting of failed or skipped libraries.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 189,
+    "category": "Soundfont conversion workflow",
+    "title": "Compression artifact audition points",
+    "description": "Mark exposed attacks, sustained loops, bright percussion, and quiet tails as repeatable comparison points during quality evaluation.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 190,
+    "category": "Soundfont conversion workflow",
+    "title": "Conversion storage planner",
+    "description": "Show required temporary space, retained originals, expected savings, and destination choices before starting a chosen conversion job.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 191,
+    "category": "Performance sets and scenes",
+    "title": "Named performance setups",
+    "description": "Save all part assignments, mixer values, routing, keyboard zones, and selected performance controls as a named setup.",
+    "status": "Proposed",
+    "phase": "Core"
+  },
+  {
+    "id": 192,
+    "category": "Performance sets and scenes",
+    "title": "Song setup association",
+    "description": "Associate a chosen performance setup with each song and show its sound dependencies before playback or rehearsal.",
+    "status": "Proposed",
+    "phase": "Core"
+  },
+  {
+    "id": 193,
+    "category": "Performance sets and scenes",
+    "title": "Setlist organizer",
+    "description": "Arrange songs into named setlists with rehearsal notes, expected durations, and quick selection from a performance-friendly view.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 194,
+    "category": "Performance sets and scenes",
+    "title": "Scene snapshot buttons",
+    "description": "Recall selected groups of part, mixer, and effect settings from labeled scene buttons with configurable protected parameters.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 195,
+    "category": "Performance sets and scenes",
+    "title": "Scene transition ramps",
+    "description": "Interpolate supported continuous parameters between scenes over beats or seconds while discrete changes follow explicit transition rules.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 196,
+    "category": "Performance sets and scenes",
+    "title": "Sustained-note scene policy",
+    "description": "Choose how held notes behave during scene changes and display when an instrument transition requires note termination.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 197,
+    "category": "Performance sets and scenes",
+    "title": "Foot-controlled set navigation",
+    "description": "Bind supported footswitch messages to next song, previous song, next scene, and emergency stop with clear assignment feedback.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 198,
+    "category": "Performance sets and scenes",
+    "title": "Performance preparation checklist",
+    "description": "Show missing libraries, disconnected devices, muted essential parts, and unresolved assignments before opening a selected setlist.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 199,
+    "category": "Performance sets and scenes",
+    "title": "Stage notes display",
+    "description": "Display song-specific cue text, section reminders, and controller instructions at an adjustable size beside essential performance controls.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 200,
+    "category": "Performance sets and scenes",
+    "title": "Setlist duration planning",
+    "description": "Estimate set duration using song lengths, planned pauses, and selected repeats, with an adjustable target time display.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 201,
+    "category": "Themes and layout",
+    "title": "Multiple appearance themes",
+    "description": "Offer light, dark, midnight, warm studio, and stage themes with consistent control meaning and readable contrast targets.",
+    "status": "Proposed",
+    "phase": "Core"
+  },
+  {
+    "id": 202,
+    "category": "Themes and layout",
+    "title": "Accent color choices",
+    "description": "Choose interface accents independently from note or part colors, with previews showing selected, disabled, and warning states.",
+    "status": "Proposed",
+    "phase": "Core"
+  },
+  {
+    "id": 203,
+    "category": "Themes and layout",
+    "title": "Adjustable information density",
+    "description": "Switch between compact, balanced, and spacious layouts while preserving access to the same core performance controls.",
+    "status": "Proposed",
+    "phase": "Core"
+  },
+  {
+    "id": 204,
+    "category": "Themes and layout",
+    "title": "Custom part colors",
+    "description": "Assign colors to parts, groups, tracks, and keyboard zones with text or pattern alternatives for identification.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 205,
+    "category": "Themes and layout",
+    "title": "Theme schedule preferences",
+    "description": "Follow system appearance or choose a manual theme schedule suited to rehearsals, daytime editing, and dark stages.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 206,
+    "category": "Themes and layout",
+    "title": "Theme editor",
+    "description": "Customize supported background, surface, text, meter, and accent colors with live contrast feedback and resettable defaults.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 207,
+    "category": "Themes and layout",
+    "title": "Detachable editor panels",
+    "description": "Arrange supported editors in resizable iPad panels with remembered positions, minimum readable sizes, and quick layout reset.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 208,
+    "category": "Themes and layout",
+    "title": "Portrait performance layout",
+    "description": "Provide a deliberate portrait arrangement of keyboard, transport, and selected part controls for comfortable handheld practice sessions.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 209,
+    "category": "Themes and layout",
+    "title": "External display performance view",
+    "description": "Show transport, lyrics, setlist cues, or a selected editor on a compatible external display with independent presentation options.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 210,
+    "category": "Themes and layout",
+    "title": "Hardware keyboard navigation",
+    "description": "Navigate editors and trigger documented shortcuts using an external keyboard, with visible focus and a searchable command list.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 211,
+    "category": "Accessibility and inclusive interaction",
+    "title": "VoiceOver control coverage",
+    "description": "Provide meaningful labels, values, actions, and navigation order for transport, part selection, sound browsing, and essential editing controls.",
+    "status": "Proposed",
+    "phase": "Core"
+  },
+  {
+    "id": 212,
+    "category": "Accessibility and inclusive interaction",
+    "title": "Dynamic text support",
+    "description": "Respect supported text-size preferences and offer readable expanded editors when dense overview labels cannot accommodate large text.",
+    "status": "Proposed",
+    "phase": "Core"
+  },
+  {
+    "id": 213,
+    "category": "Accessibility and inclusive interaction",
+    "title": "High-contrast presentation",
+    "description": "Provide high-contrast themes and clear focus, selected, armed, muted, and error states beyond subtle color differences.",
+    "status": "Proposed",
+    "phase": "Core"
+  },
+  {
+    "id": 214,
+    "category": "Accessibility and inclusive interaction",
+    "title": "Reduced motion mode",
+    "description": "Respect reduced-motion preferences and replace nonessential animations with immediate state changes that preserve useful performance feedback.",
+    "status": "Proposed",
+    "phase": "Core"
+  },
+  {
+    "id": 215,
+    "category": "Accessibility and inclusive interaction",
+    "title": "Large touch target mode",
+    "description": "Increase target sizes and spacing for essential controls, with adjustable keyboard geometry and explicit alternatives to precision gestures.",
+    "status": "Proposed",
+    "phase": "Core"
+  },
+  {
+    "id": 216,
+    "category": "Accessibility and inclusive interaction",
+    "title": "Switch Control navigation",
+    "description": "Provide logical scanning groups and accessible actions for supported performance and editing tasks using iOS Switch Control.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 217,
+    "category": "Accessibility and inclusive interaction",
+    "title": "Haptic action feedback",
+    "description": "Offer optional, configurable haptics for transport changes, scene recall, recording state, and critical performance actions on supported devices.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 218,
+    "category": "Accessibility and inclusive interaction",
+    "title": "Color-independent meters",
+    "description": "Use patterns, shapes, labels, or position alongside color to distinguish part activity, clipping, routing, and selected musical degrees.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 219,
+    "category": "Accessibility and inclusive interaction",
+    "title": "Accessible numeric editing",
+    "description": "Allow direct numeric entry, increment controls, and spoken value feedback for parameters otherwise adjusted through sliders or graphs.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 220,
+    "category": "Accessibility and inclusive interaction",
+    "title": "One-handed performance controls",
+    "description": "Place frequently used transport and expressive controls in a configurable reachable region for left-handed or right-handed operation.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 221,
+    "category": "Practice and learning",
+    "title": "Note names and fingering labels",
+    "description": "Show selectable note names, octave numbers, scale degrees, and user-entered fingering reminders on the performance keyboard.",
+    "status": "Proposed",
+    "phase": "Core"
+  },
+  {
+    "id": 222,
+    "category": "Practice and learning",
+    "title": "Practice tempo ladder",
+    "description": "Increase or decrease tempo after configured successful repetitions or manual approval, with clear targets and an immediate pause control.",
+    "status": "Proposed",
+    "phase": "Core"
+  },
+  {
+    "id": 223,
+    "category": "Practice and learning",
+    "title": "Hand separation practice",
+    "description": "Choose left-hand, right-hand, or user-defined note ranges for guided practice with independent playback and input monitoring choices.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 224,
+    "category": "Practice and learning",
+    "title": "Incoming note comparison",
+    "description": "Compare played notes against a selected practice passage with adjustable timing tolerance and transparent scoring rules.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 225,
+    "category": "Practice and learning",
+    "title": "Practice session journal",
+    "description": "Record practice duration, selected passages, tempo targets, and personal notes in a searchable local history for each song.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 226,
+    "category": "Practice and learning",
+    "title": "Ear training exercises",
+    "description": "Generate configurable interval, chord, and scale recognition exercises using selected instruments and explicit difficulty settings.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 227,
+    "category": "Practice and learning",
+    "title": "Notation practice view",
+    "description": "Evaluate an original or properly licensed notation renderer with readable rhythms, accidentals, meter changes, and supported MIDI interpretation limits.",
+    "status": "Proposed",
+    "phase": "Research"
+  },
+  {
+    "id": 228,
+    "category": "Practice and learning",
+    "title": "Lyric timing display",
+    "description": "Show timestamped lyric events with current-line highlighting, adjustable text size, and direct navigation to the associated song position.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 229,
+    "category": "Practice and learning",
+    "title": "Practice accompaniment reduction",
+    "description": "Reduce or mute selected melodic parts while preserving rhythm and harmonic accompaniment for playing along with imported songs.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 230,
+    "category": "Practice and learning",
+    "title": "Annotated rehearsal markers",
+    "description": "Attach practice instructions, fingering notes, and target tempos to song markers with optional reminders when playback reaches them.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 231,
+    "category": "Storage and operational controls",
+    "title": "Project package export",
+    "description": "Export song settings, app presets, automation, and dependency manifests as a portable project package with explicit included-resource choices.",
+    "status": "Proposed",
+    "phase": "Core"
+  },
+  {
+    "id": 232,
+    "category": "Storage and operational controls",
+    "title": "Automatic project recovery",
+    "description": "Maintain recoverable editing snapshots and present dated recovery choices after an interrupted session without replacing the last saved project.",
+    "status": "Proposed",
+    "phase": "Core"
+  },
+  {
+    "id": 233,
+    "category": "Storage and operational controls",
+    "title": "Storage usage dashboard",
+    "description": "Show space used by source libraries, converted copies, audio exports, recordings, caches, and recoverable project snapshots.",
+    "status": "Proposed",
+    "phase": "Core"
+  },
+  {
+    "id": 234,
+    "category": "Storage and operational controls",
+    "title": "On-demand library loading",
+    "description": "Load required libraries or instruments when selected and show preparation progress, estimated memory, and unload eligibility clearly.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 235,
+    "category": "Storage and operational controls",
+    "title": "App footprint optimizer",
+    "description": "Identify optional caches, previews, bundled extras, and unused downloads that can be removed without breaking declared project dependencies.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 236,
+    "category": "Storage and operational controls",
+    "title": "Device performance profiles",
+    "description": "Offer measured quality and resource profiles for different devices, with explicit polyphony, effect, latency, and memory tradeoffs.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 237,
+    "category": "Storage and operational controls",
+    "title": "Diagnostic export bundle",
+    "description": "Export user-reviewed engine versions, routing state, sanitized logs, and reproducible configuration details while excluding library audio by default.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 238,
+    "category": "Storage and operational controls",
+    "title": "Project revision snapshots",
+    "description": "Save named project revisions with comments and compare changed assignments, effects, routing, and arrangement settings before restoration.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 239,
+    "category": "Storage and operational controls",
+    "title": "Document provider integration",
+    "description": "Import and export through supported iOS document providers with clear copy, link, permission, and offline availability behavior.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 240,
+    "category": "Storage and operational controls",
+    "title": "Library backup manifest",
+    "description": "Generate a human-readable inventory of source fingerprints, locations, licenses, and dependent projects to help users plan their backups.",
+    "status": "Proposed",
+    "phase": "Expansion"
+  },
+  {
+    "id": 241,
+    "category": "Advanced compatibility research",
+    "title": "Conditional KQ preset importer",
+    "description": "Investigate .kqspreset import only after lawful format validation, sample-file analysis, dependency mapping, and documented limits; make no compatibility promise.",
+    "status": "Proposed",
+    "phase": "Research"
+  },
+  {
+    "id": 242,
+    "category": "Advanced compatibility research",
+    "title": "AUv3 instrument extension",
+    "description": "Evaluate an AUv3 instrument extension architecture, host lifecycle requirements, resource limits, and parameter exposure before committing to support.",
+    "status": "Proposed",
+    "phase": "Research"
+  },
+  {
+    "id": 243,
+    "category": "Advanced compatibility research",
+    "title": "Inter-app audio routing",
+    "description": "Assess supported modern iOS audio routing integrations and licensing requirements, with explicit validation of latency and application lifecycle behavior.",
+    "status": "Proposed",
+    "phase": "Research"
+  },
+  {
+    "id": 244,
+    "category": "Advanced compatibility research",
+    "title": "Native SpessaSynth audio backend",
+    "description": "Benchmark supported SpessaSynth integration approaches for iOS, including threading, audio scheduling, packaging, memory use, and applicable license obligations.",
+    "status": "Proposed",
+    "phase": "Research"
+  },
+  {
+    "id": 245,
+    "category": "Advanced compatibility research",
+    "title": "Reference synthesis comparison player",
+    "description": "Compare representative GM, GS, and XG passages against documented expectations and licensed references, reporting differences without claiming hardware equivalence.",
+    "status": "Proposed",
+    "phase": "Research"
+  },
+  {
+    "id": 246,
+    "category": "Advanced compatibility research",
+    "title": "Soundfont modulator compatibility inspector",
+    "description": "Catalog supported SoundFont modulators and generator behavior with reproducible cases before offering advanced modulation editing or compatibility claims.",
+    "status": "Proposed",
+    "phase": "Research"
+  },
+  {
+    "id": 247,
+    "category": "Advanced compatibility research",
+    "title": "Custom sample instrument authoring",
+    "description": "Investigate importing user-owned samples into editable instruments with validated loop, mapping, envelope, and export behavior across supported formats.",
+    "status": "Proposed",
+    "phase": "Research"
+  },
+  {
+    "id": 248,
+    "category": "Advanced compatibility research",
+    "title": "Playback during screen lock",
+    "description": "Validate background playback, interruptions, route changes, and restoration behavior across target iOS versions before defining supported operating modes.",
+    "status": "Proposed",
+    "phase": "Research"
+  },
+  {
+    "id": 249,
+    "category": "Advanced compatibility research",
+    "title": "Spatial audio listening modes",
+    "description": "Explore optional spatial positioning for parts with measured headphone behavior, fold-down quality, resource cost, and clear user control.",
+    "status": "Proposed",
+    "phase": "Research"
+  },
+  {
+    "id": 250,
+    "category": "Advanced compatibility research",
+    "title": "Network ensemble synchronization",
+    "description": "Investigate clock exchange, latency measurement, drift correction, and consent-based session discovery before proposing networked collaborative performance support.",
+    "status": "Proposed",
+    "phase": "Research"
+  }
+]

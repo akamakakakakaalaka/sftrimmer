@@ -1,0 +1,15 @@
+Project128 implementation ledger, 28 October2026
+Ruling: user explicitly instructed continued building after the installation explanation; proceed with the proposed native-shell architecture rather than an additional approval pause.
+Ruling: new isolated repository /workspace/project128; previous soundfont projects remain untouched.
+Ruling: independent worker ownership under proactive delegation; root integrates and requests a final review.
+Pending: genuine SC88Pro source; no silent substitution of its identity. A GM/GS starter bank is labeled accurately.
+Pending: native Mac build/signing/device verification unavailable on Linux.
+User clarification: GeneralUser GS plus suitable extra presets from the500 Soundfont archive is authorized. Built Project128 GS with8 genuine TimGM6mb alternatives, accurately labeled, notices/source supplied.
+Source foundation completed with independent task ownership. Fresh reviewer identified3 important issues: interruption bridge, CC123 sustain, and GPL preferred source delivery. All addressed: native event listener regression RED→GREEN; engine sustain test RED→GREEN; complete combined source exported beside archive with source-delivery notice.
+Verification:48 Node tests,2 asset sync tests,4 Chromium UI tests,TypeScript/Vite build,actual production worklet PCM/token-prefix check. Native source received static checks only.
+Ruling: local macOS virtualization is impractical on current Linux host (noKVM/virtualization flags,~21GiB diskfree); provide actual Mac CI workflow instead of claiming emulated Xcode.
+Ruling: bank q8 is10.8MB; package it once and let the Xcode copy phase place it in the compiled bundle, preserving quality under the20MB source ZIP budget.
+Deferred: custom-bank persistence afterrestart; full named-modelXG/SysEx; microtones; phase-exactseek; full AudioLayer envelope parity; native compile/sign/device gates. All disclosed in IMPLEMENTED.txt and feature catalog.
+Final required scope added: per-part app-preset MSB/LSB/Program Change maps, snapshot isolation and separate incoming-versus-font addresses. Review found repeated recall and same-baseline UI intent issues; actual PCM regressions now cover both. Fine-grained edit fields prevent a volume edit from replacing a MIDI-recalled instrument. Current60 Node tests,2 asset-sync tests,5 browser tests and production audio check.
+Final restore fix: validate imported data, stop/reset active MIDI transport, then apply restored state. Browser regression observed continued playback before fix and passed afterward. Final suite60 Node+2 asset-sync+6 browser+production PCM check all green. No native Mac compile/signing/device claim.
+Native-policy production check additionally reproduced blocked encoder data-URL fetching. Added data: only to connect-src for the locally bundled Vorbis module; external connections and script policy remain restricted. Actual UI conversion/export now passes using the exact native CSP and token prefix, and the exported SF3 decodes correctly.

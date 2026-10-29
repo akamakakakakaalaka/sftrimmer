@@ -1,0 +1,218 @@
+{
+  "bank": {
+    "id": "project128-gs",
+    "name": "Project128 GS",
+    "format": "SF3",
+    "source": "GeneralUser GS 2.0.3 BETA + 8 TimGM6mb alternates",
+    "license": "Combined derivative GPL-2.0-only; original GeneralUser license v2.0 notice retained",
+    "bytes": 10803494,
+    "sha256": "7ce8483a3bd9120b0c0a124be52c955f9b9df3dd77542d46bc8cace510461036",
+    "presetCount": 295,
+    "melodicPresetCount": 269,
+    "distinctDrumKits": 13,
+    "description": "Complete General MIDI coverage, GS variations and 13 drum kits, plus eight TimGM6mb alternate timbres at MSB 64. GeneralUser GS based; not a Roland SC-88Pro bank. High-quality Vorbis SF3; encoding is lossy.",
+    "quality": 0.8,
+    "extraPresets": [
+      {
+        "name": "Tim E.Piano 2",
+        "msb": 64,
+        "lsb": 0,
+        "program": 5,
+        "source": "TimGM6mb.sf2"
+      },
+      {
+        "name": "Tim Organ 1",
+        "msb": 64,
+        "lsb": 0,
+        "program": 16,
+        "source": "TimGM6mb.sf2"
+      },
+      {
+        "name": "Tim DistortionGuitar",
+        "msb": 64,
+        "lsb": 0,
+        "program": 30,
+        "source": "TimGM6mb.sf2"
+      },
+      {
+        "name": "Tim Slap Bass 1",
+        "msb": 64,
+        "lsb": 0,
+        "program": 36,
+        "source": "TimGM6mb.sf2"
+      },
+      {
+        "name": "Tim Orchestra Hit",
+        "msb": 64,
+        "lsb": 0,
+        "program": 55,
+        "source": "TimGM6mb.sf2"
+      },
+      {
+        "name": "Tim Synth Brass 1",
+        "msb": 64,
+        "lsb": 0,
+        "program": 62,
+        "source": "TimGM6mb.sf2"
+      },
+      {
+        "name": "Tim Fantasia",
+        "msb": 64,
+        "lsb": 0,
+        "program": 88,
+        "source": "TimGM6mb.sf2"
+      },
+      {
+        "name": "Tim Poly Synth",
+        "msb": 64,
+        "lsb": 0,
+        "program": 90,
+        "source": "TimGM6mb.sf2"
+      }
+    ],
+    "documentation": "licenses/banks/README.txt"
+  },
+  "sources": {
+    "generalUser": {
+      "name": "GeneralUser-GS.sf2",
+      "url": "https://raw.githubusercontent.com/mrbumpy409/GeneralUser-GS/684543d5e5efaef08d02be50dcda8d552478fa60/GeneralUser-GS.sf2",
+      "sha256": "9575028c7a1f589f5770fccc8cff2734566af40cd26ed836944e9a5152688cfe"
+    },
+    "generalLicense": {
+      "name": "GeneralUser-LICENSE.txt",
+      "url": "https://raw.githubusercontent.com/mrbumpy409/GeneralUser-GS/684543d5e5efaef08d02be50dcda8d552478fa60/documentation/LICENSE.txt",
+      "sha256": "7b32efefdf95ce38a043799f0659853ddc00fbaa14d8c50f0aca16b9b8b405be"
+    },
+    "tim": {
+      "name": "TimGM6mb.sf2",
+      "url": "https://archive.org/download/500-soundfonts-full-gm-sets/500_Soundfonts_Full_GM_Sets.zip",
+      "archivePage": "https://archive.org/details/500-soundfonts-full-gm-sets",
+      "entry": "TimGM6mb.sf2",
+      "offset": 36161897273,
+      "compressedBytes": 5560533,
+      "bytes": 5962044,
+      "sha256": "515ebbfac8cba71b56b882679cc469c31d809f2df04be771d569367be0c2ac94"
+    },
+    "timReference": {
+      "name": "TimGM6mb-upstream.sf2",
+      "url": "https://raw.githubusercontent.com/musescore/musescore-old/90c33ef9d87b3f5ff92efd3b07d89eb455fb1fef/mscore/share/sound/TimGM6mb.sf2",
+      "sha256": "c5378b62028c920cb11e4803327983fee2f2cdff5dc89c708e39da417e51c854"
+    },
+    "timLicense": {
+      "name": "TimGM6mb-LICENSE.txt",
+      "url": "https://metadata.ftp-master.debian.org/changelogs/main/t/timgm6mb-soundfont/unstable_copyright",
+      "sha256": "6ef01652619cf29b289a9403cd2ab59550fa3e2c30844c67292eea5421f993e9"
+    },
+    "gpl": {
+      "name": "GPL-2.0.txt",
+      "url": "https://www.gnu.org/licenses/old-licenses/gpl-2.0.txt",
+      "sha256": "edaef632cbb643e4e7a221717a6c441a4c1a7c918e6e4d56debc3d8739b233f6"
+    }
+  },
+  "originalPresetCount": 287,
+  "extraPresets": [
+    {
+      "name": "Tim E.Piano 2",
+      "msb": 64,
+      "lsb": 0,
+      "program": 5,
+      "source": "TimGM6mb.sf2"
+    },
+    {
+      "name": "Tim Organ 1",
+      "msb": 64,
+      "lsb": 0,
+      "program": 16,
+      "source": "TimGM6mb.sf2"
+    },
+    {
+      "name": "Tim DistortionGuitar",
+      "msb": 64,
+      "lsb": 0,
+      "program": 30,
+      "source": "TimGM6mb.sf2"
+    },
+    {
+      "name": "Tim Slap Bass 1",
+      "msb": 64,
+      "lsb": 0,
+      "program": 36,
+      "source": "TimGM6mb.sf2"
+    },
+    {
+      "name": "Tim Orchestra Hit",
+      "msb": 64,
+      "lsb": 0,
+      "program": 55,
+      "source": "TimGM6mb.sf2"
+    },
+    {
+      "name": "Tim Synth Brass 1",
+      "msb": 64,
+      "lsb": 0,
+      "program": 62,
+      "source": "TimGM6mb.sf2"
+    },
+    {
+      "name": "Tim Fantasia",
+      "msb": 64,
+      "lsb": 0,
+      "program": 88,
+      "source": "TimGM6mb.sf2"
+    },
+    {
+      "name": "Tim Poly Synth",
+      "msb": 64,
+      "lsb": 0,
+      "program": 90,
+      "source": "TimGM6mb.sf2"
+    }
+  ],
+  "loopRepairs": [
+    {
+      "sample": "Orchestra Hit-2xt",
+      "oldEnd": 5102,
+      "newEnd": 5101,
+      "reason": "Source loop end exceeded available PCM data"
+    }
+  ],
+  "timVerification": {
+    "archiveSampleCount": 520,
+    "upstreamSampleCount": 520,
+    "matchingPCMCount": 520,
+    "note": "Archive and documented upstream containers/program tables differ. Every archive sample has byte-identical decoded PCM in upstream."
+  },
+  "tools": {
+    "spessasynth_core": "4.4.2",
+    "wasmMediaEncoders": "0.7.0",
+    "encoder": "Ogg Vorbis, mono per SF3 sample, original sample rates retained; samples outside 8..96kHz preserved as PCM"
+  },
+  "trials": [
+    {
+      "quality": 0.65,
+      "vorbisQuality": 6.5,
+      "bytes": 9673484,
+      "sha256": "a399d2be52100ebc9c6e26bcc9fbb72c765951d245b29e67fc88ad7fb156bef1",
+      "medianNormalizedRMSError": 0.02097312397760332,
+      "p95NormalizedRMSError": 0.09900024094394143,
+      "medianAttackNormalizedRMSError": 0.02496390511498971,
+      "p95AttackNormalizedRMSError": 0.10762011966230117,
+      "p95LoopSeamDelta": 0.01997828483581543,
+      "maxLoopSeamDelta": 0.055698275566101074
+    },
+    {
+      "quality": 0.8,
+      "vorbisQuality": 8,
+      "bytes": 10803494,
+      "sha256": "7ce8483a3bd9120b0c0a124be52c955f9b9df3dd77542d46bc8cace510461036",
+      "medianNormalizedRMSError": 0.014765999776828048,
+      "p95NormalizedRMSError": 0.059430258154274954,
+      "medianAttackNormalizedRMSError": 0.016105002588324074,
+      "p95AttackNormalizedRMSError": 0.06685341507933815,
+      "p95LoopSeamDelta": 0.014236986637115479,
+      "maxLoopSeamDelta": 0.2958984375
+    }
+  ],
+  "selectedQuality": 0.8,
+  "selection": "Highest tested quality fitting the 14000000-byte bank budget. Technical decode/attack/loop comparisons only; no human listening judgment is claimed."
+}

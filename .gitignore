@@ -1,0 +1,10 @@
+node_modules/
+.superpowers/
+dist/
+output/
+test-results/
+playwright-report/
+*.xcuserstate
+xcuserdata/
+.DS_Store
+*.log

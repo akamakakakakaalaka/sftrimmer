@@ -1,0 +1,25 @@
+{
+  "name": "project128",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "node tools/generate-catalog.mjs && tsc --noEmit && vite build && node tools/sync-ios.mjs",
+    "test": "tsx --test tests/*.test.ts",
+    "test:browser": "playwright test",
+    "package": "python3 tools/package.py"
+  },
+  "dependencies": {
+    "spessasynth_core": "4.4.2",
+    "spessasynth_lib": "4.4.1",
+    "wasm-media-encoders": "0.7.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.64.1",
+    "@types/node": "24.19.2",
+    "tsx": "4.20.6",
+    "typescript": "5.9.3",
+    "vite": "8.3.5"
+  }
+}

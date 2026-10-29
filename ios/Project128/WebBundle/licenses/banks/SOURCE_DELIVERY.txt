@@ -1,0 +1,11 @@
+The combined Project128 GS bank includes GeneralUser GS data and eight TimGM6mb alternates. TimGM6mb is GPL-2.0-only. The preferred editable combined source is supplied alongside the source-project ZIP as:
+
+  Project128_GS_Editable_Source.sf2
+  32,542,290 bytes
+  SHA256 4e8194a30b2364d7e40eda8583b6acd91ffb09e8ccfec3dc74807c1c67e9a2a2
+
+This is the complete combined source before Vorbis conversion, including instrument/sample structures. It is separate from the below20MB app-source ZIP to avoid duplicating the bank in that archive. It is not required to run the player.
+
+When redistributing the compressed bank, also make the editable source and included license/provenance notices available alongside it, with equivalent access. This project does not claim that a build script or third-party URL alone constitutes a GPL written source offer. No three-year source-delivery promise on another person's behalf is being made.
+
+tools/prepare-bank.mjs documents reproducible source acquisition and can write --source-output. PROVENANCE.json records the original sources, exact hashes and measured conversion differences. GeneralUser GS's original license/notice remains included.

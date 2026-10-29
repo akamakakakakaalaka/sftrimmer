@@ -1,0 +1,130 @@
+{
+  "version": "0.1.0",
+  "status": "Source foundation; native compile/sign/device validation pending",
+  "node_behavior_tests": {
+    "passed": 60,
+    "failed": 0
+  },
+  "asset_sync_tests": {
+    "passed": 2,
+    "failed": 0
+  },
+  "chromium_UI_tests": {
+    "passed": 6,
+    "failed": 0
+  },
+  "production": {
+    "built_assets": true,
+    "native_token_prefix": true,
+    "native_content_security_policy": true,
+    "browser_sf3_conversion": true,
+    "parts": 128,
+    "starter_presets": 295,
+    "actual_audio_peak": 0.06330887973308563,
+    "user_gesture_audio": true,
+    "portrait_horizontal_overflow": false,
+    "catalog_count": 250,
+    "page_errors": [],
+    "native_iOS_verified": false
+  },
+  "native_static": {
+    "PBX_objects_parsed": 59,
+    "Swift_files_syntax_parsed": 8,
+    "bank_copy_script_executed": true,
+    "xcodebuild_run": false,
+    "XCTest_run": false,
+    "signed_IPA_created": false,
+    "device_verified": false
+  },
+  "starter_bank": {
+    "id": "project128-gs",
+    "name": "Project128 GS",
+    "format": "SF3",
+    "source": "GeneralUser GS 2.0.3 BETA + 8 TimGM6mb alternates",
+    "license": "Combined derivative GPL-2.0-only; original GeneralUser license v2.0 notice retained",
+    "bytes": 10803494,
+    "sha256": "7ce8483a3bd9120b0c0a124be52c955f9b9df3dd77542d46bc8cace510461036",
+    "presetCount": 295,
+    "melodicPresetCount": 269,
+    "distinctDrumKits": 13,
+    "description": "Complete General MIDI coverage, GS variations and 13 drum kits, plus eight TimGM6mb alternate timbres at MSB 64. GeneralUser GS based; not a Roland SC-88Pro bank. High-quality Vorbis SF3; encoding is lossy.",
+    "quality": 0.8,
+    "extraPresets": [
+      {
+        "name": "Tim E.Piano 2",
+        "msb": 64,
+        "lsb": 0,
+        "program": 5,
+        "source": "TimGM6mb.sf2"
+      },
+      {
+        "name": "Tim Organ 1",
+        "msb": 64,
+        "lsb": 0,
+        "program": 16,
+        "source": "TimGM6mb.sf2"
+      },
+      {
+        "name": "Tim DistortionGuitar",
+        "msb": 64,
+        "lsb": 0,
+        "program": 30,
+        "source": "TimGM6mb.sf2"
+      },
+      {
+        "name": "Tim Slap Bass 1",
+        "msb": 64,
+        "lsb": 0,
+        "program": 36,
+        "source": "TimGM6mb.sf2"
+      },
+      {
+        "name": "Tim Orchestra Hit",
+        "msb": 64,
+        "lsb": 0,
+        "program": 55,
+        "source": "TimGM6mb.sf2"
+      },
+      {
+        "name": "Tim Synth Brass 1",
+        "msb": 64,
+        "lsb": 0,
+        "program": 62,
+        "source": "TimGM6mb.sf2"
+      },
+      {
+        "name": "Tim Fantasia",
+        "msb": 64,
+        "lsb": 0,
+        "program": 88,
+        "source": "TimGM6mb.sf2"
+      },
+      {
+        "name": "Tim Poly Synth",
+        "msb": 64,
+        "lsb": 0,
+        "program": 90,
+        "source": "TimGM6mb.sf2"
+      }
+    ],
+    "documentation": "licenses/banks/README.txt"
+  },
+  "editable_source": {
+    "file": "Project128_GS_Editable_Source.sf2",
+    "bytes": 32542290,
+    "sha256": "4e8194a30b2364d7e40eda8583b6acd91ffb09e8ccfec3dc74807c1c67e9a2a2",
+    "lossless_XZ_file": "Project128_GS_Editable_Source.sf2.xz",
+    "XZ_bytes": 24118472,
+    "XZ_sha256": "5df574816894d24b48f9829d314f2e052a69e5b5a9f646abe119fbf4c044c02a",
+    "decompressed_bytes_verified": true
+  },
+  "Linux_host": {
+    "architecture": "x86_64",
+    "dev_kvm_available": false,
+    "CPU_virtualization_flags_exposed": false,
+    "native_Xcode_installed": false,
+    "Mac_CI_workflow_run": false
+  },
+  "features_catalog_entries": 250,
+  "features_all_completed": false
+}
