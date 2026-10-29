@@ -1,6 +1,8 @@
 name: Build iOS
 
 on:
+  push:
+    branches: [project128-ios-build]
   workflow_dispatch:
     inputs:
       sign_ipa:
