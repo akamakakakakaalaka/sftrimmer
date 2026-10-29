@@ -1,6 +1,8 @@
 import Foundation
 import SwiftUI
 import WebKit
+import UIKit
+import CoreText
 
 @MainActor
 struct PlayerWebView: UIViewRepresentable {
@@ -16,8 +18,7 @@ struct PlayerWebView: UIViewRepresentable {
         configuration.mediaTypesRequiringUserActionForPlayback = .all
         configuration.preferences.javaScriptCanOpenWindowsAutomatically = false
         configuration.userContentController.add(context.coordinator, name: "project128")
-        configuration.userContentController.addUserScript(WKUserScript(source: model.storageScript(for: url),
-                                                                        injectionTime: .atDocumentStart, forMainFrameOnly: true))
+        Self.installScripts(in: configuration.userContentController, model: model, base: url)
         let view = WKWebView(frame: .zero, configuration: configuration)
         view.navigationDelegate = context.coordinator
         view.uiDelegate = context.coordinator
@@ -29,6 +30,13 @@ struct PlayerWebView: UIViewRepresentable {
     }
 
     func updateUIView(_ uiView: WKWebView, context: Context) {}
+
+    private static func installScripts(in controller: WKUserContentController, model: AppModel, base: URL) {
+        controller.removeAllUserScripts()
+        for source in [model.storageScript(for: base), ToolbarGlyphs.script(for: base)] {
+            controller.addUserScript(WKUserScript(source: source, injectionTime: .atDocumentStart, forMainFrameOnly: true))
+        }
+    }
 
     static func dismantleUIView(_ uiView: WKWebView, coordinator: Coordinator) {
         coordinator.model.webReady = false
@@ -78,9 +86,7 @@ struct PlayerWebView: UIViewRepresentable {
                 return
             }
             // Refresh the native snapshot before any reload, including WebKit process recovery.
-            webView.configuration.userContentController.removeAllUserScripts()
-            webView.configuration.userContentController.addUserScript(WKUserScript(source: model.storageScript(for: base),
-                                                                                    injectionTime: .atDocumentStart, forMainFrameOnly: true))
+            PlayerWebView.installScripts(in: webView.configuration.userContentController, model: model, base: base)
             decisionHandler(.allow)
         }
 
@@ -151,5 +157,58 @@ struct PlayerWebView: UIViewRepresentable {
             }
             model.notice = "Export failed: \(error.localizedDescription)"
         }
+    }
+}
+
+/// Render installed iOS glyphs at runtime; no Apple font or symbol artwork is bundled.
+/// Visual candidates from public screenshots, not verified original Sampei resources.
+@MainActor
+private enum ToolbarGlyphs {
+    private static let masks: [String: String] = {
+        let format = UIGraphicsImageRendererFormat()
+        format.scale = 3
+        format.opaque = false
+        let renderer = UIGraphicsImageRenderer(size: CGSize(width: 24, height: 24), format: format)
+        var result: [String: String] = [:]
+        if let gear = UIImage(systemName: "gear", withConfiguration: UIImage.SymbolConfiguration(pointSize: 24, weight: .regular)) {
+            let image = renderer.image { _ in
+                let scale = 21.3 / max(gear.size.width, gear.size.height)
+                let size = CGSize(width: gear.size.width * scale, height: gear.size.height * scale)
+                gear.withTintColor(.black, renderingMode: .alwaysOriginal)
+                    .draw(in: CGRect(x: (24 - size.width) / 2, y: (24 - size.height) / 2, width: size.width, height: size.height))
+            }
+            if let png = image.pngData() { result["gear"] = "data:image/png;base64," + png.base64EncodedString() }
+        }
+        let text = NSAttributedString(string: "\u{266B}", attributes: [.font: UIFont.systemFont(ofSize: 24), .foregroundColor: UIColor.black])
+        let line = CTLineCreateWithAttributedString(text as CFAttributedString)
+        let bounds = CTLineGetBoundsWithOptions(line, .useGlyphPathBounds)
+        if bounds.width > 0 && bounds.height > 0 {
+            let image = renderer.image { context in
+                let scale = min(20 / bounds.width, 19 / bounds.height)
+                let size = CGSize(width: bounds.width * scale, height: bounds.height * scale)
+                let cg = context.cgContext
+                cg.textMatrix = .identity
+                cg.translateBy(x: (24 - size.width) / 2, y: (24 + size.height) / 2)
+                cg.scaleBy(x: scale, y: -scale)
+                cg.translateBy(x: -bounds.minX, y: -bounds.minY)
+                cg.textPosition = .zero
+                CTLineDraw(line, cg)
+            }
+            if let png = image.pngData() { result["music"] = "data:image/png;base64," + png.base64EncodedString() }
+        }
+        return result
+    }()
+
+    static func script(for base: URL) -> String {
+        let payload: [String: Any] = ["base": base.absoluteString, "icons": masks]
+        guard let data = try? JSONSerialization.data(withJSONObject: payload), let json = String(data: data, encoding: .utf8) else { return "" }
+        return """
+        (() => {
+          const payload = \(json), base = new URL(payload.base);
+          const prefix = base.pathname.endsWith('/') ? base.pathname : base.pathname + '/';
+          if (location.origin !== base.origin || !(location.pathname === base.pathname || location.pathname.startsWith(prefix))) return;
+          Object.defineProperty(window, 'project128NativeIcons', {value: Object.freeze(payload.icons)});
+        })();
+        """
     }
 }

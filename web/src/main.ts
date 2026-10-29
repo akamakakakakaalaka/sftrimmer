@@ -8,12 +8,12 @@ import { getPerformanceControls, getProgramPortamento } from './performance';
 import { matchesPatchQuery, patchIdentity, sortPatchEntries } from './patch-search';
 import { loadState, saveState, restoreState, createPreset, applyPreset, parsePreset } from './state';
 import { SCALES, requiresMicrotonalTuning } from './harmony';
+import { referenceIcon } from './reference-icons';
 import type { AppState, BankInfo, PartState, PlayerPosition, SavedPreset, PresetMapping, PatchBrowserSettings } from './contracts';
 
 const icons: Record<string, string> = {
   wave: '<path d="M3 12h2l2-7 4 14 3-16 3 14 2-5h2"/>',
   power: '<path d="M12 3v8M6.3 5.9a8 8 0 1 0 11.4 0"/>',
-  music: '<path d="M9 18V5l11-2v13M9 8l11-2"/><ellipse cx="6" cy="18" rx="3" ry="2"/><ellipse cx="17" cy="16" rx="3" ry="2"/>',
   upload: '<path d="M12 16V3m-5 5 5-5 5 5M4 16v5h16v-5"/>',
   folder: '<path d="M3 7V5h6l2 3h10v12H3Z"/>',
   play: '<path d="m8 5 11 7-11 7Z"/>',
@@ -27,9 +27,8 @@ const icons: Record<string, string> = {
   download: '<path d="M12 3v13m-5-5 5 5 5-5M4 17v4h16v-4"/>',
   close: '<path d="m6 6 12 12M6 18 18 6"/>',
   shield: '<path d="m12 3 8 3v6c0 4-8 9-8 9s-8-5-8-9V6Zm-4 9 3 3 5-6"/>',
-  gear: '<circle cx="12" cy="12" r="3"/><path d="m9 3-.5 2-2 1-2-.5-2 3 1.5 1.5v3L2.5 14l2 3 2-.5 2 1 .5 2h4l.5-2 2-1 2 .5 2-3-1.5-1.5v-3L20 8l-2-3-2 .5-2-1-.5-2Z"/>',
 };
-const icon = (name: string) => `<svg class="icon" viewBox="0 0 24 24" aria-hidden="true">${icons[name] || icons.wave}</svg>`;
+const icon = (name: string) => name === 'gear' || name === 'music' ? referenceIcon(name) : `<svg class="icon" viewBox="0 0 24 24" aria-hidden="true">${icons[name] || icons.wave}</svg>`;
 const escapeHTML = (value: unknown) => String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]!));
 const $ = <T extends HTMLElement = HTMLElement>(selector: string) => document.querySelector<T>(selector)!;
 const on = (selector: string, type: string, handler: EventListener) => $(selector).addEventListener(type, handler);

@@ -74,3 +74,18 @@ Built native-prefix/CSP playback,48KB font fallback loading, SF3 conversion/expo
 and all3 measured layout templates passed. PNG/HTML reference comparison and new
 phone/tablet/Parameters/patch/SMF previews generated. Repacking includes current
 verification and licensed font assets; source archive CRC/bytes/20MB checked.
+
+Toolbar icon correction, 29 October2026:
+User requested original SVG resources. Inspected developer product/manual and
+all12 public repository trees; no original Sampei SVGs/app source found. Replaced
+generic gear and hollow music icons with authored fine-toothed three-spoke gear
+and filled beamed-note SVGs. Native iOS renders installed gear/U+266B glyphs to
+themeable alpha masks; no Apple fonts/symbol paths bundled. Exact original API
+identity remains unconfirmed. Centralized WKUserScript installation preserves
+these on navigation/recovery with local origin/token guards.
+Verification:126 Node,17 browser (including3 new icon boundary/UI checks),2
+resource-sync tests passed. TypeScript/Vite build and production CSP/prefix
+mask decode, actual audio and SF3 conversion passed. All3 measured geometries
+unchanged.8 Swift syntax files and59 PBX objects statically parsed. Independent
+review found no Important/Critical issue. Native compilation/signing/device
+appearance still unverified. Source ZIP and icon comparison regenerated.

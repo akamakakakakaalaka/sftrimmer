@@ -10,7 +10,7 @@
     "failed": 0
   },
   "chromium_UI_tests": {
-    "passed": 14,
+    "passed": 17,
     "failed": 0
   },
   "production": {
@@ -18,13 +18,25 @@
     "native_token_prefix": true,
     "native_content_security_policy": true,
     "browser_sf3_conversion": true,
+    "reference_icons": [
+      {
+        "name": "gear",
+        "source": "authored-svg",
+        "decoded": true
+      },
+      {
+        "name": "music",
+        "source": "authored-svg",
+        "decoded": true
+      }
+    ],
     "parts": 128,
     "editable_part_panels": 128,
     "docked_keyboard": true,
     "local_font_under_native_CSP": true,
     "reference_geometry_layouts_verified": 3,
     "starter_presets": 295,
-    "actual_audio_peak": 0.062172215431928635,
+    "actual_audio_peak": 0.06255856901407242,
     "user_gesture_audio": true,
     "portrait_horizontal_overflow": false,
     "catalog_count": 250,
@@ -170,6 +182,17 @@
       "mute/solo stale sostenuto capture IDs",
       "history-dependent reset controllers"
     ],
-    "new_real_PCM_regressions_red_to_green": true
+    "new_real_PCM_regressions_red_to_green": true,
+    "toolbar_icons": {
+      "provenance": "ICON_SOURCES.txt",
+      "original_Sampei_SVGs_found": false,
+      "browser": "Project128-authored geometric SVGs",
+      "native": "Runtime UIImage gear and system-font U+266B PNG masks",
+      "native_appearance_verified": false,
+      "browser_switch_reload_theme_and_fallback_tests": 3,
+      "native_script_origin_and_token_guard": true,
+      "native_script_reinstalled_on_reload": true,
+      "independent_review": "No Important or Critical findings"
+    }
   }
 }

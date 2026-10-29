@@ -1,0 +1,39 @@
+Toolbar icon correction — 29 October 2026
+
+Original-resource search
+The developer's product/manual pages and all 12 public GitHub repository trees
+were inspected. No original Sampei gear/music SVG resource or app source was
+found. Website FontAwesome resources are not evidence of the app's icon source.
+KQTabBarController is a public component, not the Sampei project or icon set.
+
+References:
+https://www.kiraqtech.jp/blog/kq-sampei/
+https://www.kiraqtech.jp/blog/kq-sampei/kq-sampei-manual/
+https://github.com/KKQ-KKQ
+https://github.com/KKQ-KKQ/KQTabBarController
+
+What is shipped
+web/src/icons/gear.svg and beamed-notes.svg are Project128-authored geometric
+replacements. The gear has a circular rim, fine teeth and three spokes; notes
+use filled oval heads, stems and one sloped beam. They are not recovered Sampei
+assets and contain no copied Apple symbol paths or font files. SVG alpha masks
+inherit the active theme color and preserve toolbar dimensions and accessibility.
+
+On native iOS, PlayerWebView renders the installed UIImage symbol "gear" and
+the system-font Unicode U+266B BEAMED EIGHTH NOTES character into transparent
+PNG masks. This avoids bundling Apple artwork. These are visual candidates,
+not confirmed original Sampei API/asset names. SF "music.note" is a different
+single-note symbol and was deliberately not selected.
+
+https://developer.apple.com/documentation/uikit/uiimage/init(systemname:)
+https://developer.apple.com/sf-symbols/
+https://www.unicode.org/charts/PDF/U2600.pdf
+
+Native masks are injected at document start only for the local app origin and
+token path, and reinstalled on navigation/process recovery. Browser builds and
+missing native images fall back to the bundled SVGs. Only small PNG data URLs
+are accepted from the native image boundary; remote or SVG payloads are rejected.
+
+Validation distinguishes browser masks from actual UIKit appearance. Native
+compilation, signing and device appearance remain pending; Linux static parsing
+and a simulated PNG boundary do not establish those results.

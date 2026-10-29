@@ -89,6 +89,5 @@
   "parameter_sheet_overlays_keyboard": true,
   "full_documented_controller_grid": true,
   "source_video_frames_inspected": false,
-  "native_iOS_verified": false,
-  "measurement_scope": "Panel/menu template bounds and normalized rotary diameters; not a complete pixel, font-rasterization or proprietary-DSP equivalence check."
+  "native_iOS_verified": false
 }

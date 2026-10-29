@@ -77,6 +77,14 @@ try{
  await page.locator('[data-bank-use]').first().click();
  await page.locator('.menu-popover:not([hidden]) [data-close-view]').click();
  await mkdir('output',{recursive:true});
+ const referenceIcons=await page.evaluate(async()=>Promise.all([...document.querySelectorAll('.navigation .reference-icon')].map(async el=>{
+  const mask=getComputedStyle(el).maskImage;
+  const image=new Image();image.src=mask.match(/^url\("(.*)"\)$/)?.[1]||'';await image.decode();
+  return{name:el.getAttribute('data-icon'),source:el.getAttribute('data-icon-source'),decoded:image.naturalWidth>0};
+ })));
+ assert.equal(referenceIcons.length,2);assert(referenceIcons.every(icon=>icon.source==='authored-svg'&&icon.decoded),'Offline icon mask failed under native CSP');
+ await page.locator('#tab-settings').screenshot({path:'output/Project128_Settings_Icon.png'});
+ await page.locator('#tab-player').screenshot({path:'output/Project128_Music_Icon.png'});
  const font=await page.evaluate(async()=>{const regular=await document.fonts.load('400 13px "Fidelity Sans"'),medium=await document.fonts.load('500 13px "Fidelity Sans"');return{regular_loaded:regular.length>0,medium_loaded:medium.length>0,stack:getComputedStyle(document.body).fontFamily};});
  assert(font.regular_loaded&&font.medium_loaded,'Local typography fallback failed under the native prefix/CSP');
  const layouts=[];
@@ -100,7 +108,7 @@ try{
  await page.setViewportSize({width:1440,height:1024});await page.screenshot({path:'output/Project128_Desktop.png'});
  await writeFile('output/fidelity-verification.json',JSON.stringify({layouts,typography:font,Apple_font_bundled:false,exact_KQ_font_identity_verified:false,parameter_sheet_overlays_keyboard:true,full_documented_controller_grid:true,source_video_frames_inspected:false,native_iOS_verified:false},null,2));
  assert.deepEqual(errors,[]);
- const report={built_assets:true,native_token_prefix:true,native_content_security_policy:true,browser_sf3_conversion:true,parts:128,editable_part_panels:128,docked_keyboard:true,local_font_under_native_CSP:font.regular_loaded,reference_geometry_layouts_verified:layouts.length,starter_presets:await page.locator('#part-patch option').count(),actual_audio_peak:peak,
+ const report={built_assets:true,native_token_prefix:true,native_content_security_policy:true,browser_sf3_conversion:true,reference_icons:referenceIcons,parts:128,editable_part_panels:128,docked_keyboard:true,local_font_under_native_CSP:font.regular_loaded,reference_geometry_layouts_verified:layouts.length,starter_presets:await page.locator('#part-patch option').count(),actual_audio_peak:peak,
   user_gesture_audio:true,portrait_horizontal_overflow:false,catalog_count:250,page_errors:errors,native_iOS_verified:false};
  await writeFile('output/production-verification.json',JSON.stringify(report,null,2));
  console.log(JSON.stringify(report,null,2));
