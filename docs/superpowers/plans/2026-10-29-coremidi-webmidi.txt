@@ -48,3 +48,12 @@ strict complete-message validation and bounded native output work. Future-time
 sends and clear report NotSupportedError. Add no-code Input/Output/Enable menus
 with explicit opt-in, SysEx setting and routed-note release. Tests observed RED
 for absent outputs/UI and now pass; add native validation XCTest execution.
+
+Review follow-up
+Fixed synthetic panic leaking into hardware events, repeated note lifetime
+counts, and native output saturation recovery. Native recovery releases only
+owned notes/pedals and blocks the affected destination until explicit resume.
+Generation tickets prevent old queued messages replaying after resume. Native
+input disconnection removes only its own buffered packets. Added RED/GREEN
+browser regressions and native ledger tests. Node126/browser26/build/native
+syntax pass; real native XCTest and device build run on the Mac CI runner.

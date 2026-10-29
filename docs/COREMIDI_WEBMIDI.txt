@@ -14,6 +14,13 @@ This is a compatible subset: input maps/events/open/close/state changes; output
 discovery and immediate complete-message sends. There is no scheduled output
 or queue cancellation: future sends/clear throw NotSupportedError. Sends are
 limited to65535 bytes. Native pending work is capped at512 messages/4MiB.
+Each destination tracks up to4096 outstanding note-ons, including repeated
+presses of one key. Queue saturation or send errors pause that output, release
+only the bridge's own notes/pedals, and require explicit open/re-enable before
+retrying. A disconnected device may be unable to receive those releases.
+Synthetic internal-synth resets never appear as incoming hardware MIDI. A
+real input packet loss resets its stream parser and pauses/release its route;
+disconnecting another input preserves the selected input's buffered packets.
 Browser arrival timestamps are used, not raw CoreMIDI clock values mislabeled
 as browser time. This is not full W3C conformance or sample-accurate timing.
 
@@ -29,3 +36,8 @@ Implementation: web/src/coremidi-webmidi.ts, web/src/midi-thru.ts, existing
 MIDIInput/AppModel/PlayerWebView Swift files. Validation: browser contract/UI
 tests plus native argument-validation tests; physical devices and iOS27 beta
 latency remain unverified.
+
+CI note: the first simulator test run exposed WebKit bug293831 on iOS18.5
+(system libswiftWebKit resides in a Cryptex not in its loader search path).
+tools/configure-simulator-tests.py adds the documented simulator-only test
+environment path when that library exists. Device binaries are unchanged.

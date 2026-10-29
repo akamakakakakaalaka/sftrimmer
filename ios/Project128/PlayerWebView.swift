@@ -67,6 +67,7 @@ struct PlayerWebView: UIViewRepresentable {
                 model.notice = "\(model.midiStatus)\n\nUp to eight CoreMIDI sources use separate ports, stable while connected. WebKit delivery is batched and is not a hard real-time transport. Physical-device latency and background synthesis still need validation."
             case "midiPorts": model.refreshMIDIPorts()
             case "midiSend": model.sendMIDIOutput(body)
+            case "midiOutputResume": model.resumeMIDIOutput(body)
             case "share":
                 guard let name = body["name"] as? String, let data = body["data"] as? String else { return }
                 model.share(name: name, base64: data)

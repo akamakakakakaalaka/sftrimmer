@@ -7,6 +7,8 @@ struct NativeMIDIEvent {
     /// CoreMIDI host monotonic milliseconds; this is not the Web Audio clock.
     let timestamp: Double
     let port: Int
+    var synthesizedReset = false
+    var resetBridge = false
 }
 
 /// The CoreMIDI callback only tries a lock and copies into a fixed-capacity ring.
@@ -16,6 +18,7 @@ final class MIDIInput {
     var onStatus: ((String) -> Void)?
     var onPorts: (([[String: Any]], [[String: Any]]) -> Void)?
     var onOutputError: ((String) -> Void)?
+    var onOutputReset: ((String) -> Void)?
     private let queue = DispatchQueue(label: "org.project128.midi-delivery", qos: .userInitiated)
     private let lock = NSLock()
     private let capacity = 512
@@ -34,11 +37,16 @@ final class MIDIInput {
     private let outputLock = NSLock()
     private var outputBytesPending = 0
     private var outputMessagesPending = 0
+    private var availableOutputIDs = Set<String>() // Protected by outputLock.
+    private var blockedOutputIDs = Set<String>() // Protected by outputLock.
+    private var outputGenerations: [String: UInt64] = [:] // Invalidates queued sends after recovery.
+    private var outputStates: [String: NativeBridgePolicy.MIDIOutputNoteState] = [:] // MIDI queue only.
     private var sources: [MIDIEndpointRef: Int] = [:]
     private var timer: DispatchSourceTimer?
     private let dropSignal: DispatchSourceUserDataAdd
     private var dropped = 0
     private var needsPanic = false
+    private var disconnectedInputSlots = Set<Int>()
     private var deliveryInFlight = false
     private var timebase = mach_timebase_info_data_t()
     private let packetOffset = MemoryLayout<MIDIPacketList>.offset(of: \MIDIPacketList.packet)!
@@ -85,8 +93,10 @@ final class MIDIInput {
         let current = Set((0..<MIDIGetNumberOfSources()).map(MIDIGetSource).filter { $0 != 0 })
         for source in Set(sources.keys).subtracting(current) {
             MIDIPortDisconnectSource(inputPort, source)
-            sources.removeValue(forKey: source)
-            needsPanic = true
+            if let slot = sources.removeValue(forKey: source) {
+                discardBufferedInput(slot)
+                disconnectedInputSlots.insert(slot)
+            }
         }
         for source in current.subtracting(Set(sources.keys)).sorted() {
             guard let slot = (0..<8).first(where: { !sources.values.contains($0) }) else { break }
@@ -130,7 +140,7 @@ final class MIDIInput {
     private func destinationDescriptions() -> [[String: Any]] {
         destinations.removeAll()
         guard outputPort != 0 else { return [] }
-        return (0..<min(MIDIGetNumberOfDestinations(), 64)).compactMap { index in
+        let descriptions: [[String: Any]] = (0..<min(MIDIGetNumberOfDestinations(), 64)).compactMap { index in
             let endpoint = MIDIGetDestination(index)
             guard endpoint != 0 else { return nil }
             var uniqueID: Int32 = 0
@@ -146,16 +156,32 @@ final class MIDIInput {
             }
             return ["id": id, "name": string(kMIDIPropertyDisplayName), "manufacturer": string(kMIDIPropertyManufacturer)]
         }
+        let available = Set(destinations.keys)
+        outputLock.lock()
+        availableOutputIDs = available
+        blockedOutputIDs.formIntersection(available)
+        outputGenerations = outputGenerations.filter { available.contains($0.key) }
+        outputLock.unlock()
+        outputStates = outputStates.filter { available.contains($0.key) }
+        return descriptions
     }
 
     /// Immediate output on the non-real-time MIDI queue. The reservation bounds
     /// pending work before dispatch; JavaScript cannot enqueue unlimited packets.
     func sendOutput(_ message: NativeBridgePolicy.MIDIOutputMessage) {
         outputLock.lock()
-        let accepted = outputMessagesPending < 512 && outputBytesPending + message.bytes.count <= 4 * 1024 * 1024
+        let available = availableOutputIDs.contains(message.destination) && !blockedOutputIDs.contains(message.destination)
+        let accepted = available && outputMessagesPending < 512 && outputBytesPending + message.bytes.count <= 4 * 1024 * 1024
+        let generation = outputGenerations[message.destination, default: 0]
         if accepted { outputMessagesPending += 1; outputBytesPending += message.bytes.count }
+        let recover = available && !accepted
+        if recover { blockedOutputIDs.insert(message.destination); outputGenerations[message.destination] = generation &+ 1 }
         outputLock.unlock()
-        guard accepted else { onOutputError?("MIDI output queue is full; the message was not sent."); return }
+        guard accepted else {
+            // At most one recovery is queued for each of the 64 destinations.
+            if recover { queue.async { [weak self] in self?.recoverOutput(message.destination, reason: "MIDI output queue is full.") } }
+            return
+        }
         queue.async { [weak self] in
             guard let self else { return }
             defer {
@@ -163,21 +189,73 @@ final class MIDIInput {
                 self.outputMessagesPending -= 1; self.outputBytesPending -= message.bytes.count
                 self.outputLock.unlock()
             }
-            guard self.outputPort != 0, let endpoint = self.destinations[message.destination] else {
-                self.onOutputError?("The selected MIDI output is disconnected."); return
+            self.outputLock.lock()
+            let blocked = self.blockedOutputIDs.contains(message.destination) || self.outputGenerations[message.destination, default: 0] != generation
+            self.outputLock.unlock()
+            guard !blocked else { return }
+            var next = self.outputStates[message.destination] ?? NativeBridgePolicy.MIDIOutputNoteState()
+            guard next.record(message.bytes) else {
+                self.pauseOutput(message.destination, reason: "Too many unreleased MIDI notes."); return
             }
-            let capacity = max(MemoryLayout<MIDIPacketList>.size, message.bytes.count + 64)
-            let storage = UnsafeMutableRawPointer.allocate(byteCount: capacity, alignment: 16)
-            defer { storage.deallocate() }
-            let list = storage.bindMemory(to: MIDIPacketList.self, capacity: 1)
-            let packet = MIDIPacketListInit(list)
-            let result: OSStatus = message.bytes.withUnsafeBufferPointer { bytes in
-                guard let base = bytes.baseAddress,
-                      MIDIPacketListAdd(list, capacity, packet, 0, bytes.count, base) != nil else { return -50 }
-                return MIDISend(self.outputPort, endpoint, list)
-            }
-            if result != noErr { self.onOutputError?("MIDI output failed (\(result)).") }
+            let result = self.sendBytes(message.bytes, destination: message.destination)
+            if result == noErr { self.outputStates[message.destination] = next }
+            else { self.pauseOutput(message.destination, reason: "MIDI output failed (\(result)).") }
         }
+    }
+
+    func resumeOutput(_ destination: String) {
+        // Native recovery notifies JS after releasing notes. Do not enqueue this
+        // unblock: open().then(send) must accept the very first resumed message.
+        outputLock.lock(); defer { outputLock.unlock() }
+        if availableOutputIDs.contains(destination) { blockedOutputIDs.remove(destination) }
+    }
+
+    private func pauseOutput(_ destination: String, reason: String) {
+        outputLock.lock()
+        let first = blockedOutputIDs.insert(destination).inserted
+        if first { outputGenerations[destination, default: 0] &+= 1 }
+        outputLock.unlock()
+        if first { recoverOutput(destination, reason: reason) }
+    }
+
+    private func recoverOutput(_ destination: String, reason: String) {
+        var state = outputStates.removeValue(forKey: destination) ?? NativeBridgePolicy.MIDIOutputNoteState()
+        let releases = state.takeReleaseBytes()
+        let result = releases.isEmpty ? noErr : sendBytes(releases, destination: destination)
+        onOutputError?(reason + (result == noErr ? " Routed notes released; output paused." : " Output paused; the device could not receive all note releases."))
+        onOutputReset?(destination)
+        // Explicit user resume is required; pending ordinary sends stay blocked.
+    }
+
+    private func sendBytes(_ bytes: [UInt8], destination: String) -> OSStatus {
+        guard outputPort != 0, let endpoint = destinations[destination] else { return -50 }
+        let capacity = max(MemoryLayout<MIDIPacketList>.size, bytes.count + 64)
+        let buffer = UnsafeMutableRawPointer.allocate(byteCount: capacity, alignment: 16)
+        defer { buffer.deallocate() }
+        let list = buffer.bindMemory(to: MIDIPacketList.self, capacity: 1)
+        let packet = MIDIPacketListInit(list)
+        return bytes.withUnsafeBufferPointer { bytes in
+            guard let base = bytes.baseAddress,
+                  MIDIPacketListAdd(list, capacity, packet, 0, bytes.count, base) != nil else { return -50 }
+            return MIDISend(outputPort, endpoint, list)
+        }
+    }
+
+    /// Keep other sources' packets intact when one input disappears or its slot is reused.
+    private func discardBufferedInput(_ port: Int) {
+        lock.lock(); defer { lock.unlock() }
+        var kept = 0
+        for offset in 0..<count {
+            let source = (readIndex + offset) % capacity
+            guard ports[source] != port else { continue }
+            let target = (readIndex + kept) % capacity
+            if target != source {
+                storage.advanced(by: target * packetBytes).copyMemory(from: storage.advanced(by: source * packetBytes), byteCount: lengths[source])
+                lengths[target] = lengths[source]; timestamps[target] = timestamps[source]; ports[target] = ports[source]
+            }
+            kept += 1
+        }
+        count = kept; writeIndex = (readIndex + kept) % capacity
     }
 
     private func receive(_ list: UnsafePointer<MIDIPacketList>, port: Int) {
@@ -204,17 +282,22 @@ final class MIDIInput {
         guard !deliveryInFlight else { return }
         var events: [NativeMIDIEvent] = []
         lock.lock()
+        let resetBridge = needsPanic
+        let resetSlots = needsPanic ? Array(0..<8) : disconnectedInputSlots.sorted()
         if needsPanic {
-            // Discard the incomplete stream, then silence every logical input channel.
+            // A dropped packet invalidates parsers; these CCs affect only the internal synth.
             readIndex = writeIndex
             count = 0
             needsPanic = false
-            for port in 0..<8 {
-                for channel in UInt8(0)..<16 {
-                    events.append(NativeMIDIEvent(bytes: [0xB0 | channel, 120, 0, 0xB0 | channel, 123, 0], timestamp: 0, port: port))
-                }
+        }
+        disconnectedInputSlots.removeAll()
+        for port in resetSlots {
+            for channel in UInt8(0)..<16 {
+                events.append(NativeMIDIEvent(bytes: [0xB0 | channel, 120, 0, 0xB0 | channel, 123, 0], timestamp: 0, port: port,
+                                              synthesizedReset: true, resetBridge: resetBridge && channel == 0))
             }
-        } else {
+        }
+        if !resetBridge {
             for _ in 0..<min(count, 128) {
                 let pointer = storage.advanced(by: readIndex * packetBytes).assumingMemoryBound(to: UInt8.self)
                 let bytes = Array(UnsafeBufferPointer(start: pointer, count: lengths[readIndex]))

@@ -64,7 +64,7 @@ jobs:
       - name: Run native boundary and MIDI-output validation tests
         run: |
           set -euo pipefail
-          simulator_id="$(xcrun simctl list devices available -j | python3 -c 'import json,sys; d=json.load(sys.stdin)["devices"]; p=[v["udid"] for k,rows in d.items() if "iOS-18" in k for v in rows if v.get("isAvailable") and v["name"].startswith("iPhone")]; sys.exit("No iOS18 iPhone Simulator runtime is available") if not p else print(p[0])')"
+          simulator_id="$(python3 tools/configure-simulator-tests.py)"
           xcodebuild test \
             -project ios/Project128.xcodeproj \
             -scheme Project128 \

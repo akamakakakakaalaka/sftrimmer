@@ -15,7 +15,7 @@ test('native CoreMIDI sources deliver complete Web MIDI input events', async ({p
     const messages:number[][]=[];
     input.onmidimessage=event=>messages.push(Array.from(event.data!));
     w.nativeMIDI([0x90,60],1000,0);
-    w.nativeMIDI([100,61,0xf8,90,0xf0,1,2,0xf7,0x80,60,0],1001,0);
+    w.nativeMIDI([100,61,0xf8,0xf9,0xfd,90,0xf0,1,2,0xf7,0x80,60,0],1001,0);
     return {messages,name:input.name,manufacturer:input.manufacturer,outputs:access.outputs.size,connection:input.connection};
   });
   expect(received).toEqual({messages:[[0x90,60,100],[0xf8],[0x90,61,90],[0x80,60,0]],name:'Keyboard',manufacturer:'Test maker',outputs:0,connection:'open'});
@@ -133,4 +133,43 @@ test('MIDI Thru menus route only the chosen input and release held notes when sw
     {command:'midiSend',destination:'out',data:[0x90,64,100]},
     {command:'midiSend',destination:'out',data:[0x80,64,0]}
   ]);
+});
+
+test('synthetic synth panic never becomes hardware MIDI and duplicate notes remain releasable', async ({page})=>{
+  await page.addInitScript(()=>{
+    Object.defineProperty(navigator,'requestMIDIAccess',{value:undefined,configurable:true});
+    (window as any).__sent=[];(window as any).webkit={messageHandlers:{project128:{postMessage:(m:unknown)=>(window as any).__sent.push(m)}}};
+  });
+  await page.goto('/');await page.locator('#tab-midi').click();
+  await page.evaluate(()=>(window as any).nativeMIDIPorts([{id:'a',name:'A',slot:0},{id:'b',name:'B',slot:1}],[{id:'out',name:'Out'}]));
+  await page.locator('#midi-connect').click();await page.locator('#midi-thru-input').selectOption('a');await page.locator('#midi-thru-output').selectOption('out');await page.locator('#midi-thru-enabled').check();
+  await page.evaluate(()=>{
+    const w=window as any;
+    w.nativeMIDI([0x90,60,100,0x90,60,90,0x80,60,0],0,0);
+    w.nativeMIDIPorts([{id:'a',name:'A',slot:0}],[{id:'out',name:'Out'}]);
+    w.nativeMIDI([0xb0,120,0,0xb0,123,0],0,0,true,false);
+  });
+  await expect(page.locator('#midi-thru-enabled')).toBeChecked();
+  await page.locator('#midi-thru-enabled').uncheck();
+  expect(await page.evaluate(()=>(window as any).__sent.filter((m:any)=>m.command==='midiSend').map((m:any)=>m.data))).toEqual([[0x90,60,100],[0x90,60,90],[0x80,60,0],[0x80,60,0]]);
+});
+
+test('an input stream reset releases only routed notes and output errors require explicit resume', async ({page})=>{
+  await page.addInitScript(()=>{
+    Object.defineProperty(navigator,'requestMIDIAccess',{value:undefined,configurable:true});
+    (window as any).__sent=[];(window as any).webkit={messageHandlers:{project128:{postMessage:(m:unknown)=>(window as any).__sent.push(m)}}};
+  });
+  await page.goto('/');await page.locator('#tab-midi').click();
+  await page.evaluate(()=>(window as any).nativeMIDIPorts([{id:'a',name:'A',slot:0}],[{id:'out',name:'Out'}]));
+  await page.locator('#midi-connect').click();await page.locator('#midi-thru-input').selectOption('a');await page.locator('#midi-thru-output').selectOption('out');await page.locator('#midi-thru-enabled').check();
+  await page.evaluate(()=>{const w=window as any;w.nativeMIDI([0x90,60,100],0,0);w.nativeMIDI([0xb0,120,0,0xb0,123,0],0,0,true,true);});
+  await expect(page.locator('#midi-thru-enabled')).not.toBeChecked();
+  expect(await page.evaluate(()=>(window as any).__sent.filter((m:any)=>m.command==='midiSend').map((m:any)=>m.data))).toEqual([[0x90,60,100],[0x80,60,0]]);
+  const result=await page.evaluate(async()=>{
+    const w=window as any,access=await navigator.requestMIDIAccess(),output=access.outputs.get('out')!;
+    w.nativeMIDIOutputReset('out');let blocked='';try{output.send([0x90,61,100]);}catch(error){blocked=(error as Error).name;}
+    await output.open();output.send([0x90,62,100]);
+    return{blocked,resumes:w.__sent.filter((m:any)=>m.command==='midiOutputResume').length};
+  });
+  expect(result).toEqual({blocked:'InvalidStateError',resumes:1});
 });

@@ -50,18 +50,22 @@ export function validateMIDIOutput(data:unknown,sysexEnabled:boolean):number[]{
 }
 
 export class CoreMIDIOutput extends StateTarget {
-  readonly type='output';private connected=false;private wantedOpen=false;
+  readonly type='output';private connected=false;private wantedOpen=false;private blocked=false;
   constructor(private info:CoreMIDIDestination,private readonly owner:CoreMIDIAccess,private readonly sendNative:(message:unknown)=>void){super();}
   get id(){return this.info.id;}get name(){return this.info.name;}
   get manufacturer(){return this.info.manufacturer||'';}get version(){return this.info.version||'';}
   get state(){return this.connected?'connected':'disconnected';}
   get connection(){return !this.wantedOpen?'closed':this.connected?'open':'pending';}
-  async open(){if(!this.wantedOpen){this.wantedOpen=true;this.changed();}return this;}
+  async open(){
+    if(this.blocked){this.sendNative({command:'midiOutputResume',destination:this.id});this.blocked=false;}
+    if(!this.wantedOpen){this.wantedOpen=true;this.changed();}return this;
+  }
   async close(){if(this.wantedOpen){this.wantedOpen=false;this.changed();}return this;}
+  didReset(){this.blocked=true;this.wantedOpen=false;this.dispatchEvent(new Event('outputreset'));this.changed();}
   update(info:CoreMIDIDestination,connected:boolean){this.info=info;if(this.connected!==connected){this.connected=connected;this.changed();}}
   private changed(){this.announce(this);this.owner.announce(this);}
   send(data:unknown,timestamp?:number){
-    if(!this.connected)throw new DOMException('The MIDI output is disconnected.','InvalidStateError');
+    if(!this.connected||this.blocked)throw new DOMException('The MIDI output is disconnected or paused. Open it explicitly to resume after an output error.','InvalidStateError');
     const bytes=validateMIDIOutput(data,this.owner.sysexEnabled);
     if(timestamp!==undefined&&(!Number.isFinite(timestamp)||typeof timestamp!=='number'))throw new TypeError('Invalid MIDI timestamp.');
     if(timestamp!==undefined&&timestamp>performance.now()+1)throw new DOMException('This bridge currently supports immediate MIDI output.','NotSupportedError');
@@ -141,6 +145,8 @@ export class CoreMIDIAccess extends StateTarget {
     if(bytes[0]===0xf0&&!this.sysexEnabled)return;
     this.connected.get(source.id)?.deliver(bytes);
   }
+  resetInput(id:string){this.connected.get(id)?.dispatchEvent(new Event('midistreamreset'));}
+  resetOutput(id:string){this.knownOutputs.get(id)?.didReset();}
 }
 
 /** Separate parsers prevent a second device completing another device's message. */
@@ -153,7 +159,7 @@ class MIDIStream {
   feed(bytes:ArrayLike<number>,emit:(message:number[])=>void){
     for(let i=0;i<bytes.length;i++){
       const byte=bytes[i];if(!Number.isInteger(byte)||byte<0||byte>255)continue;
-      if(byte>=0xf8){emit([byte]);continue;}
+      if(byte>=0xf8){if(byte!==0xf9&&byte!==0xfd)emit([byte]);continue;}
       if(this.sysex){
         if(byte===0xf7){this.sysex.push(byte);emit(this.sysex);this.sysex=null;continue;}
         if(byte<0x80){if(this.sysex.length<1_048_576)this.sysex.push(byte);else this.sysex=null;continue;}
@@ -219,6 +225,11 @@ export class CoreMIDIWebInputBridge {
     let parser=this.parsers.get(source.id);if(!parser){parser=new MIDIStream();this.parsers.set(source.id,parser);}
     parser.feed(bytes,message=>{for(const access of this.accesses.values())access.deliver(source,message);});
   }
+  resetInput(slot:number){
+    const source=this.sources.find(source=>source.slot===slot);if(!source)return;
+    this.parsers.delete(source.id);for(const access of this.accesses.values())access.resetInput(source.id);
+  }
+  resetOutput(id:string){for(const access of this.accesses.values())access.resetOutput(id);}
 }
 
 /** The native host has already authorized its own bundled, token-scoped page.

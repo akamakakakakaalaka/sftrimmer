@@ -10,6 +10,64 @@ enum NativeBridgePolicy {
         let bytes: [UInt8]
     }
 
+    /// State of successfully sent messages, bounded before each physical send.
+    /// Recovery releases only notes and pedals this bridge has sent itself.
+    struct MIDIOutputNoteState {
+        private var notes: [Int: Int] = [:]
+        private var pedals = Set<Int>()
+        private var total = 0
+
+        mutating func record(_ bytes: [UInt8]) -> Bool {
+            var status: UInt8 = 0, data: [UInt8] = [], sysex = false
+            for byte in bytes {
+                if byte >= 0xf8 {
+                    if byte == 0xff { notes.removeAll(); pedals.removeAll(); total = 0 }
+                    continue
+                }
+                if sysex { if byte == 0xf7 { sysex = false }; continue }
+                if byte >= 0x80 {
+                    if byte == 0xf0 { sysex = true }
+                    status = byte; data.removeAll(keepingCapacity: true); continue
+                }
+                guard status >= 0x80 else { continue }
+                data.append(byte)
+                let kind = status & 0xf0, channel = Int(status & 15)
+                let length = status < 0xf0 ? (kind == 0xc0 || kind == 0xd0 ? 1 : 2) : (status == 0xf2 ? 2 : 1)
+                guard data.count == length else { continue }
+                let key = channel << 8 | Int(data[0])
+                if kind == 0x90 && data[1] > 0 {
+                    guard total < 4096 else { return false }
+                    notes[key, default: 0] += 1; total += 1
+                } else if kind == 0x80 || (kind == 0x90 && data[1] == 0) {
+                    if let count = notes[key] {
+                        total -= 1
+                        if count > 1 { notes[key] = count - 1 } else { notes.removeValue(forKey: key) }
+                    }
+                } else if kind == 0xb0 {
+                    if [64, 66, 69].contains(data[0]) {
+                        if data[1] >= 64 { pedals.insert(key) } else { pedals.remove(key) }
+                    }
+                    if data[0] == 120 || data[0] == 123 {
+                        for note in Array(notes.keys) where note >> 8 == channel { total -= notes.removeValue(forKey: note) ?? 0 }
+                    }
+                    if data[0] == 121 { pedals = Set(pedals.filter { $0 >> 8 != channel }) }
+                }
+                status = 0; data.removeAll(keepingCapacity: true)
+            }
+            return true
+        }
+
+        mutating func takeReleaseBytes() -> [UInt8] {
+            var bytes: [UInt8] = []
+            for pedal in pedals.sorted() { bytes += [0xb0 | UInt8(pedal >> 8), UInt8(pedal & 255), 0] }
+            for note in notes.keys.sorted() {
+                for _ in 0..<(notes[note] ?? 0) { bytes += [0x80 | UInt8(note >> 8), UInt8(note & 255), 0] }
+            }
+            notes.removeAll(); pedals.removeAll(); total = 0
+            return bytes
+        }
+    }
+
     static func midiOutputMessage(_ body: [String: Any]) throws -> MIDIOutputMessage {
         let invalid = CocoaError(.fileReadCorruptFile)
         guard let destination = body["destination"] as? String, !destination.isEmpty, destination.utf8.count <= 256,

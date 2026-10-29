@@ -48,12 +48,19 @@ final class AppModel: ObservableObject {
             DispatchQueue.main.async { self?.deliverMIDIPorts(ports, outputs: outputs) }
         }
         midi.onOutputError = { [weak self] message in DispatchQueue.main.async { self?.notice = message } }
+        midi.onOutputReset = { [weak self] destination in
+            DispatchQueue.main.async {
+                guard let self, self.webReady else { return }
+                self.webView?.callAsyncJavaScript("if (typeof window.nativeMIDIOutputReset === 'function') window.nativeMIDIOutputReset(destination);",
+                                                arguments: ["destination": destination], in: nil, in: .page, completionHandler: nil)
+            }
+        }
         midi.onBatch = { [weak self] events, dropped, completion in
             DispatchQueue.main.async {
                 guard let self, let view = self.webView, self.webReady else { completion(); return }
                 if dropped > 0 { self.midiStatus = "MIDI: \(dropped) packets dropped · input reset" }
-                let payload: [[String: Any]] = events.map { ["bytes": $0.bytes.map(Int.init), "timestamp": $0.timestamp, "port": $0.port] }
-                view.callAsyncJavaScript("if (typeof window.nativeMIDI === 'function') { for (const event of events) window.nativeMIDI(event.bytes, event.timestamp, event.port); }",
+                let payload: [[String: Any]] = events.map { ["bytes": $0.bytes.map(Int.init), "timestamp": $0.timestamp, "port": $0.port, "synthesizedReset": $0.synthesizedReset, "resetBridge": $0.resetBridge] }
+                view.callAsyncJavaScript("if (typeof window.nativeMIDI === 'function') { for (const event of events) window.nativeMIDI(event.bytes, event.timestamp, event.port, event.synthesizedReset, event.resetBridge); }",
                                          arguments: ["events": payload], in: nil, in: .page) { _ in completion() }
             }
         }
@@ -96,6 +103,11 @@ final class AppModel: ObservableObject {
     func sendMIDIOutput(_ body: [String: Any]) {
         do { midi.sendOutput(try NativeBridgePolicy.midiOutputMessage(body)) }
         catch { notice = "The MIDI output message is invalid or exceeds 65535 bytes." }
+    }
+
+    func resumeMIDIOutput(_ body: [String: Any]) {
+        guard let destination = body["destination"] as? String, !destination.isEmpty, destination.utf8.count <= 256 else { return }
+        midi.resumeOutput(destination)
     }
 
     private func sendLifecycleEvent(_ name: String, detail: [String: Any]) {

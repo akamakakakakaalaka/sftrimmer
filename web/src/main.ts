@@ -780,7 +780,7 @@ function decodeNativeMIDI(bytes:number[],port:number) {
 }
 type NativeImport = {kind:string;name:string;data:string};
 const coreMIDIWeb=installCoreMIDIWebMIDI(navigator,(window as any).webkit?.messageHandlers?.project128);
-const nativeWindow=window as unknown as {nativeImport:(file:NativeImport)=>Promise<void>;nativeMIDI:(bytes:number[],timestampNativeMonotonicMs?:number,port?:number)=>void;nativeMIDIPorts:(ports:unknown,outputs?:unknown)=>void;nativeAudioInterruption?:(interrupted:boolean)=>void};
+const nativeWindow=window as unknown as {nativeImport:(file:NativeImport)=>Promise<void>;nativeMIDI:(bytes:number[],timestampNativeMonotonicMs?:number,port?:number,synthesizedReset?:boolean,resetBridge?:boolean)=>void;nativeMIDIPorts:(ports:unknown,outputs?:unknown)=>void;nativeMIDIOutputReset:(destination:string)=>void;nativeAudioInterruption?:(interrupted:boolean)=>void};
 nativeWindow.nativeImport=async(file:NativeImport)=>run(`Importing ${file.name}…`,async()=>{
   const binary=atob(file.data);const bytes=Uint8Array.from(binary,char=>char.charCodeAt(0));const kind=file.kind.toLowerCase();
   if(kind==='bank'||/\.(sf2|sf3|dls)$/i.test(file.name))await importBank(bytes.buffer,file.name);
@@ -789,8 +789,9 @@ nativeWindow.nativeImport=async(file:NativeImport)=>run(`Importing ${file.name}�
   else if(kind==='preset'||file.name.endsWith('.p128preset'))importPreset(new TextDecoder().decode(bytes));
   else throw new Error(`Unsupported import: ${file.name}. Choose a soundbank, MIDI, Project 128 preset, or session backup.`);
 });
-nativeWindow.nativeMIDI=(bytes,_timestamp,port=0)=>{if(audioReady){decodeNativeMIDI(bytes,port);if(Number.isInteger(port)&&port>=0&&port<8)$('#midi-input-status').textContent=`Receiving MIDI on port ${port+1} · parts ${port*16+1}–${port*16+16}. Native connection details are available from the iOS MIDI status button.`;}coreMIDIWeb?.receive(port,bytes);};
+nativeWindow.nativeMIDI=(bytes,_timestamp,port=0,synthesizedReset=false,resetBridge=false)=>{if(audioReady){decodeNativeMIDI(bytes,port);if(!synthesizedReset&&Number.isInteger(port)&&port>=0&&port<8)$('#midi-input-status').textContent=`Receiving MIDI on port ${port+1} · parts ${port*16+1}–${port*16+16}. Native connection details are available from the iOS MIDI status button.`;}if(synthesizedReset){if(resetBridge)coreMIDIWeb?.resetInput(port);}else coreMIDIWeb?.receive(port,bytes);};
 nativeWindow.nativeMIDIPorts=(ports,outputs=[])=>{coreMIDIWeb?.setSources(ports);coreMIDIWeb?.setDestinations(outputs);};
+nativeWindow.nativeMIDIOutputReset=destination=>coreMIDIWeb?.resetOutput(destination);
 setupMIDIThru();
 nativeWindow.nativeAudioInterruption=interrupted=>{if(interrupted){releaseAll();void run('Audio interrupted…',async()=>{await engine.pause();renderTransport(engine.position());setStatus('Audio was interrupted. Tap play when you’re ready to continue.');});}};
 window.addEventListener('nativeAudioInterruption',event=>{

@@ -98,4 +98,26 @@ final class NativeBoundaryTests: XCTestCase {
         XCTAssertThrowsError(try NativeBridgePolicy.midiOutputMessage(["destination": "out", "data": [144, 60, 100.5]]))
         XCTAssertThrowsError(try NativeBridgePolicy.midiOutputMessage(["destination": "out", "data": [Int](repeating: 0xf8, count: 65536)]))
     }
+
+    func testOutputRecoveryCountsDuplicateNotesAndReleasesOnlyOwnedState() {
+        var state = NativeBridgePolicy.MIDIOutputNoteState()
+        XCTAssertTrue(state.record([0x90, 60, 100, 0x90, 60, 90, 0x80, 60, 0, 0xb2, 64, 127]))
+        XCTAssertEqual(state.takeReleaseBytes(), [0xb2, 64, 0, 0x80, 60, 0])
+        XCTAssertEqual(state.takeReleaseBytes(), [])
+        XCTAssertTrue(state.record([0x91, 61, 100, 0xb1, 123, 0]))
+        XCTAssertEqual(state.takeReleaseBytes(), [])
+        XCTAssertTrue(state.record([0xb1, 66, 127, 0xb1, 121, 0, 0x90, 60, 100, 0xff]))
+        XCTAssertEqual(state.takeReleaseBytes(), [])
+    }
+
+    func testOutputRecoveryLedgerBoundsRepeatedNoteOnsBeforeSending() {
+        var state = NativeBridgePolicy.MIDIOutputNoteState()
+        for _ in 0..<4096 { XCTAssertTrue(state.record([0x90, 60, 100])) }
+        var candidate = state
+        XCTAssertFalse(candidate.record([0x90, 61, 100]))
+        let releases = state.takeReleaseBytes()
+        XCTAssertEqual(releases.count, 4096 * 3)
+        XCTAssertEqual(Array(releases.prefix(3)), [0x80, 60, 0])
+        XCTAssertEqual(Array(releases.suffix(3)), [0x80, 60, 0])
+    }
 }
