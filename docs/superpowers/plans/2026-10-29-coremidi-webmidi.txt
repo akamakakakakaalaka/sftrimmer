@@ -1,0 +1,50 @@
+CoreMIDI/Web MIDI input bridge implementation plan
+Execution: native inline execution, continuing the user's existing instruction
+to build autonomously. Spec: ../specs/2026-10-29-coremidi-webmidi.txt.
+
+Goal: expose native MIDI inputs through a documented Web MIDI input subset.
+Architecture: retain the existing bounded CoreMIDI queue and direct synth path;
+add source snapshots and a JavaScript input adapter. Plain Safari is unchanged.
+Tech stack: Swift5/CoreMIDI/WKWebView, TypeScript, Playwright, Xcode Mac CI.
+
+Constraints: eight existing source slots, stable endpoint IDs, token-scoped
+native page, no browser API replacement, no claimed MIDI output or conformance,
+no native signing bypass, timestamps use browser arrival time.
+
+Review focus: slot reuse never completes another device's partial message;
+SysEx opt-in stays separate per MIDIAccess; close suppresses delivery; state
+events occur after map updates; foreign browser pages never receive a fake API.
+
+Task1: input adapter and browser contract
+Files: web/src/coremidi-webmidi.ts; tests/browser/webmidi.spec.ts.
+Interface: installCoreMIDIWebMIDI(navigator,nativeHost), returning a bridge with
+setSources(unknown) and receive(slot,unknown); navigator.requestMIDIAccess returns
+input maps/events only. Write tests, observe missing-API failure, implement the
+parser/ports, then verify real browser events and both native-absent paths.
+
+Task2: native metadata and unchanged synth routing
+Files: MIDIInput.swift, AppModel.swift, PlayerWebView.swift, web/src/main.ts.
+Interface: nativeMIDIPorts([{id,name,manufacturer,slot}]); nativeMIDI remains the
+packet path. Add queue-owned source descriptions, initial/reload refresh and
+hotplug delivery. Feed the adapter after the existing synth decoder; do not
+register a second synth handler. Test slot reuse, disconnect and independent
+streams, then run existing behavioral/UI checks and compile through Mac CI.
+
+Task3: web delivery
+Isolated checkout: /workspace/sites/project128-mobile. Reuse built assets and
+same interface. Add Home Screen metadata/icons and a versioned offline cache.
+Verify real audio, import/conversion and offline reload before private hosting.
+Keep Site ID fixed, credentials in memory/stdin, and publish the exact pushed
+static source version. Native bridge availability remains explicit.
+
+Task4: evidence and handoff
+Record contract/test results, Mac build evidence and hardware limits; publish
+the updated unsigned IPA on the already authorized branch after verification.
+Give the phone-ready URL and short Home Screen instructions when hosting works.
+
+Output addition requested during implementation
+Add CoreMIDI destination discovery and MIDIOutput.send with immediate sends,
+strict complete-message validation and bounded native output work. Future-time
+sends and clear report NotSupportedError. Add no-code Input/Output/Enable menus
+with explicit opt-in, SysEx setting and routed-note release. Tests observed RED
+for absent outputs/UI and now pass; add native validation XCTest execution.

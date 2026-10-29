@@ -44,6 +44,10 @@ final class AppModel: ObservableObject {
         midi.onStatus = { [weak self] status in
             DispatchQueue.main.async { self?.midiStatus = status }
         }
+        midi.onPorts = { [weak self] ports, outputs in
+            DispatchQueue.main.async { self?.deliverMIDIPorts(ports, outputs: outputs) }
+        }
+        midi.onOutputError = { [weak self] message in DispatchQueue.main.async { self?.notice = message } }
         midi.onBatch = { [weak self] events, dropped, completion in
             DispatchQueue.main.async {
                 guard let self, let view = self.webView, self.webReady else { completion(); return }
@@ -75,6 +79,23 @@ final class AppModel: ObservableObject {
             try session.setCategory(.playback, mode: .default, options: [.mixWithOthers])
             try session.setActive(true)
         } catch { notice = "Audio session: \(error.localizedDescription)" }
+    }
+
+    func refreshMIDIPorts() {
+        midi.describePorts { [weak self] ports, outputs in
+            DispatchQueue.main.async { self?.deliverMIDIPorts(ports, outputs: outputs) }
+        }
+    }
+
+    private func deliverMIDIPorts(_ ports: [[String: Any]], outputs: [[String: Any]]) {
+        guard webReady else { return }
+        webView?.callAsyncJavaScript("if (typeof window.nativeMIDIPorts === 'function') window.nativeMIDIPorts(ports, outputs);",
+                                    arguments: ["ports": ports, "outputs": outputs], in: nil, in: .page, completionHandler: nil)
+    }
+
+    func sendMIDIOutput(_ body: [String: Any]) {
+        do { midi.sendOutput(try NativeBridgePolicy.midiOutputMessage(body)) }
+        catch { notice = "The MIDI output message is invalid or exceeds 65535 bytes." }
     }
 
     private func sendLifecycleEvent(_ name: String, detail: [String: Any]) {

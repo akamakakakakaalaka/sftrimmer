@@ -9,6 +9,8 @@ import { matchesPatchQuery, patchIdentity, sortPatchEntries } from './patch-sear
 import { loadState, saveState, restoreState, createPreset, applyPreset, parsePreset } from './state';
 import { SCALES, requiresMicrotonalTuning } from './harmony';
 import { referenceIcon } from './reference-icons';
+import { installCoreMIDIWebMIDI } from './coremidi-webmidi';
+import { setupMIDIThru } from './midi-thru';
 import type { AppState, BankInfo, PartState, PlayerPosition, SavedPreset, PresetMapping, PatchBrowserSettings } from './contracts';
 
 const icons: Record<string, string> = {
@@ -110,6 +112,7 @@ $('#app').innerHTML = `
     <section class="view menu-popover" id="view-reset" role="tabpanel" aria-labelledby="tab-reset" hidden><button class="popover-close" data-close-view aria-label="Close menu">${icon('close')}</button><div class="page-heading"><h1>Reset</h1></div><section class="panel reset-actions"><button data-reset-cc="120">All Sound Off<small>CC120 · stop sounding voices</small></button><button data-reset-cc="123">All Notes Off<small>CC123 · release notes; pedals still apply</small></button><button data-reset-cc="121">Reset Controllers<small>CC121 · reset incoming MIDI controllers</small></button></section><p class="subtle">These actions cover all eight ports. Saved banks, presets and master tuning stay in place.</p></section>
     <section class="view menu-popover" id="view-midi" role="tabpanel" aria-labelledby="tab-midi" hidden><button class="popover-close" data-close-view aria-label="Close menu">${icon('close')}</button>
       <div class="page-heading"><h1>MIDI input &amp; program maps</h1></div>
+      <section class="panel settings-panel"><h2>MIDI Thru</h2><button class="button" id="midi-connect">Connect MIDI devices</button><div class="field-grid" style="margin:14px 0;grid-template-columns:1fr 1fr"><label class="field">Input<select id="midi-thru-input"><option value="">Choose input</option></select></label><label class="field">Output<select id="midi-thru-output"><option value="">Choose output</option></select></label></div><label class="switch-label"><input type="checkbox" id="midi-thru-enabled" disabled>Enable MIDI Thru</label><label class="switch-label" style="margin-top:12px"><input type="checkbox" id="midi-thru-sysex">Allow SysEx</label><p class="settings-note" id="midi-thru-status" role="status">Connect MIDI devices to choose an input and output.</p><button class="text-button" id="midi-thru-release">Release routed notes</button><p class="settings-note">Forwards the selected live input immediately. It pauses when the player is hidden. Choose a route that does not echo MIDI back into itself. MIDI-file playback stays in the internal player.</p></section>
       <section class="panel settings-panel"><h2>Eight input ports</h2><p id="midi-input-status">The iOS shell connects CoreMIDI sources to separate ports. Start audio to receive notes. In the browser, use the touch or computer keyboard.</p><div class="midi-port-list">${Array.from({length:8},(_,i)=>`<div><strong>Port ${i+1}</strong><span>Parts ${i*16+1}–${i*16+16} · channels 1–16</span></div>`).join('')}</div><p class="settings-note">Bank Select MSB / LSB and Program Change address a soundbank patch, or an individual saved preset when a mapping exists. Part locks prevent incoming patch changes.</p><button class="button" id="edit-program-maps">Edit selected part's program map</button></section>
     </section>
     <section class="view menu-popover" id="view-library" role="tabpanel" aria-labelledby="tab-library" hidden><button class="popover-close" data-close-view aria-label="Close menu">${icon('close')}</button>
@@ -776,7 +779,8 @@ function decodeNativeMIDI(bytes:number[],port:number) {
   }
 }
 type NativeImport = {kind:string;name:string;data:string};
-const nativeWindow=window as unknown as {nativeImport:(file:NativeImport)=>Promise<void>;nativeMIDI:(bytes:number[],timestampNativeMonotonicMs?:number,port?:number)=>void;nativeAudioInterruption?:(interrupted:boolean)=>void};
+const coreMIDIWeb=installCoreMIDIWebMIDI(navigator,(window as any).webkit?.messageHandlers?.project128);
+const nativeWindow=window as unknown as {nativeImport:(file:NativeImport)=>Promise<void>;nativeMIDI:(bytes:number[],timestampNativeMonotonicMs?:number,port?:number)=>void;nativeMIDIPorts:(ports:unknown,outputs?:unknown)=>void;nativeAudioInterruption?:(interrupted:boolean)=>void};
 nativeWindow.nativeImport=async(file:NativeImport)=>run(`Importing ${file.name}…`,async()=>{
   const binary=atob(file.data);const bytes=Uint8Array.from(binary,char=>char.charCodeAt(0));const kind=file.kind.toLowerCase();
   if(kind==='bank'||/\.(sf2|sf3|dls)$/i.test(file.name))await importBank(bytes.buffer,file.name);
@@ -785,7 +789,9 @@ nativeWindow.nativeImport=async(file:NativeImport)=>run(`Importing ${file.name}�
   else if(kind==='preset'||file.name.endsWith('.p128preset'))importPreset(new TextDecoder().decode(bytes));
   else throw new Error(`Unsupported import: ${file.name}. Choose a soundbank, MIDI, Project 128 preset, or session backup.`);
 });
-nativeWindow.nativeMIDI=(bytes,_timestamp,port=0)=>{if(audioReady){decodeNativeMIDI(bytes,port);if(Number.isInteger(port)&&port>=0&&port<8)$('#midi-input-status').textContent=`Receiving MIDI on port ${port+1} · parts ${port*16+1}–${port*16+16}. Native connection details are available from the iOS MIDI status button.`;}};
+nativeWindow.nativeMIDI=(bytes,_timestamp,port=0)=>{if(audioReady){decodeNativeMIDI(bytes,port);if(Number.isInteger(port)&&port>=0&&port<8)$('#midi-input-status').textContent=`Receiving MIDI on port ${port+1} · parts ${port*16+1}–${port*16+16}. Native connection details are available from the iOS MIDI status button.`;}coreMIDIWeb?.receive(port,bytes);};
+nativeWindow.nativeMIDIPorts=(ports,outputs=[])=>{coreMIDIWeb?.setSources(ports);coreMIDIWeb?.setDestinations(outputs);};
+setupMIDIThru();
 nativeWindow.nativeAudioInterruption=interrupted=>{if(interrupted){releaseAll();void run('Audio interrupted…',async()=>{await engine.pause();renderTransport(engine.position());setStatus('Audio was interrupted. Tap play when you’re ready to continue.');});}};
 window.addEventListener('nativeAudioInterruption',event=>{
   const detail=(event as CustomEvent<{began?:boolean}>).detail;

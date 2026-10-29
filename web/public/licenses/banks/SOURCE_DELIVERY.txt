@@ -6,6 +6,11 @@ The combined Project128 GS bank includes GeneralUser GS data and eight TimGM6mb 
 
 This is the complete combined source before Vorbis conversion, including instrument/sample structures. It is separate from the below20MB app-source ZIP to avoid duplicating the bank in that archive. It is not required to run the player.
 
+For the public iPhone IPA build, the identical editable source is also supplied
+at sources/banks/Project128_GS_Editable_Source.sf2 on the project128-ios-build
+branch of https://github.com/akamakakakakaalaka/sftrimmer . This source is not
+copied into the app bundle or its IPA.
+
 When redistributing the compressed bank, also make the editable source and included license/provenance notices available alongside it, with equivalent access. This project does not claim that a build script or third-party URL alone constitutes a GPL written source offer. No three-year source-delivery promise on another person's behalf is being made.
 
 tools/prepare-bank.mjs documents reproducible source acquisition and can write --source-output. PROVENANCE.json records the original sources, exact hashes and measured conversion differences. GeneralUser GS's original license/notice remains included.

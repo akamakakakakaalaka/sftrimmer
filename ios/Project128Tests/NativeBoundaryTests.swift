@@ -83,4 +83,19 @@ final class NativeBoundaryTests: XCTestCase {
         XCTAssertThrowsError(try NativeBridgePolicy.importKind(filename: "sound.kqspreset"))
         XCTAssertThrowsError(try NativeBridgePolicy.importKind(filename: "script.js"))
     }
+
+    func testMIDIOutputAcceptsCompleteMessagesAndRejectsInvalidStreams() throws {
+        let message = try NativeBridgePolicy.midiOutputMessage(["destination": "coremidi-output-uid-1", "data": [0x90, 60, 100, 0x80, 60, 0]])
+        XCTAssertEqual(message.destination, "coremidi-output-uid-1")
+        XCTAssertEqual(message.bytes, [0x90, 60, 100, 0x80, 60, 0])
+        let sysex = try NativeBridgePolicy.midiOutputMessage(["destination": "out", "data": [0xf0, 0x7e, 0xf8, 0x7f, 9, 1, 0xf7]])
+        XCTAssertEqual(sysex.bytes.last, 0xf7)
+        for bytes in [[0x90, 60], [60, 100], [0xf0, 1], [0xf7], [0xf9], [0x90, -1, 100], [0x90, 60, 256], []] {
+            XCTAssertThrowsError(try NativeBridgePolicy.midiOutputMessage(["destination": "out", "data": bytes]))
+        }
+        XCTAssertThrowsError(try NativeBridgePolicy.midiOutputMessage(["destination": "", "data": [0xf8]]))
+        XCTAssertThrowsError(try NativeBridgePolicy.midiOutputMessage(["destination": "out", "data": [NSNumber(value: true)]]))
+        XCTAssertThrowsError(try NativeBridgePolicy.midiOutputMessage(["destination": "out", "data": [144, 60, 100.5]]))
+        XCTAssertThrowsError(try NativeBridgePolicy.midiOutputMessage(["destination": "out", "data": [Int](repeating: 0xf8, count: 65536)]))
+    }
 }

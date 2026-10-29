@@ -1,0 +1,31 @@
+Project128 CoreMIDI / Web MIDI bridge
+
+Native input: MIDI device -> CoreMIDI -> bounded native queue -> Web MIDI input.
+Native output: Web MIDI input -> chosen MIDI Thru route -> MIDIOutput.send ->
+validated native message -> bounded output queue -> MIDISend -> MIDI device.
+
+No-code controls are under MIDI: Connect MIDI devices, choose Input and Output,
+then Enable MIDI Thru. Routing starts off, pauses when the player is hidden and
+releases its held notes/pedals when stopped or switched. Allow SysEx is opt-in.
+It routes live input; MIDI-file sequencing still plays through the internal
+synth and is not silently redirected to hardware.
+
+This is a compatible subset: input maps/events/open/close/state changes; output
+discovery and immediate complete-message sends. There is no scheduled output
+or queue cancellation: future sends/clear throw NotSupportedError. Sends are
+limited to65535 bytes. Native pending work is capped at512 messages/4MiB.
+Browser arrival timestamps are used, not raw CoreMIDI clock values mislabeled
+as browser time. This is not full W3C conformance or sample-accurate timing.
+
+The native host allows only its own local token-scoped page. API injection
+preserves an existing browser implementation, and Safari without a native host
+gets no fake hardware access. The original synth receives each native packet
+once; publishing a separate web player does not remove native CoreMIDI code.
+
+A valid native installation remains necessary for iPhone hardware MIDI. The
+web player needs no CoreMIDI for MIDI files, soundfonts or onscreen keys.
+
+Implementation: web/src/coremidi-webmidi.ts, web/src/midi-thru.ts, existing
+MIDIInput/AppModel/PlayerWebView Swift files. Validation: browser contract/UI
+tests plus native argument-validation tests; physical devices and iOS27 beta
+latency remain unverified.

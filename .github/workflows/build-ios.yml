@@ -61,6 +61,29 @@ jobs:
             build/simulator-build.log
           if-no-files-found: warn
           retention-days: 7
+      - name: Run native boundary and MIDI-output validation tests
+        run: |
+          set -euo pipefail
+          simulator_id="$(xcrun simctl list devices available -j | python3 -c 'import json,sys; d=json.load(sys.stdin)["devices"]; p=[v["udid"] for k,rows in d.items() if "iOS-18" in k for v in rows if v.get("isAvailable") and v["name"].startswith("iPhone")]; sys.exit("No iOS18 iPhone Simulator runtime is available") if not p else print(p[0])')"
+          xcodebuild test \
+            -project ios/Project128.xcodeproj \
+            -scheme Project128 \
+            -configuration Debug \
+            -destination "platform=iOS Simulator,id=$simulator_id" \
+            -derivedDataPath build/TestDerivedData \
+            -resultBundlePath build/NativeTests.xcresult \
+            CODE_SIGNING_ALLOWED=NO ENABLE_TESTABILITY=YES \
+            2>&1 | tee build/native-tests.log
+      - name: Save native test evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Project128-native-tests
+          path: |
+            build/native-tests.log
+            build/NativeTests.xcresult
+          if-no-files-found: warn
+          retention-days: 7
       - name: Compile an unsigned application for a real iPhone
         run: |
           set -euo pipefail

@@ -1,0 +1,55 @@
+Project128: CoreMIDI to Web MIDI input/output bridge
+
+User intent
+The user requested software linking CoreMIDI and Web MIDI while retaining a
+free phone-oriented player for MIDI files, soundfonts and the onscreen keyboard.
+The existing native shell already forwards CoreMIDI packets to the synthesizer.
+This work exposes that input transport and native destinations through a Web MIDI-compatible API.
+
+Architecture
+MIDI device -> iOS CoreMIDI -> existing bounded MIDIInput queue -> WKWebView ->
+Web MIDI input adapter -> MIDIAccess.inputs / MIDIInput MIDI message events.
+Web MIDI input -> user-selected MIDI Thru -> MIDIOutput.send -> validated native
+message -> bounded CoreMIDI output queue -> MIDISend -> destination device.
+The existing direct synthesizer path continues to receive each packet once.
+Safari receives no pretend hardware API when no native bridge is available.
+
+Chosen scope
+An input/output adapter inside the existing first-party native app. It enumerates the
+up-to-eight connected sources using stable CoreMIDI identifiers and preserves
+the existing MIDI port routing. It provides requestMIDIAccess, read-only input
+maps, input open/close, connect/disconnect events, complete MIDI messages,
+running-status parsing and per-access SysEx filtering. Message timestamps are
+arrival-time estimates; raw CoreMIDI clock values are not mislabeled as browser
+time. Output maps expose connected native destinations. Immediate output is supported;
+future timestamps and queue cancellation report NotSupportedError. A send is
+limited to65535 bytes; native pending output is capped at512 messages/4MiB.
+The MIDI Thru UI provides Input, Output and Enable controls; routing is off by
+default, releases its routed held notes/pedals on stop and pauses when hidden.
+It routes a selected live input, not the internal MIDI-file sequencer.
+This is a documented input/immediate-output subset, not full Web MIDI conformance.
+
+Alternatives considered
+A JavaScript-only PWA cannot access the CoreMIDI framework. A separate network
+relay needs another installed native host and adds transport/latency concerns.
+The integrated adapter reuses the existing trusted-origin policy and bounded
+input transport, without making remote websites trusted MIDI clients.
+
+Boundaries
+Only the native shell's own local, token-scoped page installs the adapter.
+Existing browser Web MIDI APIs are preserved. Device names are text; packets
+and source descriptors are validated. JavaScript does not handle real-time
+CoreMIDI callbacks directly. Native installation still requires valid signing.
+The user's Safari player does not need this bridge for MIDI-file playback.
+
+Verification
+Browser contract tests cover absent-native behavior, preservation of existing
+APIs, source discovery, actual event delivery, MIDI parsing, SysEx separation,
+open/close and disconnect/reconnect. Existing playback tests protect the direct
+synth route. Mac CI checks real native compilation. Hardware timing and iOS27
+beta device behavior remain separate, unverified gates.
+
+Separate web delivery
+Keep a private hosted copy of the same player with Home Screen metadata and a
+versioned offline cache. It remains a separate delivery target; it does not
+replace the native source or claim to acquire CoreMIDI inside Safari.

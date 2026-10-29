@@ -14,6 +14,8 @@ struct NativeMIDIEvent {
 final class MIDIInput {
     var onBatch: (([NativeMIDIEvent], Int, @escaping () -> Void) -> Void)?
     var onStatus: ((String) -> Void)?
+    var onPorts: (([[String: Any]], [[String: Any]]) -> Void)?
+    var onOutputError: ((String) -> Void)?
     private let queue = DispatchQueue(label: "org.project128.midi-delivery", qos: .userInitiated)
     private let lock = NSLock()
     private let capacity = 512
@@ -27,6 +29,11 @@ final class MIDIInput {
     private var count = 0
     private var client: MIDIClientRef = 0
     private var inputPort: MIDIPortRef = 0
+    private var outputPort: MIDIPortRef = 0
+    private var destinations: [String: MIDIEndpointRef] = [:]
+    private let outputLock = NSLock()
+    private var outputBytesPending = 0
+    private var outputMessagesPending = 0
     private var sources: [MIDIEndpointRef: Int] = [:]
     private var timer: DispatchSourceTimer?
     private let dropSignal: DispatchSourceUserDataAdd
@@ -63,6 +70,7 @@ final class MIDIInput {
                 Unmanaged<MIDIInput>.fromOpaque(context).takeUnretainedValue().receive(list, port: sourcePort)
             }, Unmanaged.passUnretained(self).toOpaque(), &self.inputPort)
             guard portStatus == noErr else { self.onStatus?("MIDI input unavailable (\(portStatus))"); return }
+            _ = MIDIOutputPortCreate(self.client, "Project128 Output" as CFString, &self.outputPort)
             self.connectSources()
             let timer = DispatchSource.makeTimerSource(queue: self.queue)
             timer.schedule(deadline: .now(), repeating: .milliseconds(8), leeway: .milliseconds(1))
@@ -96,6 +104,80 @@ final class MIDIInput {
             return "Port \(slot + 1): \(name)"
         }.joined(separator: "\n")
         onStatus?("MIDI: \(sources.count) input\(sources.count == 1 ? "" : "s")\(excess > 0 ? " · \(excess) not connected" : "")\(assignments.isEmpty ? "" : "\n\(assignments)")")
+        onPorts?(sourceDescriptions(), destinationDescriptions())
+    }
+
+    /// Read endpoint metadata on the same queue that owns the connected sources.
+    func describePorts(_ completion: @escaping ([[String: Any]], [[String: Any]]) -> Void) {
+        queue.async { [weak self] in completion(self?.sourceDescriptions() ?? [], self?.destinationDescriptions() ?? []) }
+    }
+
+    private func sourceDescriptions() -> [[String: Any]] {
+        sources.sorted { $0.value < $1.value }.map { source, slot in
+            func string(_ property: CFString) -> String {
+                var value: Unmanaged<CFString>?
+                guard MIDIObjectGetStringProperty(source, property, &value) == noErr, let value else { return "" }
+                return String((value.takeRetainedValue() as String).prefix(256))
+            }
+            var uniqueID: Int32 = 0
+            let status = MIDIObjectGetIntegerProperty(source, kMIDIPropertyUniqueID, &uniqueID)
+            let identifier = status == noErr && uniqueID != 0 ? "uid-\(uniqueID)" : "endpoint-\(source)"
+            return ["id": "coremidi-input-\(identifier)", "name": string(kMIDIPropertyDisplayName),
+                    "manufacturer": string(kMIDIPropertyManufacturer), "slot": slot]
+        }
+    }
+
+    private func destinationDescriptions() -> [[String: Any]] {
+        destinations.removeAll()
+        guard outputPort != 0 else { return [] }
+        return (0..<min(MIDIGetNumberOfDestinations(), 64)).compactMap { index in
+            let endpoint = MIDIGetDestination(index)
+            guard endpoint != 0 else { return nil }
+            var uniqueID: Int32 = 0
+            let status = MIDIObjectGetIntegerProperty(endpoint, kMIDIPropertyUniqueID, &uniqueID)
+            let identifier = status == noErr && uniqueID != 0 ? "uid-\(uniqueID)" : "endpoint-\(endpoint)"
+            let id = "coremidi-output-\(identifier)"
+            guard destinations[id] == nil else { return nil }
+            destinations[id] = endpoint
+            func string(_ property: CFString) -> String {
+                var value: Unmanaged<CFString>?
+                guard MIDIObjectGetStringProperty(endpoint, property, &value) == noErr, let value else { return "" }
+                return String((value.takeRetainedValue() as String).prefix(256))
+            }
+            return ["id": id, "name": string(kMIDIPropertyDisplayName), "manufacturer": string(kMIDIPropertyManufacturer)]
+        }
+    }
+
+    /// Immediate output on the non-real-time MIDI queue. The reservation bounds
+    /// pending work before dispatch; JavaScript cannot enqueue unlimited packets.
+    func sendOutput(_ message: NativeBridgePolicy.MIDIOutputMessage) {
+        outputLock.lock()
+        let accepted = outputMessagesPending < 512 && outputBytesPending + message.bytes.count <= 4 * 1024 * 1024
+        if accepted { outputMessagesPending += 1; outputBytesPending += message.bytes.count }
+        outputLock.unlock()
+        guard accepted else { onOutputError?("MIDI output queue is full; the message was not sent."); return }
+        queue.async { [weak self] in
+            guard let self else { return }
+            defer {
+                self.outputLock.lock()
+                self.outputMessagesPending -= 1; self.outputBytesPending -= message.bytes.count
+                self.outputLock.unlock()
+            }
+            guard self.outputPort != 0, let endpoint = self.destinations[message.destination] else {
+                self.onOutputError?("The selected MIDI output is disconnected."); return
+            }
+            let capacity = max(MemoryLayout<MIDIPacketList>.size, message.bytes.count + 64)
+            let storage = UnsafeMutableRawPointer.allocate(byteCount: capacity, alignment: 16)
+            defer { storage.deallocate() }
+            let list = storage.bindMemory(to: MIDIPacketList.self, capacity: 1)
+            let packet = MIDIPacketListInit(list)
+            let result: OSStatus = message.bytes.withUnsafeBufferPointer { bytes in
+                guard let base = bytes.baseAddress,
+                      MIDIPacketListAdd(list, capacity, packet, 0, bytes.count, base) != nil else { return -50 }
+                return MIDISend(self.outputPort, endpoint, list)
+            }
+            if result != noErr { self.onOutputError?("MIDI output failed (\(result)).") }
+        }
     }
 
     private func receive(_ list: UnsafePointer<MIDIPacketList>, port: Int) {
@@ -154,6 +236,7 @@ final class MIDIInput {
         timer?.cancel()
         dropSignal.cancel()
         if inputPort != 0 { MIDIPortDispose(inputPort) }
+        if outputPort != 0 { MIDIPortDispose(outputPort) }
         if client != 0 { MIDIClientDispose(client) }
         storage.deallocate()
     }
