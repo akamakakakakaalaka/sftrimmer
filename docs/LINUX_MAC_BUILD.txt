@@ -46,6 +46,13 @@ HOW TO RUN THE INCLUDED CI
    then builds the shared Project128 scheme for generic iOS Simulator
    with CODE_SIGNING_ALLOWED=NO. Download Project128-simulator from the
    successful run. It contains the simulator .app ZIP and build log.
+   It also builds Release for iphoneos with signing disabled and packages
+   Payload/Project128.app as Project128-unsigned.ipa. Download the separate
+   Project128-unsigned-device artifact for that file and its platform/build
+   logs. Archive integrity and the20MB limit are checked on the Mac runner.
+   This is a real device executable, but it must still be signed/installed
+   through a setup such as AltStore or Sideloadly, generally using a computer
+   and the user's Apple account. Safari downloading alone does not install it.
 4. This simulator build requires no Apple signing certificate or paid
    Apple Developer membership. GitHub Actions availability, included
    minutes, billing, and any approval rules depend on your repository
@@ -86,6 +93,16 @@ development/ad hoc profiles require authorized registered devices; an
 App Store export is for Apple's distribution flow and is not a universal
 sideloadable IPA. A simulator .app cannot be installed on a real iPhone.
 No signed IPA is claimed until a successful signing run produces one.
+
+CURRENT BUILD ACCESS, 29 OCTOBER2026
+GitHub command-line access is now connected to the user's account. The local
+project still has no configured remote, and the connector lists only the public
+sftrimmer repository. Creating a separate private project128-ios repository was
+denied with GraphQL "Resource not accessible by integration (createRepository)".
+No remote code was changed and no Mac workflow was dispatched. Using the
+unrelated public repository needs the user's choice; source would be public on
+that branch. No Apple signing identity/profile is configured locally. The new
+unsigned-device job is prepared locally but has not produced an IPA yet.
 
 WHAT THIS CAN AND CANNOT VERIFY
 A successful macOS CI compile establishes that Xcode accepts the native

@@ -14,7 +14,7 @@ permissions:
 
 jobs:
   simulator:
-    name: Unsigned simulator build
+    name: Unsigned simulator and iPhone builds
     runs-on: macos-15
     timeout-minutes: 35
     defaults:
@@ -57,6 +57,40 @@ jobs:
           path: |
             build/Project128-simulator.zip
             build/simulator-build.log
+          if-no-files-found: warn
+          retention-days: 7
+      - name: Compile an unsigned application for a real iPhone
+        run: |
+          set -euo pipefail
+          xcodebuild \
+            -project ios/Project128.xcodeproj \
+            -scheme Project128 \
+            -configuration Release \
+            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath build/DeviceDerivedData \
+            CODE_SIGNING_ALLOWED=NO \
+            build 2>&1 | tee build/unsigned-device-build.log
+          app_path=build/DeviceDerivedData/Build/Products/Release-iphoneos/Project128.app
+          test -f "$app_path/Project128"
+          xcrun vtool -show-build "$app_path/Project128" | tee build/device-platform.log
+          mkdir -p build/unsigned/Payload
+          ditto "$app_path" build/unsigned/Payload/Project128.app
+          (
+            cd build/unsigned
+            zip -q -r -9 ../Project128-unsigned.ipa Payload
+          )
+          unzip -t build/Project128-unsigned.ipa
+          python3 -c 'import pathlib; p=pathlib.Path("build/Project128-unsigned.ipa"); print(f"Unsigned device IPA: {p.stat().st_size:,} bytes"); assert p.stat().st_size < 20_000_000, "IPA exceeds 20 MB"'
+      - name: Save unsigned iPhone IPA and compile evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Project128-unsigned-device
+          path: |
+            build/Project128-unsigned.ipa
+            build/unsigned-device-build.log
+            build/device-platform.log
           if-no-files-found: warn
           retention-days: 7
 
